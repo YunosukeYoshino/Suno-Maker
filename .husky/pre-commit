@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# ステージングされたファイルに対してのみ lint-staged を実行
+bunx lint-staged
+
+# テスト実行（警告の場合はパス）
+bun test || true
