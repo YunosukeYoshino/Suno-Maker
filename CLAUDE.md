@@ -110,3 +110,29 @@ src/
 - `--font-geist-sans` と `--font-geist-mono` - フォントファミリー
 - `prefers-color-scheme` による自動ダークモード対応
 - Tailwind CSS v4 のインラインテーマ設定
+
+## ドキュメント管理とワークフロー
+
+### ドキュメント自動更新
+- **重要**: 新しい機能や変更を実装する際は、関連するdocsファイルを自動的に更新してください
+- アーキテクチャ変更時は `ARCHITECTURE.md` を更新
+- API変更時は `API_DESIGN.md` を更新
+- テスト戦略変更時は `TESTING_STRATEGY.md` を更新
+- プロジェクト計画変更時は `PROJECT_PLAN.md` を更新
+
+### Git コミットルール
+- **必須**: 各作業単位ごとに `gh` コマンドを使用してコミットを作成してください
+- コミットメッセージは変更内容を明確に記述
+- 関連するissueがある場合は参照を含める
+- 例: `git commit -m "feat: Genre値オブジェクトとテストを実装 #123"`
+
+### 作業フロー
+1. 機能実装 → テスト作成 → ドキュメント更新 → コミット
+2. 各段階で品質チェック（lint, format, test）を実行
+3. 最終確認後にコミット・プッシュ
+
+@/docs/import ARCHITECTURE.md
+@/docs/import PROJECT_PLAN.md
+@/docs/import API_DESIGN.md
+@/docs/import TESTING_STRATEGY.md
+@/docs/import README.md
