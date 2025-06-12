@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { Genre, type GenreValue } from '@/domain/valueObjects/Genre';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, X } from 'lucide-react';
+import { useState, useCallback } from "react";
+import { Genre, type GenreValue } from "@/domain/valueObjects/Genre";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, X } from "lucide-react";
 
 interface GenreSelectorProps {
   selectedGenres: string[];
@@ -20,10 +20,10 @@ export function GenreSelector({
   selectedGenres,
   onGenreChange,
   maxSelection = 5,
-  className = '',
+  className = "",
 }: GenreSelectorProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('main');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("main");
 
   const mainGenres = Genre.getMainGenres();
   const allGenres = Genre.getSupportedGenres();
@@ -83,7 +83,9 @@ export function GenreSelector({
         </div>
         <div className="flex flex-wrap gap-2 min-h-[2rem]">
           {selectedGenres.length === 0 ? (
-            <p className="text-sm text-muted-foreground">ジャンルを選択してください</p>
+            <p className="text-sm text-muted-foreground">
+              ジャンルを選択してください
+            </p>
           ) : (
             selectedGenres.map((genre) => (
               <Badge
@@ -121,12 +123,13 @@ export function GenreSelector({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {mainGenres.map((genre) => {
               const isSelected = selectedGenres.includes(genre);
-              const isDisabled = !isSelected && selectedGenres.length >= maxSelection;
-              
+              const isDisabled =
+                !isSelected && selectedGenres.length >= maxSelection;
+
               return (
                 <Button
                   key={genre}
-                  variant={isSelected ? 'default' : 'outline'}
+                  variant={isSelected ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleGenreToggle(genre)}
                   disabled={isDisabled}
@@ -155,12 +158,14 @@ export function GenreSelector({
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
                         {subGenres.map((subGenre) => {
                           const isSelected = selectedGenres.includes(subGenre);
-                          const isDisabled = !isSelected && selectedGenres.length >= maxSelection;
-                          
+                          const isDisabled =
+                            !isSelected &&
+                            selectedGenres.length >= maxSelection;
+
                           return (
                             <Button
                               key={subGenre}
-                              variant={isSelected ? 'secondary' : 'ghost'}
+                              variant={isSelected ? "secondary" : "ghost"}
                               size="sm"
                               onClick={() => handleGenreToggle(subGenre)}
                               disabled={isDisabled}
@@ -183,12 +188,13 @@ export function GenreSelector({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 pr-4">
               {allGenres.map((genre) => {
                 const isSelected = selectedGenres.includes(genre);
-                const isDisabled = !isSelected && selectedGenres.length >= maxSelection;
-                
+                const isDisabled =
+                  !isSelected && selectedGenres.length >= maxSelection;
+
                 return (
                   <Button
                     key={genre}
-                    variant={isSelected ? 'default' : 'outline'}
+                    variant={isSelected ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleGenreToggle(genre)}
                     disabled={isDisabled}
@@ -212,18 +218,19 @@ export function GenreSelector({
               className="pl-10"
             />
           </div>
-          
+
           {searchTerm && (
             <ScrollArea className="h-[350px]">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 pr-4">
                 {filteredGenres.map((genre) => {
                   const isSelected = selectedGenres.includes(genre);
-                  const isDisabled = !isSelected && selectedGenres.length >= maxSelection;
-                  
+                  const isDisabled =
+                    !isSelected && selectedGenres.length >= maxSelection;
+
                   return (
                     <Button
                       key={genre}
-                      variant={isSelected ? 'default' : 'outline'}
+                      variant={isSelected ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleGenreToggle(genre)}
                       disabled={isDisabled}

@@ -1,9 +1,9 @@
-import { Genre } from '@/domain/valueObjects/Genre';
-import { Language } from '@/domain/valueObjects/Language';
-import { StyleField } from '@/domain/valueObjects/StyleField';
-import { Prompt } from '@/domain/entities/Prompt';
-import type { IPromptRepository } from '@/domain/repositories/IPromptRepository';
-import type { MusicParameters } from '@/presentation/components/ParameterSliders';
+import { Genre } from "@/domain/valueObjects/Genre";
+import { Language } from "@/domain/valueObjects/Language";
+import { StyleField } from "@/domain/valueObjects/StyleField";
+import { Prompt } from "@/domain/entities/Prompt";
+import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
+import type { MusicParameters } from "@/presentation/components/ParameterSliders";
 
 export interface GeneratePromptInput {
   genres: string[];
@@ -34,7 +34,7 @@ export class GeneratePromptUseCase {
     // 2. ドメインオブジェクトの作成
     const genre = Genre.create(input.genres);
     const language = Language.create(input.language);
-    
+
     // 3. スタイルフィールドの生成
     const styleField = this.generateStyleField(input);
 
@@ -66,29 +66,33 @@ export class GeneratePromptUseCase {
 
   private validateInput(input: GeneratePromptInput): void {
     if (!input.genres || input.genres.length === 0) {
-      throw new Error('ジャンルを選択してください');
+      throw new Error("ジャンルを選択してください");
     }
 
     if (input.genres.length > 5) {
-      throw new Error('ジャンルは最大5つまで選択できます');
+      throw new Error("ジャンルは最大5つまで選択できます");
     }
 
     if (!input.language) {
-      throw new Error('言語を選択してください');
+      throw new Error("言語を選択してください");
     }
 
     // ジャンルの有効性チェック
     try {
       Genre.create(input.genres);
     } catch (error) {
-      throw new Error(`無効なジャンルです: ${error instanceof Error ? error.message : '不明なエラー'}`);
+      throw new Error(
+        `無効なジャンルです: ${error instanceof Error ? error.message : "不明なエラー"}`
+      );
     }
 
     // 言語の有効性チェック
     try {
       Language.create(input.language);
     } catch (error) {
-      throw new Error(`無効な言語です: ${error instanceof Error ? error.message : '不明なエラー'}`);
+      throw new Error(
+        `無効な言語です: ${error instanceof Error ? error.message : "不明なエラー"}`
+      );
     }
   }
 
@@ -110,51 +114,52 @@ export class GeneratePromptUseCase {
 
     // パラメータベースのキーワード追加
     if (input.parameters) {
-      const { energy, complexity, tempo, emotional_intensity } = input.parameters;
+      const { energy, complexity, tempo, emotional_intensity } =
+        input.parameters;
 
       // エネルギーレベルを追加
       if (energy !== undefined) {
         if (energy >= 8) {
-          parts.push('high energy', 'intense');
+          parts.push("high energy", "intense");
         } else if (energy >= 6) {
-          parts.push('energetic');
+          parts.push("energetic");
         } else if (energy >= 4) {
-          parts.push('moderate');
+          parts.push("moderate");
         } else {
-          parts.push('calm', 'relaxed');
+          parts.push("calm", "relaxed");
         }
       }
 
       // 複雑さレベルを追加
       if (complexity !== undefined) {
         if (complexity >= 8) {
-          parts.push('complex', 'intricate');
+          parts.push("complex", "intricate");
         } else if (complexity >= 6) {
-          parts.push('layered');
+          parts.push("layered");
         } else if (complexity <= 3) {
-          parts.push('simple', 'minimalist');
+          parts.push("simple", "minimalist");
         }
       }
 
       // テンポを追加
       if (tempo !== undefined) {
         if (tempo >= 8) {
-          parts.push('fast tempo', 'driving');
+          parts.push("fast tempo", "driving");
         } else if (tempo >= 6) {
-          parts.push('upbeat');
+          parts.push("upbeat");
         } else if (tempo <= 3) {
-          parts.push('slow tempo', 'ballad');
+          parts.push("slow tempo", "ballad");
         }
       }
 
       // 感情的強度を追加
       if (emotional_intensity !== undefined) {
         if (emotional_intensity >= 8) {
-          parts.push('emotionally intense', 'passionate');
+          parts.push("emotionally intense", "passionate");
         } else if (emotional_intensity >= 6) {
-          parts.push('expressive');
+          parts.push("expressive");
         } else if (emotional_intensity <= 3) {
-          parts.push('subtle', 'understated');
+          parts.push("subtle", "understated");
         }
       }
     }
@@ -164,7 +169,7 @@ export class GeneratePromptUseCase {
       parts.push(input.customStyle.trim());
     }
 
-    const styleFieldText = parts.join(', ');
+    const styleFieldText = parts.join(", ");
     return StyleField.create(styleFieldText);
   }
 
@@ -188,16 +193,19 @@ export class GeneratePromptUseCase {
         warnings.push(...result.warnings);
       } else {
         // フォールバック最適化
-        optimizations.push('基本最適化を適用しました');
+        optimizations.push("基本最適化を適用しました");
       }
     } catch (error) {
-      warnings.push('最適化に失敗しました');
+      warnings.push("最適化に失敗しました");
     }
 
     return { optimizations, warnings };
   }
 
-  private calculateQualityScore(prompt: Prompt, input: GeneratePromptInput): number {
+  private calculateQualityScore(
+    prompt: Prompt,
+    input: GeneratePromptInput
+  ): number {
     let score = 50; // ベーススコア
 
     // ジャンル数によるスコア
@@ -231,11 +239,16 @@ export class GeneratePromptUseCase {
       score += paramCount * 3; // 各パラメータ3点
 
       // バランスの良いパラメータ設定にボーナス
-      const { energy, complexity, tempo, emotional_intensity } = input.parameters;
+      const { energy, complexity, tempo, emotional_intensity } =
+        input.parameters;
       if (energy && complexity && tempo && emotional_intensity) {
-        const variance = Math.abs(energy - 5) + Math.abs(complexity - 5) + 
-                        Math.abs(tempo - 5) + Math.abs(emotional_intensity - 5);
-        if (variance <= 8) { // 全体的にバランスが良い
+        const variance =
+          Math.abs(energy - 5) +
+          Math.abs(complexity - 5) +
+          Math.abs(tempo - 5) +
+          Math.abs(emotional_intensity - 5);
+        if (variance <= 8) {
+          // 全体的にバランスが良い
           score += 10;
         }
       }

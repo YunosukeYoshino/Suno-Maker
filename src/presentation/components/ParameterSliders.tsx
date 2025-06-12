@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { RotateCcw } from 'lucide-react';
+import { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { RotateCcw } from "lucide-react";
 
 export interface MusicParameters {
   energy: number; // 1-10 (低エネルギーから高エネルギー)
@@ -30,102 +30,102 @@ interface ParameterConfig {
 
 const PARAMETER_CONFIGS: ParameterConfig[] = [
   {
-    key: 'energy',
-    label: 'Energy',
-    description: '音楽のエネルギーレベル',
+    key: "energy",
+    label: "Energy",
+    description: "音楽のエネルギーレベル",
     getLevelText: (value: number) => {
-      if (value <= 2) return 'Very Low';
-      if (value <= 4) return 'Low';
-      if (value <= 6) return 'Medium';
-      if (value <= 8) return 'High';
-      return 'Very High';
+      if (value <= 2) return "Very Low";
+      if (value <= 4) return "Low";
+      if (value <= 6) return "Medium";
+      if (value <= 8) return "High";
+      return "Very High";
     },
     getColor: (value: number) => {
-      if (value <= 3) return 'bg-blue-500';
-      if (value <= 6) return 'bg-green-500';
-      if (value <= 8) return 'bg-yellow-500';
-      return 'bg-red-500';
+      if (value <= 3) return "bg-blue-500";
+      if (value <= 6) return "bg-green-500";
+      if (value <= 8) return "bg-yellow-500";
+      return "bg-red-500";
     },
   },
   {
-    key: 'complexity',
-    label: 'Complexity',
-    description: '音楽の複雑さ・層の厚さ',
+    key: "complexity",
+    label: "Complexity",
+    description: "音楽の複雑さ・層の厚さ",
     getLevelText: (value: number) => {
-      if (value <= 2) return 'Very Simple';
-      if (value <= 4) return 'Simple';
-      if (value <= 6) return 'Moderate';
-      if (value <= 8) return 'Complex';
-      return 'Very Complex';
+      if (value <= 2) return "Very Simple";
+      if (value <= 4) return "Simple";
+      if (value <= 6) return "Moderate";
+      if (value <= 8) return "Complex";
+      return "Very Complex";
     },
     getColor: (value: number) => {
-      if (value <= 3) return 'bg-green-500';
-      if (value <= 6) return 'bg-blue-500';
-      if (value <= 8) return 'bg-purple-500';
-      return 'bg-red-500';
+      if (value <= 3) return "bg-green-500";
+      if (value <= 6) return "bg-blue-500";
+      if (value <= 8) return "bg-purple-500";
+      return "bg-red-500";
     },
   },
   {
-    key: 'tempo',
-    label: 'Tempo',
-    description: 'テンポ・リズムの速さ',
+    key: "tempo",
+    label: "Tempo",
+    description: "テンポ・リズムの速さ",
     getLevelText: (value: number) => {
-      if (value <= 2) return 'Very Slow';
-      if (value <= 4) return 'Slow';
-      if (value <= 6) return 'Medium';
-      if (value <= 8) return 'Fast';
-      return 'Very Fast';
+      if (value <= 2) return "Very Slow";
+      if (value <= 4) return "Slow";
+      if (value <= 6) return "Medium";
+      if (value <= 8) return "Fast";
+      return "Very Fast";
     },
     getColor: (value: number) => {
-      if (value <= 3) return 'bg-blue-500';
-      if (value <= 6) return 'bg-green-500';
-      if (value <= 8) return 'bg-orange-500';
-      return 'bg-red-500';
+      if (value <= 3) return "bg-blue-500";
+      if (value <= 6) return "bg-green-500";
+      if (value <= 8) return "bg-orange-500";
+      return "bg-red-500";
     },
   },
   {
-    key: 'emotional_intensity',
-    label: 'Emotional Intensity',
-    description: '感情的な強度・表現力',
+    key: "emotional_intensity",
+    label: "Emotional Intensity",
+    description: "感情的な強度・表現力",
     getLevelText: (value: number) => {
-      if (value <= 2) return 'Very Calm';
-      if (value <= 4) return 'Calm';
-      if (value <= 6) return 'Moderate';
-      if (value <= 8) return 'Intense';
-      return 'Very Intense';
+      if (value <= 2) return "Very Calm";
+      if (value <= 4) return "Calm";
+      if (value <= 6) return "Moderate";
+      if (value <= 8) return "Intense";
+      return "Very Intense";
     },
     getColor: (value: number) => {
-      if (value <= 3) return 'bg-blue-500';
-      if (value <= 6) return 'bg-green-500';
-      if (value <= 8) return 'bg-yellow-500';
-      return 'bg-red-500';
+      if (value <= 3) return "bg-blue-500";
+      if (value <= 6) return "bg-green-500";
+      if (value <= 8) return "bg-yellow-500";
+      return "bg-red-500";
     },
   },
 ];
 
 const PRESETS: { name: string; parameters: MusicParameters }[] = [
   {
-    name: 'Relaxed',
+    name: "Relaxed",
     parameters: { energy: 3, complexity: 4, tempo: 3, emotional_intensity: 2 },
   },
   {
-    name: 'Balanced',
+    name: "Balanced",
     parameters: { energy: 5, complexity: 5, tempo: 5, emotional_intensity: 5 },
   },
   {
-    name: 'Energetic',
+    name: "Energetic",
     parameters: { energy: 8, complexity: 6, tempo: 7, emotional_intensity: 7 },
   },
   {
-    name: 'Intense',
+    name: "Intense",
     parameters: { energy: 9, complexity: 8, tempo: 8, emotional_intensity: 9 },
   },
   {
-    name: 'Minimal',
+    name: "Minimal",
     parameters: { energy: 4, complexity: 2, tempo: 4, emotional_intensity: 3 },
   },
   {
-    name: 'Epic',
+    name: "Epic",
     parameters: { energy: 9, complexity: 9, tempo: 6, emotional_intensity: 8 },
   },
 ];
@@ -140,7 +140,7 @@ const DEFAULT_PARAMETERS: MusicParameters = {
 export function ParameterSliders({
   parameters,
   onParameterChange,
-  className = '',
+  className = "",
 }: ParameterSlidersProps) {
   const handleParameterChange = useCallback(
     (key: keyof MusicParameters, value: number[]) => {
@@ -262,12 +262,14 @@ export function ParameterSliders({
             {PARAMETER_CONFIGS.map((config) => {
               const value = parameters[config.key];
               const levelText = config.getLevelText(value);
-              
+
               return (
                 <div key={config.key} className="text-center">
                   <div className="font-medium text-sm">{config.label}</div>
                   <div className="text-2xl font-bold mt-1">{value}</div>
-                  <div className="text-xs text-muted-foreground">{levelText}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {levelText}
+                  </div>
                 </div>
               );
             })}

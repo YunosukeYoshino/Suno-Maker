@@ -79,18 +79,24 @@ describe("Genre", () => {
     it("階層化されたジャンル分類を提供している", () => {
       const mainGenres = Genre.getMainGenres();
       expect(mainGenres.length).toBeGreaterThan(15);
-      
+
       // 各メインジャンルにサブジャンルが存在することを確認
-      const hasSubGenres = mainGenres.some(main => 
-        Genre.getSubGenres(main).length > 0
+      const hasSubGenres = mainGenres.some(
+        (main) => Genre.getSubGenres(main).length > 0
       );
       expect(hasSubGenres).toBe(true);
     });
 
     it("地域別・文化的ジャンルを含んでいる", () => {
       const supportedGenres = Genre.getSupportedGenres();
-      const culturalGenres = ["J-Pop", "K-Pop", "Afrobeat", "Reggaeton", "Flamenco"] as const;
-      
+      const culturalGenres = [
+        "J-Pop",
+        "K-Pop",
+        "Afrobeat",
+        "Reggaeton",
+        "Flamenco",
+      ] as const;
+
       for (const genre of culturalGenres) {
         expect(supportedGenres.includes(genre)).toBe(true);
       }
@@ -98,8 +104,14 @@ describe("Genre", () => {
 
     it("モダンなジャンルを含んでいる", () => {
       const supportedGenres = Genre.getSupportedGenres();
-      const modernGenres = ["Future Bass", "Phonk", "Drill", "Hyperpop", "Vaporwave"] as const;
-      
+      const modernGenres = [
+        "Future Bass",
+        "Phonk",
+        "Drill",
+        "Hyperpop",
+        "Vaporwave",
+      ] as const;
+
       for (const genre of modernGenres) {
         expect(supportedGenres.includes(genre)).toBe(true);
       }
