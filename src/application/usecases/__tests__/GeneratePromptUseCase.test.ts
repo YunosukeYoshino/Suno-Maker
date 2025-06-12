@@ -37,8 +37,10 @@ describe('GeneratePromptUseCase', () => {
         language: 'en',
         mood: ['energetic'],
         instruments: ['electric guitar'],
-        energy: 8,
-        complexity: 6,
+        parameters: {
+          energy: 8,
+          complexity: 6,
+        },
       };
 
       mockOptimizationService.optimize.mockResolvedValue({
@@ -136,8 +138,12 @@ describe('GeneratePromptUseCase', () => {
         language: 'en',
         mood: ['energetic'],
         instruments: ['guitar'],
-        energy: 7,
-        complexity: 5,
+        parameters: {
+          energy: 7,
+          complexity: 5,
+          tempo: 6,
+          emotional_intensity: 5,
+        },
       };
 
       mockOptimizationService.optimize.mockResolvedValue({
@@ -201,7 +207,9 @@ describe('GeneratePromptUseCase', () => {
       const input: GeneratePromptInput = {
         genres: ['Rock'],
         language: 'en',
-        energy: 9,
+        parameters: {
+          energy: 9,
+        },
       };
 
       mockOptimizationService.optimize.mockResolvedValue({
@@ -219,7 +227,9 @@ describe('GeneratePromptUseCase', () => {
       const input: GeneratePromptInput = {
         genres: ['Jazz'],
         language: 'en',
-        complexity: 9,
+        parameters: {
+          complexity: 9,
+        },
       };
 
       mockOptimizationService.optimize.mockResolvedValue({
@@ -248,6 +258,46 @@ describe('GeneratePromptUseCase', () => {
       const result = await useCase.execute(input);
       
       expect(result.prompt.styleField.value).toContain('atmospheric, dreamy');
+    });
+
+    it('テンポレベルに応じて適切なキーワードを追加する', async () => {
+      const input: GeneratePromptInput = {
+        genres: ['Electronic'],
+        language: 'en',
+        parameters: {
+          tempo: 9,
+        },
+      };
+
+      mockOptimizationService.optimize.mockResolvedValue({
+        optimizations: [],
+        warnings: [],
+      });
+
+      const result = await useCase.execute(input);
+      
+      expect(result.prompt.styleField.value).toContain('fast tempo');
+      expect(result.prompt.styleField.value).toContain('driving');
+    });
+
+    it('感情的強度に応じて適切なキーワードを追加する', async () => {
+      const input: GeneratePromptInput = {
+        genres: ['Pop'],
+        language: 'en',
+        parameters: {
+          emotional_intensity: 9,
+        },
+      };
+
+      mockOptimizationService.optimize.mockResolvedValue({
+        optimizations: [],
+        warnings: [],
+      });
+
+      const result = await useCase.execute(input);
+      
+      expect(result.prompt.styleField.value).toContain('emotionally intense');
+      expect(result.prompt.styleField.value).toContain('passionate');
     });
   });
 });

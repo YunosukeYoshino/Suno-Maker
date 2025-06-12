@@ -4,13 +4,14 @@ import { StyleField } from '../../domain/valueObjects/StyleField';
 import { Prompt } from '../../domain/entities/Prompt';
 import type { IPromptRepository } from '../../domain/repositories/IPromptRepository';
 
+import type { MusicParameters } from '../../presentation/components/ParameterSliders';
+
 export interface GeneratePromptInput {
   genres: string[];
   language: string;
   mood?: string[];
   instruments?: string[];
-  energy?: number; // 1-10
-  complexity?: number; // 1-10
+  parameters?: Partial<MusicParameters>;
   customStyle?: string;
 }
 
@@ -108,27 +109,54 @@ export class GeneratePromptUseCase {
       parts.push(...input.instruments);
     }
 
-    // エネルギーレベルを追加
-    if (input.energy !== undefined) {
-      if (input.energy >= 8) {
-        parts.push('high energy', 'intense');
-      } else if (input.energy >= 6) {
-        parts.push('energetic');
-      } else if (input.energy >= 4) {
-        parts.push('moderate');
-      } else {
-        parts.push('calm', 'relaxed');
-      }
-    }
+    // パラメータベースのキーワード追加
+    if (input.parameters) {
+      const { energy, complexity, tempo, emotional_intensity } = input.parameters;
 
-    // 複雑さレベルを追加
-    if (input.complexity !== undefined) {
-      if (input.complexity >= 8) {
-        parts.push('complex', 'intricate');
-      } else if (input.complexity >= 6) {
-        parts.push('layered');
-      } else if (input.complexity <= 3) {
-        parts.push('simple', 'minimalist');
+      // エネルギーレベルを追加
+      if (energy !== undefined) {
+        if (energy >= 8) {
+          parts.push('high energy', 'intense');
+        } else if (energy >= 6) {
+          parts.push('energetic');
+        } else if (energy >= 4) {
+          parts.push('moderate');
+        } else {
+          parts.push('calm', 'relaxed');
+        }
+      }
+
+      // 複雑さレベルを追加
+      if (complexity !== undefined) {
+        if (complexity >= 8) {
+          parts.push('complex', 'intricate');
+        } else if (complexity >= 6) {
+          parts.push('layered');
+        } else if (complexity <= 3) {
+          parts.push('simple', 'minimalist');
+        }
+      }
+
+      // テンポを追加
+      if (tempo !== undefined) {
+        if (tempo >= 8) {
+          parts.push('fast tempo', 'driving');
+        } else if (tempo >= 6) {
+          parts.push('upbeat');
+        } else if (tempo <= 3) {
+          parts.push('slow tempo', 'ballad');
+        }
+      }
+
+      // 感情的強度を追加
+      if (emotional_intensity !== undefined) {
+        if (emotional_intensity >= 8) {
+          parts.push('emotionally intense', 'passionate');
+        } else if (emotional_intensity >= 6) {
+          parts.push('expressive');
+        } else if (emotional_intensity <= 3) {
+          parts.push('subtle', 'understated');
+        }
       }
     }
 
@@ -198,12 +226,20 @@ export class GeneratePromptUseCase {
       score += 10;
     }
 
-    // エネルギーや複雑さの設定
-    if (input.energy !== undefined) {
-      score += 5;
-    }
-    if (input.complexity !== undefined) {
-      score += 5;
+    // パラメータ設定によるスコア
+    if (input.parameters) {
+      const paramCount = Object.keys(input.parameters).length;
+      score += paramCount * 3; // 各パラメータ3点
+
+      // バランスの良いパラメータ設定にボーナス
+      const { energy, complexity, tempo, emotional_intensity } = input.parameters;
+      if (energy && complexity && tempo && emotional_intensity) {
+        const variance = Math.abs(energy - 5) + Math.abs(complexity - 5) + 
+                        Math.abs(tempo - 5) + Math.abs(emotional_intensity - 5);
+        if (variance <= 8) { // 全体的にバランスが良い
+          score += 10;
+        }
+      }
     }
 
     return Math.min(100, Math.max(0, score));
