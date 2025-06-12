@@ -1,5 +1,5 @@
-import type { ILyricsRepository } from "@/domain/repositories/ILyricsRepository";
 import { Lyrics } from "@/domain/entities/Lyrics";
+import type { ILyricsRepository } from "@/domain/repositories/ILyricsRepository";
 import { Language } from "@/domain/valueObjects/Language";
 import {
   LyricsStructure,
@@ -84,9 +84,9 @@ export class OptimizeLyricsUseCase {
       ...input.optimizationOptions,
     };
 
-    let optimizations: string[] = [];
-    let warnings: string[] = [];
-    let suggestions: string[] = [];
+    const optimizations: string[] = [];
+    const warnings: string[] = [];
+    const suggestions: string[] = [];
     let processedText = input.lyrics;
 
     // 1. 構造タグの自動挿入
@@ -129,11 +129,11 @@ export class OptimizeLyricsUseCase {
     }
 
     // 5. Suno特有の最適化
-    let finalLyrics = Lyrics.create(
-      `optimized_lyrics_${Date.now()}`,
-      processedText,
-      language
-    );
+    let finalLyrics = Lyrics.create({
+      title: `optimized_lyrics_${Date.now()}`,
+      content: processedText,
+      language: language,
+    });
 
     if (options.optimizeForSuno) {
       const sunoResult = await this.optimizeForSuno(finalLyrics);
@@ -386,7 +386,7 @@ export class OptimizeLyricsUseCase {
     }
 
     // 基本的なSuno最適化
-    let content = lyrics.content;
+    const content = lyrics.content;
 
     // Sunoで推奨される形式チェック
     if (!content.includes("[") || !content.includes("]")) {
@@ -401,7 +401,11 @@ export class OptimizeLyricsUseCase {
     }
 
     return {
-      lyrics: Lyrics.create(lyrics.title, content, lyrics.language),
+      lyrics: Lyrics.create({
+        title: lyrics.title,
+        content: content,
+        language: lyrics.language,
+      }),
       optimizations,
       warnings,
     };
@@ -469,7 +473,7 @@ export class OptimizeLyricsUseCase {
     let score = 100;
 
     // 歌詞の基本品質（60点満点）
-    const lyricsStats = lyrics.getStatistics();
+    const lyricsStats = lyrics.getStats();
 
     // 文字数適正性（20点）
     const lengthOptimal =

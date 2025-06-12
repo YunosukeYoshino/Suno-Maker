@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  LyricsStructure,
   type LyricsSection,
+  LyricsStructure,
   type StructureTemplate,
 } from "../LyricsStructure";
 

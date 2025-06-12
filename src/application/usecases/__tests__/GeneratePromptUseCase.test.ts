@@ -1,13 +1,13 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import {
-  GeneratePromptUseCase,
-  type GeneratePromptInput,
-  type PromptOptimizationService,
-} from "../GeneratePromptUseCase";
-import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import { Prompt } from "@/domain/entities/Prompt";
+import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  type GeneratePromptInput,
+  GeneratePromptUseCase,
+  type PromptOptimizationService,
+} from "../GeneratePromptUseCase";
 
 describe("GeneratePromptUseCase", () => {
   let useCase: GeneratePromptUseCase;

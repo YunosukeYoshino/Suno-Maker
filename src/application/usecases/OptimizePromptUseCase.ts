@@ -1,8 +1,8 @@
-import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import { Prompt } from "@/domain/entities/Prompt";
-import { StyleField } from "@/domain/valueObjects/StyleField";
+import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
+import { StyleField } from "@/domain/valueObjects/StyleField";
 
 export interface OptimizePromptInput {
   prompt: Prompt;
@@ -89,9 +89,9 @@ export class OptimizePromptUseCase {
     const originalPrompt = input.prompt;
     const targetLength = input.targetLength || 120;
 
-    let optimizations: OptimizePromptOutput["optimizations"] = [];
-    let warnings: string[] = [];
-    let suggestions: string[] = [];
+    const optimizations: OptimizePromptOutput["optimizations"] = [];
+    const warnings: string[] = [];
+    const suggestions: string[] = [];
 
     // 1. 現在のスタイルフィールド分析
     const originalStyleField = originalPrompt.styleField;

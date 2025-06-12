@@ -1,16 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { X, Heart, Zap, Palette } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Heart, Palette, X, Zap } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 
 export interface MoodItem {
   id: string;

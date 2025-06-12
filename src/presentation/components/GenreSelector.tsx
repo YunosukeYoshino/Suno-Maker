@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Genre, type GenreValue } from "@/domain/valueObjects/Genre";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Genre, type GenreValue } from "@/domain/valueObjects/Genre";
 import { Search, X } from "lucide-react";
+import { useCallback, useState } from "react";
 
 interface GenreSelectorProps {
   selectedGenres: string[];

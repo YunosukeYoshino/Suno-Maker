@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
 import {
@@ -11,13 +16,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { Search, X, Music } from "lucide-react";
+import { Music, Search, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 
 export interface InstrumentCategory {
   id: string;

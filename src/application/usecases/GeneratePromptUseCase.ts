@@ -1,8 +1,8 @@
+import { Prompt } from "@/domain/entities/Prompt";
+import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { StyleField } from "@/domain/valueObjects/StyleField";
-import { Prompt } from "@/domain/entities/Prompt";
-import type { IPromptRepository } from "@/domain/repositories/IPromptRepository";
 import type { MusicParameters } from "@/presentation/components/ParameterSliders";
 
 export interface GeneratePromptInput {
