@@ -299,5 +299,43 @@ describe('GeneratePromptUseCase', () => {
       expect(result.prompt.styleField.value).toContain('emotionally intense');
       expect(result.prompt.styleField.value).toContain('passionate');
     });
+
+    it('楽器選択が適切にスタイルフィールドに反映される', async () => {
+      const input: GeneratePromptInput = {
+        genres: ['Rock'],
+        language: 'en',
+        instruments: ['electric guitar', 'drums', 'bass'],
+      };
+
+      mockOptimizationService.optimize.mockResolvedValue({
+        optimizations: [],
+        warnings: [],
+      });
+
+      const result = await useCase.execute(input);
+      
+      expect(result.prompt.styleField.value).toContain('electric guitar');
+      expect(result.prompt.styleField.value).toContain('drums');
+      expect(result.prompt.styleField.value).toContain('bass');
+    });
+
+    it('多数の楽器選択でも適切に処理される', async () => {
+      const input: GeneratePromptInput = {
+        genres: ['Jazz'],
+        language: 'en',
+        instruments: ['piano', 'saxophone', 'trumpet', 'bass', 'drums'],
+      };
+
+      mockOptimizationService.optimize.mockResolvedValue({
+        optimizations: [],
+        warnings: [],
+      });
+
+      const result = await useCase.execute(input);
+      
+      input.instruments?.forEach(instrument => {
+        expect(result.prompt.styleField.value).toContain(instrument);
+      });
+    });
   });
 });
