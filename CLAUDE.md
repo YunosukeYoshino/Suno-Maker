@@ -120,6 +120,13 @@ src/
 - テスト戦略変更時は `TESTING_STRATEGY.md` を更新
 - プロジェクト計画変更時は `PROJECT_PLAN.md` を更新
 
+### ブランチ戦略
+- **必須**: 各機能開発は専用ブランチで行ってください
+- ブランチ命名規則: `feature/機能名` または `fix/修正内容`
+- 例: `feature/genre-value-object`, `fix/prompt-validation`
+- 作業開始時に `git checkout -b feature/機能名` でブランチ作成
+- 作業完了後は `gh pr create` でプルリクエスト作成
+
 ### Git コミットルール
 - **必須**: 各作業単位ごとに `gh` コマンドを使用してコミットを作成してください
 - コミットメッセージは変更内容を明確に記述
@@ -127,9 +134,11 @@ src/
 - 例: `git commit -m "feat: Genre値オブジェクトとテストを実装 #123"`
 
 ### 作業フロー
-1. 機能実装 → テスト作成 → ドキュメント更新 → コミット
-2. 各段階で品質チェック（lint, format, test）を実行
-3. 最終確認後にコミット・プッシュ
+1. ブランチ作成 (`git checkout -b feature/機能名`)
+2. 機能実装 → テスト作成 → ドキュメント更新 → コミット
+3. 各段階で品質チェック（lint, format, test）を実行
+4. プルリクエスト作成 (`gh pr create`)
+5. レビュー・マージ後にブランチ削除
 
 @/docs/import ARCHITECTURE.md
 @/docs/import PROJECT_PLAN.md
