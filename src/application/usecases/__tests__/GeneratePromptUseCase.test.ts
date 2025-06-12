@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeneratePromptUseCase, type GeneratePromptInput, type PromptOptimizationService } from '../GeneratePromptUseCase';
-import type { IPromptRepository } from '../../../domain/repositories/IPromptRepository';
-import { Prompt } from '../../../domain/entities/Prompt';
-import { Genre } from '../../../domain/valueObjects/Genre';
-import { Language } from '../../../domain/valueObjects/Language';
+import type { IPromptRepository } from '@/domain/repositories/IPromptRepository';
+import { Prompt } from '@/domain/entities/Prompt';
+import { Genre } from '@/domain/valueObjects/Genre';
+import { Language } from '@/domain/valueObjects/Language';
 
 describe('GeneratePromptUseCase', () => {
   let useCase: GeneratePromptUseCase;

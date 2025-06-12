@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Genre, type GenreValue } from '../../domain/valueObjects/Genre';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../src/components/ui/badge';
-import { Input } from '../../../src/components/ui/input';
-import { ScrollArea } from '../../../src/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../src/components/ui/tabs';
+import { Genre, type GenreValue } from '@/domain/valueObjects/Genre';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, X } from 'lucide-react';
 
 interface GenreSelectorProps {
