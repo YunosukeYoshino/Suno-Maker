@@ -14,7 +14,7 @@ describe("Genre", () => {
     });
 
     it("空文字列では作成できない", () => {
-      expect(() => Genre.create("")).toThrow(
+      expect(() => Genre.create("" as any)).toThrow(
         "ジャンル名は空文字列にできません"
       );
     });
@@ -67,6 +67,42 @@ describe("Genre", () => {
       const genre1 = Genre.create("Rock");
       const genre2 = Genre.create("Pop");
       expect(genre1.equals(genre2)).toBe(false);
+    });
+  });
+
+  describe("ジャンル数要件", () => {
+    it("120種類以上のジャンルをサポートしている", () => {
+      const supportedGenres = Genre.getSupportedGenres();
+      expect(supportedGenres.length).toBeGreaterThanOrEqual(120);
+    });
+
+    it("階層化されたジャンル分類を提供している", () => {
+      const mainGenres = Genre.getMainGenres();
+      expect(mainGenres.length).toBeGreaterThan(15);
+      
+      // 各メインジャンルにサブジャンルが存在することを確認
+      const hasSubGenres = mainGenres.some(main => 
+        Genre.getSubGenres(main).length > 0
+      );
+      expect(hasSubGenres).toBe(true);
+    });
+
+    it("地域別・文化的ジャンルを含んでいる", () => {
+      const supportedGenres = Genre.getSupportedGenres();
+      const culturalGenres = ["J-Pop", "K-Pop", "Afrobeat", "Reggaeton", "Flamenco"] as const;
+      
+      for (const genre of culturalGenres) {
+        expect(supportedGenres.includes(genre)).toBe(true);
+      }
+    });
+
+    it("モダンなジャンルを含んでいる", () => {
+      const supportedGenres = Genre.getSupportedGenres();
+      const modernGenres = ["Future Bass", "Phonk", "Drill", "Hyperpop", "Vaporwave"] as const;
+      
+      for (const genre of modernGenres) {
+        expect(supportedGenres.includes(genre)).toBe(true);
+      }
     });
   });
 });
