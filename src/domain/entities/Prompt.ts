@@ -401,9 +401,13 @@ export class Prompt {
       id: json.id,
       title: json.title,
       genre: Genre.create(
-        (json.genre.includes(",") ? json.genre.split(", ") : json.genre) as Parameters<typeof Genre.create>[0]
+        (json.genre.includes(",")
+          ? json.genre.split(", ")
+          : json.genre) as Parameters<typeof Genre.create>[0]
       ),
-      language: Language.create(json.language as Parameters<typeof Language.create>[0]),
+      language: Language.create(
+        json.language as Parameters<typeof Language.create>[0]
+      ),
       styleField: StyleField.create(json.styleField),
       tags: json.tags,
       description: json.description,

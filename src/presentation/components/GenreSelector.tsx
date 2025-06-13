@@ -60,8 +60,12 @@ export function GenreSelector({
     try {
       const supportedGenres = Genre.getSupportedGenres();
       // Type guard to check if mainGenre is a valid SupportedGenre
-      if (supportedGenres.includes(mainGenre as (typeof supportedGenres)[number])) {
-        return Genre.getSubGenres(mainGenre as (typeof supportedGenres)[number]);
+      if (
+        supportedGenres.includes(mainGenre as (typeof supportedGenres)[number])
+      ) {
+        return Genre.getSubGenres(
+          mainGenre as (typeof supportedGenres)[number]
+        );
       }
       return [];
     } catch {
@@ -152,7 +156,9 @@ export function GenreSelector({
               {selectedGenres
                 .filter((genre) => {
                   const mainGenresList = Genre.getMainGenres();
-                  return mainGenresList.includes(genre as (typeof mainGenresList)[number]);
+                  return mainGenresList.includes(
+                    genre as (typeof mainGenresList)[number]
+                  );
                 })
                 .map((mainGenre) => {
                   const subGenres = getSubGenresForMain(mainGenre);

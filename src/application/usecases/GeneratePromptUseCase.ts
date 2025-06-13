@@ -32,8 +32,12 @@ export class GeneratePromptUseCase {
     this.validateInput(input);
 
     // 2. ドメインオブジェクトの作成
-    const genre = Genre.create(input.genres as Parameters<typeof Genre.create>[0]);
-    const language = Language.create(input.language as Parameters<typeof Language.create>[0]);
+    const genre = Genre.create(
+      input.genres as Parameters<typeof Genre.create>[0]
+    );
+    const language = Language.create(
+      input.language as Parameters<typeof Language.create>[0]
+    );
 
     // 3. スタイルフィールドの生成
     const styleField = this.generateStyleField(input);

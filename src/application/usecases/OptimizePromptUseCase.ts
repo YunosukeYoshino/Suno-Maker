@@ -470,7 +470,9 @@ export class OptimizePromptUseCase {
     // 基本的な成功率予測
     const factors = {
       genreCompatibility: this.calculateGenreCompatibility(
-        Array.isArray(prompt.genre.value) ? prompt.genre.value : [prompt.genre.value]
+        Array.isArray(prompt.genre.value)
+          ? prompt.genre.value
+          : [prompt.genre.value]
       ),
       styleCohesion: this.calculateStyleCohesion(prompt.styleField.value),
       lengthOptimality: this.calculateLengthOptimality(

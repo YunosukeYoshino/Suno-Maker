@@ -172,7 +172,11 @@ export class LyricsStructure {
 
       if (sectionMatch) {
         // 前のセクションを完了
-        if (currentSection?.content && currentSection.type && currentSection.startLine !== undefined) {
+        if (
+          currentSection?.content &&
+          currentSection.type &&
+          currentSection.startLine !== undefined
+        ) {
           sections.push({
             type: currentSection.type,
             content: currentSection.content.trim(),
@@ -199,7 +203,11 @@ export class LyricsStructure {
     }
 
     // 最後のセクションを追加
-    if (currentSection?.content && currentSection.type && currentSection.startLine !== undefined) {
+    if (
+      currentSection?.content &&
+      currentSection.type &&
+      currentSection.startLine !== undefined
+    ) {
       sections.push({
         type: currentSection.type,
         content: currentSection.content.trim(),
