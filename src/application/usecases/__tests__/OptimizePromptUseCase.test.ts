@@ -21,31 +21,43 @@ import {
 
 describe.skip("OptimizePromptUseCase", () => {
   let useCase: OptimizePromptUseCase;
-  let mockRepository: {
-    save: MockedFunction<IPromptRepository["save"]>;
-    findById: MockedFunction<IPromptRepository["findById"]>;
-  };
-  let mockStyleOptimizer: {
-    optimize: MockedFunction<StyleFieldOptimizer["optimize"]>;
-  };
-  let mockConflictDetector: {
-    detectConflicts: MockedFunction<GenreConflictDetector["detectConflicts"]>;
-  };
-  let mockSuccessPredictor: {
-    predict: MockedFunction<SuccessRatePredictor["predict"]>;
-  };
+  let mockRepository: IPromptRepository;
+  let mockStyleOptimizer: StyleFieldOptimizer;
+  let mockConflictDetector: GenreConflictDetector;
+  let mockSuccessPredictor: SuccessRatePredictor;
 
   beforeEach(() => {
     mockRepository = {
       save: vi.fn(),
       findById: vi.fn(),
-      findByFilters: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
       findAll: vi.fn(),
+      findByFilters: vi.fn(),
+      findByGenre: vi.fn(),
+      findByLanguage: vi.fn(),
+      findByTags: vi.fn(),
+      findPublicPrompts: vi.fn(),
+      findUserPrompts: vi.fn(),
+      findTrendingPrompts: vi.fn(),
+      findRecommendedPrompts: vi.fn(),
+      getPromptCount: vi.fn(),
+      getPublicPromptCount: vi.fn(),
+      getGenreDistribution: vi.fn(),
+      getLanguageDistribution: vi.fn(),
+      getQualityScoreDistribution: vi.fn(),
+      saveBatch: vi.fn(),
+      deleteBatch: vi.fn(),
+      findByIds: vi.fn(),
+      searchByText: vi.fn(),
+      searchBySimilarity: vi.fn(),
+      exists: vi.fn(),
+      getLastUpdated: vi.fn(),
+      cleanup: vi.fn(),
     } as IPromptRepository;
 
     mockStyleOptimizer = {
+      optimize: vi.fn(),
       optimizeForLength: vi.fn(),
     } as StyleFieldOptimizer;
 
@@ -54,6 +66,7 @@ describe.skip("OptimizePromptUseCase", () => {
     } as GenreConflictDetector;
 
     mockSuccessPredictor = {
+      predict: vi.fn(),
       predictSuccessRate: vi.fn(),
     } as SuccessRatePredictor;
 
@@ -68,12 +81,12 @@ describe.skip("OptimizePromptUseCase", () => {
   const createSamplePrompt = (
     styleFieldValue = "Rock, energetic, guitar"
   ): Prompt => {
-    return Prompt.create(
-      "Test Prompt",
-      Genre.create(["Rock"]),
-      Language.create("en"),
-      StyleField.create(styleFieldValue)
-    );
+    return Prompt.create({
+      title: "Test Prompt",
+      genre: Genre.create(["Rock"]),
+      language: Language.create("en"),
+      styleField: StyleField.create(styleFieldValue),
+    });
   };
 
   describe("基本的な最適化", () => {
@@ -84,9 +97,9 @@ describe.skip("OptimizePromptUseCase", () => {
       const longPrompt = {
         ...basePrompt,
         styleField: {
+          ...basePrompt.styleField,
           value:
             "Rock, energetic, electric guitar, drums, bass, powerful, melodic, driving beat, intense, emotional",
-          ...basePrompt.styleField,
         },
       } as Prompt;
 
@@ -98,7 +111,8 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: StyleField.create(
           "Rock, energetic, guitar, drums, powerful"
         ),
@@ -107,9 +121,13 @@ describe.skip("OptimizePromptUseCase", () => {
         ],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 85,
         factors: {
           genreCompatibility: 90,
@@ -140,14 +158,19 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: StyleField.create(shortStyleField),
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 90,
         factors: {
           genreCompatibility: 100,
@@ -168,14 +191,14 @@ describe.skip("OptimizePromptUseCase", () => {
 
   describe("ジャンル競合検出", () => {
     it("競合するジャンルを検出し警告を出す", async () => {
-      const prompt = Prompt.create(
-        "Conflicting Genres",
-        Genre.create(["Classical", "Death Metal"]),
-        Language.create("en"),
-        StyleField.create(
+      const prompt = Prompt.create({
+        title: "Conflicting Genres",
+        genre: Genre.create(["Classical", "Death Metal"]),
+        language: Language.create("en"),
+        styleField: StyleField.create(
           "classical orchestra, death metal, aggressive, peaceful"
-        )
-      );
+        ),
+      });
 
       const input: OptimizePromptInput = {
         prompt,
@@ -184,12 +207,14 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
         conflicts: [
           {
             genre1: "Classical",
@@ -202,7 +227,8 @@ describe.skip("OptimizePromptUseCase", () => {
         ],
       });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 60,
         factors: {
           genreCompatibility: 40,
@@ -231,12 +257,12 @@ describe.skip("OptimizePromptUseCase", () => {
         mockSuccessPredictor
       );
 
-      const prompt = Prompt.create(
-        "Conflicting Genres",
-        Genre.create(["Classical", "Death Metal"]),
-        Language.create("en"),
-        StyleField.create("classical orchestra, death metal")
-      );
+      const prompt = Prompt.create({
+        title: "Conflicting Genres",
+        genre: Genre.create(["Classical", "Death Metal"]),
+        language: Language.create("en"),
+        styleField: StyleField.create("classical orchestra, death metal"),
+      });
 
       const input: OptimizePromptInput = {
         prompt,
@@ -245,12 +271,14 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 60,
         factors: {
           genreCompatibility: 40,
@@ -290,9 +318,13 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 85,
         factors: {
           genreCompatibility: 90,
@@ -329,9 +361,13 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 80,
         factors: {
           genreCompatibility: 90,
@@ -371,9 +407,13 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 80,
         factors: {
           genreCompatibility: 90,
@@ -395,12 +435,18 @@ describe.skip("OptimizePromptUseCase", () => {
 
   describe("メタタグ構造検証", () => {
     it("多すぎるジャンル数に対して警告を出す", async () => {
-      const prompt = Prompt.create(
-        "Too Many Genres",
-        Genre.create(["Rock", "Jazz", "Electronic", "Classical", "Hip-Hop"]),
-        Language.create("en"),
-        StyleField.create("complex multi-genre fusion")
-      );
+      const prompt = Prompt.create({
+        title: "Too Many Genres",
+        genre: Genre.create([
+          "Rock",
+          "Jazz",
+          "Electronic",
+          "Classical",
+          "Hip-Hop",
+        ]),
+        language: Language.create("en"),
+        styleField: StyleField.create("complex multi-genre fusion"),
+      });
 
       const input: OptimizePromptInput = {
         prompt,
@@ -409,14 +455,19 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 65,
         factors: {
           genreCompatibility: 50,
@@ -449,14 +500,19 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 70,
         factors: {
           genreCompatibility: 90,
@@ -491,14 +547,19 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 92,
         factors: {
           genreCompatibility: 95,
@@ -531,12 +592,16 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: prompt.styleField,
         changes: [],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
       const result = await useCaseWithoutPredictor.execute(input);
 
@@ -559,16 +624,21 @@ describe.skip("OptimizePromptUseCase", () => {
         preserveLanguage: true,
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: StyleField.create("Rock, energy, electric guitar"),
         changes: [
           { type: "shortened", description: "Sunoモード最適化", impact: 0.3 },
         ],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 88,
         factors: {
           genreCompatibility: 90,
@@ -607,7 +677,8 @@ describe.skip("OptimizePromptUseCase", () => {
         },
       };
 
-      mockStyleOptimizer.optimizeForLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockStyleOptimizer.optimizeForLength as any).mockResolvedValue({
         optimizedField: StyleField.create(
           "Rock, jazz fusion, electric guitar, piano"
         ),
@@ -616,9 +687,13 @@ describe.skip("OptimizePromptUseCase", () => {
         ],
       });
 
-      mockConflictDetector.detectConflicts.mockResolvedValue({ conflicts: [] });
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockConflictDetector.detectConflicts as any).mockResolvedValue({
+        conflicts: [],
+      });
 
-      mockSuccessPredictor.predictSuccessRate.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSuccessPredictor.predictSuccessRate as any).mockResolvedValue({
         overallScore: 85,
         factors: {
           genreCompatibility: 80,
@@ -632,7 +707,8 @@ describe.skip("OptimizePromptUseCase", () => {
       const result = await useCase.execute(input);
 
       expect(result.optimizedLength).toBeLessThanOrEqual(60);
-      expect(mockStyleOptimizer.optimizeForLength).toHaveBeenCalledWith(
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      expect(mockStyleOptimizer.optimizeForLength as any).toHaveBeenCalledWith(
         prompt.styleField,
         60,
         expect.objectContaining({

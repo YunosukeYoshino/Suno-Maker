@@ -314,7 +314,9 @@ Still should work`;
     it("JSONから復元できる", () => {
       const structure = LyricsStructure.create(sampleSections);
       const json = structure.toJSON();
-      const restored = LyricsStructure.fromJSON(json);
+      const restored = LyricsStructure.fromJSON(
+        json as { sections: unknown[]; template?: StructureTemplate }
+      );
 
       expect(restored.equals(structure)).toBe(true);
     });

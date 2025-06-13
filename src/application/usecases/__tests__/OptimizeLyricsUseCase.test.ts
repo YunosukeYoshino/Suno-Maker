@@ -18,32 +18,9 @@ import {
 
 describe.skip("OptimizeLyricsUseCase", () => {
   let useCase: OptimizeLyricsUseCase;
-  let mockRepository: {
-    save: MockedFunction<ILyricsRepository["save"]>;
-    findById: MockedFunction<ILyricsRepository["findById"]>;
-    findByFilters: MockedFunction<ILyricsRepository["findByFilters"]>;
-    update: MockedFunction<ILyricsRepository["update"]>;
-    delete: MockedFunction<ILyricsRepository["delete"]>;
-    findAll: MockedFunction<ILyricsRepository["findAll"]>;
-  };
-  let mockJapaneseService: {
-    optimizeStructure: MockedFunction<
-      JapaneseOptimizationService["optimizeStructure"]
-    >;
-    checkGrammar: MockedFunction<JapaneseOptimizationService["checkGrammar"]>;
-    suggestImprovements: MockedFunction<
-      JapaneseOptimizationService["suggestImprovements"]
-    >;
-  };
-  let mockSunoService: {
-    optimizeForSuno: MockedFunction<SunoOptimizationService["optimizeForSuno"]>;
-    validateStructure: MockedFunction<
-      SunoOptimizationService["validateStructure"]
-    >;
-    suggestStructureChanges: MockedFunction<
-      SunoOptimizationService["suggestStructureChanges"]
-    >;
-  };
+  let mockRepository: ILyricsRepository;
+  let mockJapaneseService: JapaneseOptimizationService;
+  let mockSunoService: SunoOptimizationService;
 
   beforeEach(() => {
     mockRepository = {
@@ -53,20 +30,52 @@ describe.skip("OptimizeLyricsUseCase", () => {
       update: vi.fn(),
       delete: vi.fn(),
       findAll: vi.fn(),
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
-    } as any;
+      findByLanguage: vi.fn(),
+      findByTags: vi.fn(),
+      findPublicLyrics: vi.fn(),
+      findUserLyrics: vi.fn(),
+      findStructuredLyrics: vi.fn(),
+      findByStructureTypes: vi.fn(),
+      findBySimilarLength: vi.fn(),
+      findTrendingLyrics: vi.fn(),
+      findRecommendedLyrics: vi.fn(),
+      getStats: vi.fn(),
+      getLyricsCount: vi.fn(),
+      getPublicLyricsCount: vi.fn(),
+      getLanguageDistribution: vi.fn(),
+      getStructureTagDistribution: vi.fn(),
+      getCharacterCountDistribution: vi.fn(),
+      saveBatch: vi.fn(),
+      deleteBatch: vi.fn(),
+      findByIds: vi.fn(),
+      searchByContent: vi.fn(),
+      searchByTitle: vi.fn(),
+      searchBySimilarity: vi.fn(),
+      findByOptimizationLevel: vi.fn(),
+      findProblematicLyrics: vi.fn(),
+      exists: vi.fn(),
+      getLastUpdated: vi.fn(),
+      cleanup: vi.fn(),
+      analyzeLyricsComplexity: vi.fn(),
+      exportLyrics: vi.fn(),
+      importLyrics: vi.fn(),
+    } as ILyricsRepository;
 
     mockJapaneseService = {
+      optimizeStructure: vi.fn(),
+      checkGrammar: vi.fn(),
+      suggestImprovements: vi.fn(),
       optimizeForPronunciation: vi.fn(),
       suggestHiraganaUsage: vi.fn(),
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
-    } as any;
+    } as JapaneseOptimizationService;
 
     mockSunoService = {
+      optimizeForSuno: vi.fn(),
+      validateStructure: vi.fn(),
+      suggestStructureChanges: vi.fn(),
       validateForSuno: vi.fn(),
       optimizeLength: vi.fn(),
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
-    } as any;
+    } as SunoOptimizationService;
 
     useCase = new OptimizeLyricsUseCase(
       mockRepository,
@@ -97,13 +106,15 @@ Over the ridge`,
       };
 
       // サービスのモック設定を修正
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
       });
 
-      mockSunoService.optimizeLength.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
         // biome-ignore lint/suspicious/noExplicitAny: test data
         optimizedLyrics: null as any,
         changes: [],
@@ -130,7 +141,8 @@ Sing it with us`,
         language: "en",
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -159,7 +171,8 @@ Sing it with us`,
         },
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -193,7 +206,8 @@ Sing it with us`,
         },
       };
 
-      mockJapaneseService.optimizeForPronunciation.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.optimizeForPronunciation as any).mockResolvedValue({
         optimizedText: `わたしはあなたを愛している
 いつまでも一緒にいよう`,
         changes: [
@@ -202,11 +216,13 @@ Sing it with us`,
         ],
       });
 
-      mockJapaneseService.suggestHiraganaUsage.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.suggestHiraganaUsage as any).mockResolvedValue({
         suggestions: [],
       });
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -225,12 +241,14 @@ Sing it with us`,
         language: "ja",
       };
 
-      mockJapaneseService.optimizeForPronunciation.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.optimizeForPronunciation as any).mockResolvedValue({
         optimizedText: "大丈夫だよ、有難う",
         changes: [],
       });
 
-      mockJapaneseService.suggestHiraganaUsage.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.suggestHiraganaUsage as any).mockResolvedValue({
         suggestions: [
           {
             kanji: "大丈夫",
@@ -247,7 +265,8 @@ Sing it with us`,
         ],
       });
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -278,7 +297,8 @@ Sing it with us`,
         },
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -301,18 +321,20 @@ Sing it with us`,
         language: "en",
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: false,
         issues: ["構造タグが不足しています", "セクションが短すぎます"],
         suggestions: ["コーラスを追加してください"],
       });
 
-      mockSunoService.optimizeLength.mockResolvedValue({
-        optimizedLyrics: Lyrics.create(
-          "test_title",
-          "Simple lyrics without tags",
-          Language.create("en")
-        ),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: Lyrics.create({
+          title: "test_title",
+          content: "Simple lyrics without tags",
+          language: Language.create("en"),
+        }),
         changes: [],
       });
 
@@ -333,12 +355,14 @@ Sing it with us`,
         language: "en",
       };
 
-      mockJapaneseService.optimizeForPronunciation.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.optimizeForPronunciation as any).mockResolvedValue({
         optimizedText: "Simple lyrics without any structure tags at all",
         changes: [],
       });
 
-      mockJapaneseService.suggestHiraganaUsage.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockJapaneseService.suggestHiraganaUsage as any).mockResolvedValue({
         suggestions: [],
       });
 
@@ -381,7 +405,8 @@ Sing it loud`,
         },
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
@@ -424,18 +449,20 @@ Everything's perfect, everything's fine`,
         language: "en",
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],
       });
 
-      mockSunoService.optimizeLength.mockResolvedValue({
-        optimizedLyrics: Lyrics.create(
-          "test_title",
-          input.lyrics,
-          Language.create("en")
-        ),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: Lyrics.create({
+          title: "test_title",
+          content: input.lyrics,
+          language: Language.create("en"),
+        }),
         changes: ["Suno最適化を適用しました"],
       });
 
@@ -450,7 +477,8 @@ Everything's perfect, everything's fine`,
         language: "en",
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: false,
         issues: [
           "構造タグが不足しています",
@@ -460,12 +488,13 @@ Everything's perfect, everything's fine`,
         suggestions: [],
       });
 
-      mockSunoService.optimizeLength.mockResolvedValue({
-        optimizedLyrics: Lyrics.create(
-          "test_title",
-          "A",
-          Language.create("en")
-        ),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: Lyrics.create({
+          title: "test_title",
+          content: "A",
+          language: Language.create("en"),
+        }),
         changes: [],
       });
 
@@ -526,7 +555,8 @@ Over the ridge`,
         },
       };
 
-      mockSunoService.validateForSuno.mockResolvedValue({
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.validateForSuno as any).mockResolvedValue({
         isValid: true,
         issues: [],
         suggestions: [],

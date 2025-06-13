@@ -34,7 +34,15 @@ describe.skip("GeneratePromptUseCase", () => {
       getGenreDistribution: vi.fn(),
       getLanguageDistribution: vi.fn(),
       getQualityScoreDistribution: vi.fn(),
-    };
+      saveBatch: vi.fn(),
+      deleteBatch: vi.fn(),
+      findByIds: vi.fn(),
+      searchByText: vi.fn(),
+      searchBySimilarity: vi.fn(),
+      exists: vi.fn(),
+      getLastUpdated: vi.fn(),
+      cleanup: vi.fn(),
+    } as IPromptRepository;
 
     mockOptimizationService = {
       optimize: vi.fn(),

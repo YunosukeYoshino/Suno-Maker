@@ -11,12 +11,13 @@ interface ValidSongProps {
   title: string;
   prompt: Prompt;
   lyrics?: Lyrics;
-  audioUrl?: string;
-  videoUrl?: string;
-  imageUrl?: string;
+  sunoUrl?: string;
   tags?: string[];
   description?: string;
+  isGenerated?: boolean;
   isPublic?: boolean;
+  rating?: number;
+  playCount?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -65,7 +66,7 @@ describe("Song", () => {
       expect(song.id).toBe("song-123");
       expect(song.title).toBe("My Love Song");
       expect(song.prompt.id).toBe(testPrompt.id);
-      expect(song.lyrics.id).toBe(testLyrics.id);
+      expect(song.lyrics?.id).toBe(testLyrics.id);
       expect(song.isGenerated).toBe(true);
       expect(song.isPublic).toBe(true);
       expect(song.rating).toBe(4.5);
