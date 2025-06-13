@@ -4,8 +4,21 @@ import { Language } from "../../valueObjects/Language";
 import { StyleField } from "../../valueObjects/StyleField";
 import { Prompt } from "../Prompt";
 
+interface ValidPromptProps {
+  id?: string;
+  title: string;
+  genre: Genre;
+  language: Language;
+  styleField: StyleField;
+  tags?: string[];
+  description?: string;
+  isPublic?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 describe("Prompt", () => {
-  let validProps: any;
+  let validProps: ValidPromptProps;
 
   beforeEach(() => {
     validProps = {

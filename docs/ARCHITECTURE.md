@@ -50,27 +50,35 @@ src/
 │   │   ├── Prompt.ts                # プロンプトエンティティ
 │   │   ├── Lyrics.ts                # 歌詞エンティティ
 │   │   ├── Song.ts                  # 楽曲エンティティ
+│   │   ├── Template.ts              # ✅ Phase 3 テンプレートエンティティ
 │   │   └── __tests__/               # エンティティテスト
 │   ├── valueObjects/                # 値オブジェクト
-│   │   ├── Genre.ts                 # ジャンル（120+種類）
+│   │   ├── Genre.ts                 # ジャンル（240+種類）
 │   │   ├── Language.ts              # 言語（17言語対応）
 │   │   ├── StyleField.ts            # スタイルフィールド（120文字最適化）
+│   │   ├── LyricsStructure.ts       # ✅ Phase 2.2 歌詞構造値オブジェクト
 │   │   └── __tests__/               # 値オブジェクトテスト
 │   ├── repositories/                # リポジトリインターフェース
 │   │   ├── IPromptRepository.ts     # プロンプトリポジトリ契約
 │   │   ├── ILyricsRepository.ts     # 歌詞リポジトリ契約
-│   │   └── ISongRepository.ts       # 楽曲リポジトリ契約
+│   │   ├── ISongRepository.ts       # 楽曲リポジトリ契約
+│   │   ├── ITemplateRepository.ts   # ✅ Phase 3 テンプレートリポジトリ契約
+│   │   └── __tests__/               # リポジトリテスト
 │   └── index.ts                     # ドメイン層エクスポート
 ├── application/                      # アプリケーション層
 │   ├── usecases/                    # ユースケース
 │   │   ├── GeneratePromptUseCase.ts # プロンプト生成ユースケース
 │   │   ├── OptimizeLyricsUseCase.ts # 歌詞最適化ユースケース
+│   │   ├── OptimizePromptUseCase.ts # プロンプト最適化ユースケース
+│   │   ├── TemplateLibraryUseCase.ts # ✅ Phase 3 テンプレートライブラリユースケース
 │   │   ├── CreateSongUseCase.ts     # 楽曲作成ユースケース
 │   │   └── __tests__/               # ユースケーステスト
 │   ├── services/                    # アプリケーションサービス
 │   │   ├── PromptOptimizationService.ts
 │   │   ├── LyricsAnalysisService.ts
-│   │   └── QualityScoreService.ts
+│   │   ├── QualityScoreService.ts
+│   │   ├── TemplateSeederService.ts # ✅ Phase 3 テンプレートシードサービス
+│   │   └── __tests__/               # サービステスト
 │   └── stores/                      # 状態管理
 │       ├── promptStore.ts           # プロンプト状態管理
 │       ├── lyricsStore.ts           # 歌詞状態管理
@@ -90,13 +98,22 @@ src/
     ├── components/                   # UIコンポーネント
     │   ├── prompt/                  # プロンプト関連コンポーネント
     │   │   ├── PromptGenerator.tsx
-    │   │   ├── GenreSelector.tsx
+    │   │   ├── GenreSelector.tsx    # ✅ Phase 2.1実装済み
+    │   │   ├── ParameterSliders.tsx # ✅ Phase 2.1実装済み
+    │   │   ├── InstrumentSelector.tsx # ✅ Phase 2.1実装済み
+    │   │   ├── MoodMatrix.tsx       # ✅ Phase 2.1実装済み
     │   │   ├── StyleFieldEditor.tsx
     │   │   └── OptimizationPanel.tsx
+    │   ├── templates/               # ✅ Phase 3 テンプレート関連コンポーネント
+    │   │   ├── TemplateLibrary.tsx  # ✅ Phase 3 テンプレートライブラリ
+    │   │   ├── TemplateCard.tsx     # テンプレートカード表示
+    │   │   ├── TemplateCreator.tsx  # カスタムテンプレート作成
+    │   │   ├── TemplatePreview.tsx  # テンプレートプレビュー
+    │   │   └── __tests__/           # テンプレートコンポーネントテスト
     │   ├── lyrics/                  # 歌詞関連コンポーネント
     │   │   ├── LyricsEditor.tsx
-    │   │   ├── StructureTagEditor.tsx
-    │   │   ├── LanguageOptimizer.tsx
+    │   │   ├── StructureTagEditor.tsx # ✅ Phase 2.2実装済み
+    │   │   ├── LanguageOptimizer.tsx  # ✅ Phase 2.2実装済み
     │   │   └── LyricsPreview.tsx
     │   ├── song/                    # 楽曲関連コンポーネント
     │   │   ├── SongBuilder.tsx
@@ -196,15 +213,54 @@ class Song {
 }
 ```
 
+#### 4. Template エンティティ（✅ Phase 3実装済み）
+```typescript
+class Template {
+  private constructor(private readonly props: TemplateProps) {}
+  
+  // ファクトリーメソッド
+  static create(props: TemplateProps): Template
+  
+  // 不変更新メソッド
+  incrementUsage(): Template
+  updateQualityScore(score: number): Template
+  
+  // ビジネスロジック
+  matches(criteria: TemplateMatchCriteria): boolean
+  toPrompt(): Prompt
+  
+  // カテゴリ分類（4種類）
+  // - genre-specific: ジャンル特化テンプレート
+  // - language-specific: 言語特化テンプレート  
+  // - mood-specific: ムード特化テンプレート
+  // - custom: ユーザー作成カスタムテンプレート
+  
+  // 品質管理
+  get qualityScore(): number  // 0-100の品質スコア
+  get usageCount(): number    // 使用回数追跡
+  
+  // メタデータ
+  get tags(): string[]        // 検索・分類用タグ
+  get category(): TemplateCategory
+  get createdAt(): Date
+  get updatedAt(): Date
+}
+```
+
 ### 値オブジェクト設計
 
 #### 1. Genre 値オブジェクト
 ```typescript
 class Genre {
-  // サポートジャンル管理
+  // サポートジャンル管理（232種類対応）
   static getSupportedGenres(): readonly SupportedGenre[]
   static getMainGenres(): readonly SupportedGenre[]
   static getSubGenres(mainGenre: SupportedGenre): readonly SupportedGenre[]
+  
+  // Phase 2.1実装済み：階層化ジャンル分類
+  static getGenresByCategory(): GenreCategory[]
+  static getPopularGenres(): SupportedGenre[]
+  static getRegionalGenres(): { region: string; genres: SupportedGenre[] }[]
   
   // バリデーション
   static isSupported(genre: string): boolean
@@ -242,10 +298,12 @@ class StyleField {
   extractMoods(): string[]
   toStructured(): StructuredStyle
   
-  // 最適化
+  // Phase 2.3実装済み：120文字最適化
   optimize(): string
   prioritize(priorities: Priority[]): string
   removeDuplicates(): StyleField
+  shortenSynonyms(): StyleField
+  removeRedundantTerms(): StyleField
   
   // バリデーション
   isWithinLimit(): boolean
@@ -257,53 +315,177 @@ class StyleField {
 }
 ```
 
+#### 4. LyricsStructure 値オブジェクト（Phase 2.2実装済み）
+```typescript
+class LyricsStructure {
+  // 構造解析
+  static fromText(text: string): LyricsStructure
+  static parseStructureFromText(text: string): LyricsSection[]
+  static getRecommendedTemplates(): StructureTemplate[]
+  
+  // 構造タグ自動挿入
+  formatWithTags(): string
+  formatForSuno(): string
+  formatPlainText(): string
+  
+  // 構造操作
+  addSection(section: LyricsSection): LyricsStructure
+  removeSection(index: number): LyricsStructure
+  reorderSection(fromIndex: number, toIndex: number): LyricsStructure
+  
+  // 分析
+  getAnalysis(): StructureAnalysis
+  getStructureWarnings(): string[]
+}
+```
+
 ## 🔄 アプリケーション層設計
 
 ### ユースケース設計
 
-#### 1. GeneratePromptUseCase
+#### 1. GeneratePromptUseCase（Phase 2.1実装済み）
 ```typescript
 interface GeneratePromptInput {
-  genre: Genre
-  language: Language
-  mood?: string[]
-  instruments?: string[]
+  genres: string[]  // 複数ジャンル対応（最大5個）
+  language: string
+  mood?: string[]   // ムードマトリックス対応（25種類）
+  instruments?: string[]  // 楽器セレクター対応（70+種類）
+  parameters?: {  // パラメータスライダー対応
+    energy?: number
+    complexity?: number
+    tempo?: number
+    emotional_intensity?: number
+  }
   customStyle?: string
 }
 
 interface GeneratePromptOutput {
   prompt: Prompt
   optimizations: string[]
-  qualityScore: number
+  qualityScore: number  // 品質スコア算出
+  warnings: string[]
   suggestions: string[]
 }
 
 class GeneratePromptUseCase {
+  // Phase 2.1: 全セレクター統合実装済み
   async execute(input: GeneratePromptInput): Promise<GeneratePromptOutput>
 }
 ```
 
-#### 2. OptimizeLyricsUseCase
+#### 2. OptimizeLyricsUseCase（Phase 2.2実装済み）
 ```typescript
 interface OptimizeLyricsInput {
-  lyrics: Lyrics
-  targetLanguage: Language
-  optimizationType: 'suno' | 'general' | 'pronunciation'
+  lyrics: string
+  language: string
+  targetStructure?: StructureTemplate
+  optimizationOptions?: {
+    autoInsertTags: boolean        // 構造タグ自動挿入
+    optimizeForJapanese: boolean   // 日本語最適化
+    optimizeForSuno: boolean       // Suno特化最適化
+    maxLength: number             // 3000文字制限
+    enforceStructure: boolean
+  }
 }
 
 interface OptimizeLyricsOutput {
   optimizedLyrics: Lyrics
-  changes: OptimizationChange[]
-  improvementScore: number
-  warnings: string[]
+  structure: LyricsStructure      // 構造解析結果
+  optimizations: string[]         // 最適化履歴
+  warnings: string[]             // 警告事項
+  suggestions: string[]          // 改善提案
+  qualityScore: number          // 品質スコア
 }
 
 class OptimizeLyricsUseCase {
+  // Phase 2.2: 構造タグ自動挿入・日本語最適化実装済み
   async execute(input: OptimizeLyricsInput): Promise<OptimizeLyricsOutput>
 }
 ```
 
-#### 3. CreateSongUseCase
+#### 3. OptimizePromptUseCase（Phase 2.3実装済み）
+```typescript
+interface OptimizePromptInput {
+  prompt: Prompt
+  targetLength?: number           // デフォルト120文字
+  optimizationMode: 'suno' | 'general' | 'creative'
+  preserveGenres: boolean
+  preserveLanguage: boolean
+  customPriorities?: {
+    genres: number      // 1-10
+    instruments: number // 1-10
+    mood: number       // 1-10
+    technical: number  // 1-10
+  }
+}
+
+interface OptimizePromptOutput {
+  optimizedPrompt: Prompt
+  originalLength: number
+  optimizedLength: number
+  compressionRatio: number
+  optimizations: Array<{
+    type: 'removed' | 'shortened' | 'reordered' | 'merged'
+    description: string
+    originalText?: string
+    optimizedText?: string
+  }>
+  warnings: string[]
+  qualityScore: number
+  suggestions: string[]
+}
+
+class OptimizePromptUseCase {
+  // Phase 2.3: 120文字最適化・ジャンル競合検出・成功率予測実装済み
+  async execute(input: OptimizePromptInput): Promise<OptimizePromptOutput>
+}
+```
+
+#### 4. TemplateLibraryUseCase（✅ Phase 3実装済み）
+```typescript
+interface CreateCustomTemplateInput {
+  name: string
+  description: string
+  genre: Genre
+  language: Language
+  styleField: StyleField
+  lyricsStructure: string
+  tags: string[]
+}
+
+interface UseTemplateResult {
+  template: Template
+  prompt: Prompt
+}
+
+class TemplateLibraryUseCase {
+  // テンプレート取得メソッド
+  async getTemplatesByGenre(genre: Genre, limit?: number): Promise<Template[]>
+  async getTemplatesByLanguage(language: Language, limit?: number): Promise<Template[]>
+  async getPopularTemplates(limit?: number): Promise<Template[]>
+  async getHighQualityTemplates(minScore?: number, limit?: number): Promise<Template[]>
+  async getTemplatesByCategory(category: TemplateCategory, limit?: number): Promise<Template[]>
+  
+  // 検索・推奨機能
+  async searchTemplates(filters: TemplateSearchFilters, options?: TemplateSearchOptions): Promise<TemplateSearchResult>
+  async recommendTemplates(criteria: TemplateMatchCriteria, limit?: number): Promise<Template[]>
+  async semanticSearchTemplates(query: string, limit?: number): Promise<Template[]>
+  
+  // テンプレート使用・管理
+  async useTemplate(templateId: string): Promise<UseTemplateResult>
+  async createCustomTemplate(input: CreateCustomTemplateInput): Promise<Template>
+  async updateTemplateQuality(id: string, score: number): Promise<Template>
+  
+  // 統計・分析
+  async getTemplateStatistics(): Promise<TemplateStatistics>
+  async getTemplateCount(filters?: TemplateSearchFilters): Promise<number>
+  
+  // Phase 3実装済み：25+プロフェッショナルテンプレート
+  async generateInitialTemplates(): Promise<Template[]>
+}
+```
+
+#### 5. CreateSongUseCase
 ```typescript
 interface CreateSongInput {
   title: string

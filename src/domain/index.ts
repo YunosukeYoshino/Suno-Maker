@@ -7,11 +7,13 @@ export { StyleField } from "./valueObjects/StyleField";
 export { Prompt } from "./entities/Prompt";
 export { Lyrics } from "./entities/Lyrics";
 export { Song } from "./entities/Song";
+export { Template } from "./entities/Template";
 
 // Repository Interfaces
 export type { IPromptRepository } from "./repositories/IPromptRepository";
 export type { ILyricsRepository } from "./repositories/ILyricsRepository";
 export type { ISongRepository } from "./repositories/ISongRepository";
+export type { ITemplateRepository } from "./repositories/ITemplateRepository";
 
 // Types
 export type { GenreValue } from "./valueObjects/Genre";
@@ -38,6 +40,11 @@ export type {
   SongValidationResult,
   SongJSON,
 } from "./entities/Song";
+export type {
+  TemplateProps,
+  TemplateCategory,
+  TemplateMatchCriteria,
+} from "./entities/Template";
 
 // Repository Types
 export type {
@@ -55,3 +62,9 @@ export type {
   SongSearchOptions,
   SongSearchResult,
 } from "./repositories/ISongRepository";
+export type {
+  TemplateSearchFilters,
+  TemplateSearchOptions,
+  TemplateSearchResult,
+  TemplateStatistics,
+} from "./repositories/ITemplateRepository";

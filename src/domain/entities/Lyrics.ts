@@ -11,7 +11,9 @@ const LyricsSchema = z.object({
     .string()
     .min(1, "歌詞の内容は必須です")
     .max(3000, "歌詞は3000文字以内で入力してください"),
-  language: z.instanceof(Language),
+  language: z.custom<Language>((data) => data instanceof Language, {
+    message: "Languageインスタンスである必要があります",
+  }),
   tags: z.array(z.string()).default([]),
   description: z.string().default(""),
   isPublic: z.boolean().default(false),
@@ -225,7 +227,7 @@ export class Lyrics {
     const lines = this.content.split("\n").filter((line) => line.trim());
     const sections = this.extractSections();
     const hasStructureTags = sections.some((section) =>
-      STRUCTURE_TAGS.includes(section.type as any)
+      STRUCTURE_TAGS.includes(section.type as (typeof STRUCTURE_TAGS)[number])
     );
 
     const averageLineLength =

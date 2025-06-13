@@ -9,9 +9,15 @@ const PromptSchema = z.object({
     .string()
     .min(1, "タイトルは1文字以上100文字以内で入力してください")
     .max(100, "タイトルは1文字以上100文字以内で入力してください"),
-  genre: z.instanceof(Genre),
-  language: z.instanceof(Language),
-  styleField: z.instanceof(StyleField),
+  genre: z.custom<Genre>((data) => data instanceof Genre, {
+    message: "Genreインスタンスである必要があります",
+  }),
+  language: z.custom<Language>((data) => data instanceof Language, {
+    message: "Languageインスタンスである必要があります",
+  }),
+  styleField: z.custom<StyleField>((data) => data instanceof StyleField, {
+    message: "StyleFieldインスタンスである必要があります",
+  }),
   tags: z.array(z.string()).default([]),
   description: z.string().default(""),
   isPublic: z.boolean().default(false),
@@ -395,9 +401,13 @@ export class Prompt {
       id: json.id,
       title: json.title,
       genre: Genre.create(
-        json.genre.includes(",") ? json.genre.split(", ") : json.genre
+        (json.genre.includes(",")
+          ? json.genre.split(", ")
+          : json.genre) as Parameters<typeof Genre.create>[0]
       ),
-      language: Language.create(json.language),
+      language: Language.create(
+        json.language as Parameters<typeof Language.create>[0]
+      ),
       styleField: StyleField.create(json.styleField),
       tags: json.tags,
       description: json.description,

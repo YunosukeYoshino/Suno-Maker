@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Lyrics } from "./Lyrics";
-import { Prompt } from "./Prompt";
+import { Lyrics, type LyricsJSON } from "./Lyrics";
+import { Prompt, type PromptJSON } from "./Prompt";
 
 const SongSchema = z.object({
   id: z.string().min(1),
@@ -8,8 +8,15 @@ const SongSchema = z.object({
     .string()
     .min(1, "タイトルは1文字以上100文字以内で入力してください")
     .max(100, "タイトルは1文字以上100文字以内で入力してください"),
-  prompt: z.instanceof(Prompt),
-  lyrics: z.instanceof(Lyrics).nullable().default(null),
+  prompt: z.custom<Prompt>((data) => data instanceof Prompt, {
+    message: "Promptインスタンスである必要があります",
+  }),
+  lyrics: z
+    .custom<Lyrics>((data) => data instanceof Lyrics, {
+      message: "Lyricsインスタンスである必要があります",
+    })
+    .nullable()
+    .default(null),
   sunoUrl: z.string().url().nullable().default(null),
   tags: z.array(z.string()).default([]),
   description: z.string().default(""),
@@ -52,8 +59,8 @@ export interface SongValidationResult {
 export interface SongJSON {
   id: string;
   title: string;
-  prompt: any; // PromptJSON
-  lyrics: any | null; // LyricsJSON | null
+  prompt: PromptJSON;
+  lyrics: LyricsJSON | null;
   sunoUrl: string | null;
   tags: string[];
   description: string;
@@ -174,6 +181,7 @@ export class Song {
   updateTags(tags: string[]): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       tags,
       updatedAt: new Date(),
     });
@@ -182,6 +190,7 @@ export class Song {
   updateDescription(description: string): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       description,
       updatedAt: new Date(),
     });
@@ -190,6 +199,7 @@ export class Song {
   markAsGenerated(sunoUrl?: string): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       isGenerated: true,
       sunoUrl: sunoUrl || this.props.sunoUrl,
       updatedAt: new Date(),
@@ -199,6 +209,7 @@ export class Song {
   markAsNotGenerated(): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       isGenerated: false,
       sunoUrl: null,
       updatedAt: new Date(),
@@ -208,6 +219,7 @@ export class Song {
   makePublic(): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       isPublic: true,
       updatedAt: new Date(),
     });
@@ -216,6 +228,7 @@ export class Song {
   makePrivate(): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       isPublic: false,
       updatedAt: new Date(),
     });
@@ -224,6 +237,7 @@ export class Song {
   updateRating(rating: number): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       rating: Math.max(0, Math.min(5, rating)),
       updatedAt: new Date(),
     });
@@ -232,6 +246,7 @@ export class Song {
   incrementPlayCount(): Song {
     return Song.create({
       ...this.props,
+      prompt: this.props.prompt,
       playCount: this.props.playCount + 1,
       updatedAt: new Date(),
     });
@@ -243,7 +258,8 @@ export class Song {
     const hasPrompt = this.props.prompt !== null;
     const languageConsistency =
       !hasLyrics ||
-      this.props.prompt.language.equals(this.props.lyrics?.language);
+      !this.props.lyrics ||
+      this.props.prompt.language.equals(this.props.lyrics.language);
 
     const promptQualityScore =
       this.props.prompt.calculateQualityScore().overall;

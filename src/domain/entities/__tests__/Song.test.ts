@@ -6,8 +6,24 @@ import { Lyrics } from "../Lyrics";
 import { Prompt } from "../Prompt";
 import { Song } from "../Song";
 
+interface ValidSongProps {
+  id?: string;
+  title: string;
+  prompt: Prompt;
+  lyrics?: Lyrics;
+  sunoUrl?: string;
+  tags?: string[];
+  description?: string;
+  isGenerated?: boolean;
+  isPublic?: boolean;
+  rating?: number;
+  playCount?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 describe("Song", () => {
-  let validProps: any;
+  let validProps: ValidSongProps;
   let testPrompt: Prompt;
   let testLyrics: Lyrics;
 
@@ -50,7 +66,7 @@ describe("Song", () => {
       expect(song.id).toBe("song-123");
       expect(song.title).toBe("My Love Song");
       expect(song.prompt.id).toBe(testPrompt.id);
-      expect(song.lyrics.id).toBe(testLyrics.id);
+      expect(song.lyrics?.id).toBe(testLyrics.id);
       expect(song.isGenerated).toBe(true);
       expect(song.isPublic).toBe(true);
       expect(song.rating).toBe(4.5);
