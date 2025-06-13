@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+import { beforeEach } from "vitest";
 
 // VitestでjestのMockedを使用できるようにする
 declare global {
@@ -11,3 +12,8 @@ global.jest = {
   // biome-ignore lint/suspicious/noExplicitAny: jest compatibility layer
   Mocked: (fn: any) => fn,
 };
+
+// DOM環境のクリーンアップ
+beforeEach(() => {
+  document.body.innerHTML = "";
+});

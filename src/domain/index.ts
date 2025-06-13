@@ -8,12 +8,14 @@ export { Prompt } from "./entities/Prompt";
 export { Lyrics } from "./entities/Lyrics";
 export { Song } from "./entities/Song";
 export { Template } from "./entities/Template";
+export { SuccessExample } from "./entities/SuccessExample";
 
 // Repository Interfaces
 export type { IPromptRepository } from "./repositories/IPromptRepository";
 export type { ILyricsRepository } from "./repositories/ILyricsRepository";
 export type { ISongRepository } from "./repositories/ISongRepository";
 export type { ITemplateRepository } from "./repositories/ITemplateRepository";
+export type { ISuccessExampleRepository } from "./repositories/ISuccessExampleRepository";
 
 // Types
 export type { GenreValue } from "./valueObjects/Genre";
@@ -45,6 +47,10 @@ export type {
   TemplateCategory,
   TemplateMatchCriteria,
 } from "./entities/Template";
+export type {
+  SuccessExampleProps,
+  SuccessExampleSearchCriteria,
+} from "./entities/SuccessExample";
 
 // Repository Types
 export type {
@@ -68,3 +74,9 @@ export type {
   TemplateSearchResult,
   TemplateStatistics,
 } from "./repositories/ITemplateRepository";
+export type {
+  SuccessExampleSearchFilters,
+  SuccessExampleSearchOptions,
+  SuccessExampleSearchResult,
+  SuccessExampleStatistics,
+} from "./repositories/ISuccessExampleRepository";
