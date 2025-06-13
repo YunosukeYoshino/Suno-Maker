@@ -8,9 +8,14 @@
 [![Biome](https://img.shields.io/badge/Biome-1.9.4-60A5FA)](https://biomejs.dev/)
 [![Vitest](https://img.shields.io/badge/Vitest-3.2.3-6E9F18)](https://vitest.dev/)
 
-## 📋 概要
+## 🎶 このツールについて
 
-Suno MakerはSUNOでの音楽生成を最適化するための包括的なツールです。科学的アプローチに基づく高品質なプロンプト生成と、日本語・英語対応の歌詞最適化機能を提供します。
+「Sunoで、もっといい曲を作りたい！」
+
+Suno Makerは、そんなあなたのための相棒です。
+AIが最高のパフォーマンスを発揮できるように、音楽理論や成功パターンを詰め込んだ「魔法の呪文（プロンプト）」を一緒に考えたり、グッとくる歌詞作りをお手伝いします。
+
+面倒なことはツールに任せて、あなたは創造的な部分に集中してください。
 
 ## ✨ Phase 2 実装完了機能
 
@@ -167,6 +172,7 @@ bun x shadcn@latest add [component-name]
 - 自動品質向上
 - リアルタイム最適化
 
+<!--
 ## 🤝 コントリビューション
 
 ### 開発参加
@@ -185,6 +191,7 @@ bun x shadcn@latest add [component-name]
 ## 📄 ライセンス
 
 MIT License - 詳細は [LICENSE](./LICENSE) ファイルを参照
+-->
 
 ## 🙏 謝辞
 
