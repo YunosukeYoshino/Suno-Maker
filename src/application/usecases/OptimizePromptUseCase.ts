@@ -98,9 +98,9 @@ export class OptimizePromptUseCase {
     const originalLength = originalStyleField.value.length;
 
     // 2. ジャンル競合検出
-    const genreConflicts = await this.detectGenreConflicts(
-      originalPrompt.genre.value
-    );
+    const genreValue = originalPrompt.genre.value;
+    const genreArray = Array.isArray(genreValue) ? genreValue : [genreValue];
+    const genreConflicts = await this.detectGenreConflicts(genreArray);
     if (genreConflicts.length > 0) {
       warnings.push(
         ...genreConflicts.map(
@@ -134,13 +134,13 @@ export class OptimizePromptUseCase {
     suggestions.push(...metaTagValidation.suggestions);
 
     // 5. 最適化されたプロンプト作成
-    const optimizedPrompt = Prompt.create(
-      originalPrompt.title + "_optimized",
-      originalPrompt.genre,
-      originalPrompt.language,
-      optimizedStyleResult.styleField,
-      originalPrompt.isPublic
-    );
+    const optimizedPrompt = Prompt.create({
+      title: `${originalPrompt.title}_optimized`,
+      genre: originalPrompt.genre,
+      language: originalPrompt.language,
+      styleField: optimizedStyleResult.styleField,
+      isPublic: originalPrompt.isPublic,
+    });
 
     // 6. 成功率予測
     const successPrediction = await this.predictSuccessRate(optimizedPrompt);
@@ -205,7 +205,13 @@ export class OptimizePromptUseCase {
     }
 
     // 基本的な競合検出
-    const conflicts: any[] = [];
+    const conflicts: Array<{
+      genre1: string;
+      genre2: string;
+      severity: "high" | "medium" | "low";
+      reason: string;
+      suggestion: string;
+    }> = [];
     const conflictPairs: Record<
       string,
       { conflictsWith: string[]; reason: string; suggestion: string }
@@ -286,7 +292,7 @@ export class OptimizePromptUseCase {
       );
 
       const optimizationChanges = result.changes.map((change) => ({
-        type: change.type as any,
+        type: change.type as "removed" | "shortened" | "reordered" | "merged",
         description: change.description,
         originalText: styleField.value,
         optimizedText: result.optimizedField.value,
@@ -337,7 +343,7 @@ export class OptimizePromptUseCase {
     ];
 
     let shortenedValue = optimizedValue;
-    redundantTerms.forEach((term) => {
+    for (const term of redundantTerms) {
       const regex = new RegExp(`\\b${term}\\s+`, "gi");
       if (regex.test(shortenedValue)) {
         shortenedValue = shortenedValue.replace(regex, "");
@@ -349,7 +355,7 @@ export class OptimizePromptUseCase {
         });
         optimizedValue = shortenedValue;
       }
-    });
+    }
 
     // 3. 同義語の短縮
     const synonymReplacements: Record<string, string> = {
@@ -365,7 +371,7 @@ export class OptimizePromptUseCase {
       peaceful: "calm",
     };
 
-    Object.entries(synonymReplacements).forEach(([long, short]) => {
+    for (const [long, short] of Object.entries(synonymReplacements)) {
       const regex = new RegExp(`\\b${long}\\b`, "gi");
       if (regex.test(optimizedValue) && optimizedValue.length > targetLength) {
         const newValue = optimizedValue.replace(regex, short);
@@ -379,12 +385,11 @@ export class OptimizePromptUseCase {
           optimizedValue = newValue;
         }
       }
-    });
+    }
 
     // 4. 最終的な切り詰め（必要な場合のみ）
     if (optimizedValue.length > targetLength) {
-      const truncatedValue =
-        optimizedValue.substring(0, targetLength - 3) + "...";
+      const truncatedValue = `${optimizedValue.substring(0, targetLength - 3)}...`;
       optimizations.push({
         type: "removed",
         description: `文字数制限のため末尾を切り詰め（${optimizedValue.length - targetLength + 3}文字削除）`,
@@ -410,7 +415,9 @@ export class OptimizePromptUseCase {
     const suggestions: string[] = [];
 
     // ジャンル数チェック
-    const genreCount = prompt.genre.value.length;
+    const genreValue = prompt.genre.value;
+    const genreArray = Array.isArray(genreValue) ? genreValue : [genreValue];
+    const genreCount = genreArray.length;
     if (genreCount > 3) {
       warnings.push(`ジャンル数が多すぎます（${genreCount}個）`);
       suggestions.push("ジャンルは1-3個に絞ることを推奨します");
@@ -434,14 +441,14 @@ export class OptimizePromptUseCase {
       "song title",
     ];
 
-    sunoProblematicTerms.forEach((term) => {
+    for (const term of sunoProblematicTerms) {
       if (styleValue.includes(term)) {
         warnings.push(`著作権に関わる可能性のある用語: "${term}"`);
         suggestions.push(
           "具体的なアーティスト名や楽曲名の使用は避けてください"
         );
       }
-    });
+    }
 
     return { warnings, suggestions };
   }
@@ -462,7 +469,9 @@ export class OptimizePromptUseCase {
 
     // 基本的な成功率予測
     const factors = {
-      genreCompatibility: this.calculateGenreCompatibility(prompt.genre.value),
+      genreCompatibility: this.calculateGenreCompatibility(
+        Array.isArray(prompt.genre.value) ? prompt.genre.value : [prompt.genre.value]
+      ),
       styleCohesion: this.calculateStyleCohesion(prompt.styleField.value),
       lengthOptimality: this.calculateLengthOptimality(
         prompt.styleField.value.length
@@ -562,7 +571,16 @@ export class OptimizePromptUseCase {
     optimizedPrompt: Prompt,
     optimizations: OptimizePromptOutput["optimizations"],
     warnings: string[],
-    successPrediction: any
+    successPrediction: {
+      overallScore: number;
+      factors: {
+        genreCompatibility: number;
+        styleCohesion: number;
+        lengthOptimality: number;
+        technicalCorrectness: number;
+      };
+      improvements: string[];
+    }
   ): number {
     let score = 100;
 

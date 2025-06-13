@@ -51,13 +51,13 @@ export class LyricsStructure {
     sections: LyricsSection[],
     template?: StructureTemplate
   ): LyricsStructure {
-    this.validateStructure(sections);
+    LyricsStructure.validateStructure(sections);
     return new LyricsStructure(sections, template);
   }
 
   static fromText(text: string): LyricsStructure {
-    const sections = this.parseStructureFromText(text);
-    const detectedTemplate = this.detectTemplate(sections);
+    const sections = LyricsStructure.parseStructureFromText(text);
+    const detectedTemplate = LyricsStructure.detectTemplate(sections);
     return new LyricsStructure(sections, detectedTemplate);
   }
 
@@ -172,21 +172,24 @@ export class LyricsStructure {
 
       if (sectionMatch) {
         // 前のセクションを完了
-        if (currentSection && currentSection.content) {
+        if (currentSection?.content && currentSection.type && currentSection.startLine !== undefined) {
           sections.push({
-            type: currentSection.type!,
+            type: currentSection.type,
             content: currentSection.content.trim(),
-            startLine: currentSection.startLine!,
+            startLine: currentSection.startLine,
             endLine: lineNumber - 1,
           });
         }
 
         // 新しいセクションを開始
-        const sectionType = this.normalizeSectionType(sectionMatch[1]);
+        const sectionType = LyricsStructure.normalizeSectionType(
+          sectionMatch[1]
+        );
         currentSection = {
           type: sectionType,
           content: "",
           startLine: lineNumber,
+          endLine: lineNumber,
         };
       } else if (currentSection && trimmedLine) {
         // セクション内容を追加
@@ -196,11 +199,11 @@ export class LyricsStructure {
     }
 
     // 最後のセクションを追加
-    if (currentSection && currentSection.content) {
+    if (currentSection?.content && currentSection.type && currentSection.startLine !== undefined) {
       sections.push({
-        type: currentSection.type!,
+        type: currentSection.type,
         content: currentSection.content.trim(),
-        startLine: currentSection.startLine!,
+        startLine: currentSection.startLine,
         endLine: lineNumber,
       });
     }
@@ -243,11 +246,11 @@ export class LyricsStructure {
     sections: LyricsSection[]
   ): StructureTemplate | undefined {
     const sectionTypes = sections.map((s) => s.type);
-    const templates = this.getRecommendedTemplates();
+    const templates = LyricsStructure.getRecommendedTemplates();
 
     // 完全一致を探す
     const exactMatch = templates.find((template) =>
-      this.arraysEqual(template.sections, sectionTypes)
+      LyricsStructure.arraysEqual(template.sections, sectionTypes)
     );
 
     if (exactMatch) {
@@ -256,7 +259,7 @@ export class LyricsStructure {
 
     // 部分一致を探す（80%以上の一致）
     const partialMatch = templates.find((template) => {
-      const similarity = this.calculateSimilarity(
+      const similarity = LyricsStructure.calculateSimilarity(
         template.sections,
         sectionTypes
       );
@@ -522,16 +525,26 @@ export class LyricsStructure {
     };
   }
 
-  static fromJSON(data: any): LyricsStructure {
-    const sections = data.sections.map(
-      (s: any): LyricsSection => ({
+  static fromJSON(data: {
+    sections: unknown[];
+    template?: StructureTemplate;
+  }): LyricsStructure {
+    const sections = data.sections.map((sectionData): LyricsSection => {
+      const s = sectionData as {
+        type: unknown;
+        content: string;
+        startLine: number;
+        endLine: number;
+        isOptional?: boolean;
+      };
+      return {
         type: LyricsSectionTypeSchema.parse(s.type),
         content: s.content,
         startLine: s.startLine,
         endLine: s.endLine,
         isOptional: s.isOptional,
-      })
-    );
+      };
+    });
 
     return new LyricsStructure(sections, data.template);
   }

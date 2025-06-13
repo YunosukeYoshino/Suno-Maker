@@ -315,7 +315,7 @@ export function MoodMatrix({
       center: [], // 中央エリア
     };
 
-    MOOD_ITEMS.forEach((mood) => {
+    for (const mood of MOOD_ITEMS) {
       if (mood.energy >= 4 && mood.valence >= 4) {
         matrix.highPos.push(mood);
       } else if (mood.energy >= 4 && mood.valence <= 2) {
@@ -327,7 +327,7 @@ export function MoodMatrix({
       } else {
         matrix.center.push(mood);
       }
-    });
+    }
 
     return matrix;
   }, []);
@@ -448,7 +448,7 @@ export function MoodMatrix({
                       key={moodName}
                       variant="secondary"
                       className="flex items-center gap-1"
-                      style={{ backgroundColor: mood?.color + "20" }}
+                      style={{ backgroundColor: `${mood?.color}20` }}
                     >
                       {getMoodDisplayName(moodName)}
                       <Button

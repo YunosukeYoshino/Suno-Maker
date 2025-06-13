@@ -78,6 +78,8 @@ export default function Home() {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                role="img"
+                aria-label="アイデア"
               >
                 <path
                   strokeLinecap="round"
@@ -102,6 +104,8 @@ export default function Home() {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                role="img"
+                aria-label="音楽"
               >
                 <path
                   strokeLinecap="round"
@@ -126,6 +130,8 @@ export default function Home() {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                role="img"
+                aria-label="品質保証"
               >
                 <path
                   strokeLinecap="round"

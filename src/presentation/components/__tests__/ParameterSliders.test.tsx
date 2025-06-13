@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ParameterSliders } from "../ParameterSliders";
 
 describe.skip("ParameterSliders", () => {
@@ -61,10 +61,10 @@ describe.skip("ParameterSliders", () => {
       );
 
       const sliders = screen.getAllByRole("slider");
-      sliders.forEach((slider) => {
+      for (const slider of sliders) {
         expect(slider).toHaveAttribute("min", "1");
         expect(slider).toHaveAttribute("max", "10");
-      });
+      }
     });
   });
 

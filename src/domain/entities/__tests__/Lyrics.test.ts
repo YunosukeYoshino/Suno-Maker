@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Language } from "../../valueObjects/Language";
-import { Lyrics } from "../Lyrics";
+import { Lyrics, type LyricsProps } from "../Lyrics";
 
 describe("Lyrics", () => {
-  let validProps: any;
+  let validProps: Partial<LyricsProps> & {
+    title: string;
+    content: string;
+    language: Language;
+  };
 
   beforeEach(() => {
     validProps = {

@@ -3,7 +3,14 @@ import type { IPromptRepository } from "@/domain/repositories/IPromptRepository"
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { StyleField } from "@/domain/valueObjects/StyleField";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockedFunction,
+} from "vitest";
 import {
   type GenreConflictDetector,
   type OptimizePromptInput,
@@ -14,10 +21,19 @@ import {
 
 describe.skip("OptimizePromptUseCase", () => {
   let useCase: OptimizePromptUseCase;
-  let mockRepository: jest.Mocked<IPromptRepository>;
-  let mockStyleOptimizer: jest.Mocked<StyleFieldOptimizer>;
-  let mockConflictDetector: jest.Mocked<GenreConflictDetector>;
-  let mockSuccessPredictor: jest.Mocked<SuccessRatePredictor>;
+  let mockRepository: {
+    save: MockedFunction<IPromptRepository["save"]>;
+    findById: MockedFunction<IPromptRepository["findById"]>;
+  };
+  let mockStyleOptimizer: {
+    optimize: MockedFunction<StyleFieldOptimizer["optimize"]>;
+  };
+  let mockConflictDetector: {
+    detectConflicts: MockedFunction<GenreConflictDetector["detectConflicts"]>;
+  };
+  let mockSuccessPredictor: {
+    predict: MockedFunction<SuccessRatePredictor["predict"]>;
+  };
 
   beforeEach(() => {
     mockRepository = {
@@ -27,19 +43,19 @@ describe.skip("OptimizePromptUseCase", () => {
       update: vi.fn(),
       delete: vi.fn(),
       findAll: vi.fn(),
-    } as any;
+    } as IPromptRepository;
 
     mockStyleOptimizer = {
       optimizeForLength: vi.fn(),
-    } as any;
+    } as StyleFieldOptimizer;
 
     mockConflictDetector = {
       detectConflicts: vi.fn(),
-    } as any;
+    } as GenreConflictDetector;
 
     mockSuccessPredictor = {
       predictSuccessRate: vi.fn(),
-    } as any;
+    } as SuccessRatePredictor;
 
     useCase = new OptimizePromptUseCase(
       mockRepository,
@@ -632,7 +648,7 @@ describe.skip("OptimizePromptUseCase", () => {
   describe("入力バリデーション", () => {
     it("プロンプトが指定されていない場合エラーを投げる", async () => {
       const input: OptimizePromptInput = {
-        prompt: null as any,
+        prompt: null as unknown as Prompt,
         optimizationMode: "suno",
         preserveGenres: true,
         preserveLanguage: true,
@@ -664,7 +680,7 @@ describe.skip("OptimizePromptUseCase", () => {
 
       const input: OptimizePromptInput = {
         prompt,
-        optimizationMode: "invalid" as any,
+        optimizationMode: "invalid" as "suno" | "general" | "creative",
         preserveGenres: true,
         preserveLanguage: true,
       };

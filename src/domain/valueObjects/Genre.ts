@@ -257,8 +257,8 @@ export class Genre {
   private constructor(private readonly _value: GenreValue) {}
 
   static create(value: GenreValue): Genre {
-    // 空文字列や空配列のチェック
-    if (value === "" || (Array.isArray(value) && value.length === 0)) {
+    // 空配列のチェック
+    if (Array.isArray(value) && value.length === 0) {
       throw new Error("ジャンル名は空文字列にできません");
     }
 

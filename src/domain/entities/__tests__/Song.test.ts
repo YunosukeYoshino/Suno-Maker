@@ -6,8 +6,23 @@ import { Lyrics } from "../Lyrics";
 import { Prompt } from "../Prompt";
 import { Song } from "../Song";
 
+interface ValidSongProps {
+  id?: string;
+  title: string;
+  prompt: Prompt;
+  lyrics?: Lyrics;
+  audioUrl?: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  tags?: string[];
+  description?: string;
+  isPublic?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 describe("Song", () => {
-  let validProps: any;
+  let validProps: ValidSongProps;
   let testPrompt: Prompt;
   let testLyrics: Lyrics;
 

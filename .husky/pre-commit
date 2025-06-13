@@ -4,5 +4,8 @@
 # ステージングされたファイルに対してのみ lint-staged を実行
 bunx lint-staged
 
+# TypeScript型チェック（テストファイルを除く）
+bunx tsc --noEmit --skipLibCheck
+
 # テスト実行（警告の場合はパス）
 bun test || true

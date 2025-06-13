@@ -1,7 +1,14 @@
 import { Lyrics } from "@/domain/entities/Lyrics";
 import type { ILyricsRepository } from "@/domain/repositories/ILyricsRepository";
 import { Language } from "@/domain/valueObjects/Language";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockedFunction,
+} from "vitest";
 import {
   type JapaneseOptimizationService,
   type OptimizeLyricsInput,
@@ -11,9 +18,32 @@ import {
 
 describe.skip("OptimizeLyricsUseCase", () => {
   let useCase: OptimizeLyricsUseCase;
-  let mockRepository: jest.Mocked<ILyricsRepository>;
-  let mockJapaneseService: jest.Mocked<JapaneseOptimizationService>;
-  let mockSunoService: jest.Mocked<SunoOptimizationService>;
+  let mockRepository: {
+    save: MockedFunction<ILyricsRepository["save"]>;
+    findById: MockedFunction<ILyricsRepository["findById"]>;
+    findByFilters: MockedFunction<ILyricsRepository["findByFilters"]>;
+    update: MockedFunction<ILyricsRepository["update"]>;
+    delete: MockedFunction<ILyricsRepository["delete"]>;
+    findAll: MockedFunction<ILyricsRepository["findAll"]>;
+  };
+  let mockJapaneseService: {
+    optimizeStructure: MockedFunction<
+      JapaneseOptimizationService["optimizeStructure"]
+    >;
+    checkGrammar: MockedFunction<JapaneseOptimizationService["checkGrammar"]>;
+    suggestImprovements: MockedFunction<
+      JapaneseOptimizationService["suggestImprovements"]
+    >;
+  };
+  let mockSunoService: {
+    optimizeForSuno: MockedFunction<SunoOptimizationService["optimizeForSuno"]>;
+    validateStructure: MockedFunction<
+      SunoOptimizationService["validateStructure"]
+    >;
+    suggestStructureChanges: MockedFunction<
+      SunoOptimizationService["suggestStructureChanges"]
+    >;
+  };
 
   beforeEach(() => {
     mockRepository = {
@@ -23,16 +53,19 @@ describe.skip("OptimizeLyricsUseCase", () => {
       update: vi.fn(),
       delete: vi.fn(),
       findAll: vi.fn(),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
     } as any;
 
     mockJapaneseService = {
       optimizeForPronunciation: vi.fn(),
       suggestHiraganaUsage: vi.fn(),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
     } as any;
 
     mockSunoService = {
       validateForSuno: vi.fn(),
       optimizeLength: vi.fn(),
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
     } as any;
 
     useCase = new OptimizeLyricsUseCase(
@@ -71,6 +104,7 @@ Over the ridge`,
       });
 
       mockSunoService.optimizeLength.mockResolvedValue({
+        // biome-ignore lint/suspicious/noExplicitAny: test data
         optimizedLyrics: null as any,
         changes: [],
       });

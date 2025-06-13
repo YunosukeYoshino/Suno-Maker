@@ -14,7 +14,7 @@ describe("Genre", () => {
     });
 
     it("空文字列では作成できない", () => {
-      expect(() => Genre.create("" as any)).toThrow(
+      expect(() => Genre.create("" as string)).toThrow(
         "ジャンル名は空文字列にできません"
       );
     });

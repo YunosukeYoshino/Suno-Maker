@@ -58,7 +58,12 @@ export function GenreSelector({
 
   const getSubGenresForMain = (mainGenre: string) => {
     try {
-      return Genre.getSubGenres(mainGenre as any);
+      const supportedGenres = Genre.getSupportedGenres();
+      // Type guard to check if mainGenre is a valid SupportedGenre
+      if (supportedGenres.includes(mainGenre as (typeof supportedGenres)[number])) {
+        return Genre.getSubGenres(mainGenre as (typeof supportedGenres)[number]);
+      }
+      return [];
     } catch {
       return [];
     }
@@ -145,7 +150,10 @@ export function GenreSelector({
           {selectedGenres.length > 0 && (
             <div className="space-y-3">
               {selectedGenres
-                .filter((genre) => mainGenres.includes(genre as any))
+                .filter((genre) => {
+                  const mainGenresList = Genre.getMainGenres();
+                  return mainGenresList.includes(genre as (typeof mainGenresList)[number]);
+                })
                 .map((mainGenre) => {
                   const subGenres = getSubGenresForMain(mainGenre);
                   if (subGenres.length === 0) return null;
@@ -214,7 +222,9 @@ export function GenreSelector({
             <Input
               placeholder="ジャンルを検索..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
               className="pl-10"
             />
           </div>

@@ -6,8 +6,8 @@ import { StyleField } from "@/domain/valueObjects/StyleField";
 import type { MusicParameters } from "@/presentation/components/ParameterSliders";
 
 export interface GeneratePromptInput {
-  genres: string[];
-  language: string;
+  genres: string[]; // Will be validated at runtime by Genre.create
+  language: string; // Will be validated at runtime by Language.create
   mood?: string[];
   instruments?: string[];
   parameters?: Partial<MusicParameters>;
@@ -32,8 +32,8 @@ export class GeneratePromptUseCase {
     this.validateInput(input);
 
     // 2. ドメインオブジェクトの作成
-    const genre = Genre.create(input.genres);
-    const language = Language.create(input.language);
+    const genre = Genre.create(input.genres as Parameters<typeof Genre.create>[0]);
+    const language = Language.create(input.language as Parameters<typeof Language.create>[0]);
 
     // 3. スタイルフィールドの生成
     const styleField = this.generateStyleField(input);
@@ -79,7 +79,7 @@ export class GeneratePromptUseCase {
 
     // ジャンルの有効性チェック
     try {
-      Genre.create(input.genres);
+      Genre.create(input.genres as Parameters<typeof Genre.create>[0]);
     } catch (error) {
       throw new Error(
         `無効なジャンルです: ${error instanceof Error ? error.message : "不明なエラー"}`
@@ -88,7 +88,7 @@ export class GeneratePromptUseCase {
 
     // 言語の有効性チェック
     try {
-      Language.create(input.language);
+      Language.create(input.language as Parameters<typeof Language.create>[0]);
     } catch (error) {
       throw new Error(
         `無効な言語です: ${error instanceof Error ? error.message : "不明なエラー"}`
@@ -165,7 +165,7 @@ export class GeneratePromptUseCase {
     }
 
     // カスタムスタイルを追加
-    if (input.customStyle && input.customStyle.trim()) {
+    if (input.customStyle?.trim()) {
       parts.push(input.customStyle.trim());
     }
 

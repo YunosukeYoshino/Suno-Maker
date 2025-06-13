@@ -28,8 +28,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### shadcn/ui
 - **コンポーネントライブラリ**: shadcn/ui を使用
+- **重要**: UIコンポーネントは `/components/ui/` に配置（`src/components/ui/` ではない）
 - インストール: `bun x shadcn@latest add [component-name]`
 - 設定ファイル: `components.json`
+- インポート: `@/components/ui/component-name`
 
 ## アーキテクチャ
 

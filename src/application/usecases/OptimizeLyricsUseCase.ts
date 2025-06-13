@@ -454,7 +454,7 @@ export class OptimizeLyricsUseCase {
 
     // 3. 最後の手段：文字数で切り詰め
     if (shortened.length > maxLength) {
-      shortened = shortened.substring(0, maxLength - 3) + "...";
+      shortened = `${shortened.substring(0, maxLength - 3)}...`;
       optimizations.push("文字数制限のため歌詞を切り詰めました");
     }
 
@@ -477,12 +477,12 @@ export class OptimizeLyricsUseCase {
 
     // 文字数適正性（20点）
     const lengthOptimal =
-      lyricsStats.characterCount >= 200 && lyricsStats.characterCount <= 2000;
+      lyricsStats.totalCharacters >= 200 && lyricsStats.totalCharacters <= 2000;
     score += lengthOptimal ? 0 : -20;
 
     // 行数適正性（20点）
     const lineOptimal =
-      lyricsStats.lineCount >= 8 && lyricsStats.lineCount <= 40;
+      lyricsStats.totalLines >= 8 && lyricsStats.totalLines <= 40;
     score += lineOptimal ? 0 : -20;
 
     // セクション数適正性（20点）

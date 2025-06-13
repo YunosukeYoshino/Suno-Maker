@@ -231,7 +231,7 @@ export function ParameterSliders({
                 <div className="space-y-3">
                   <Slider
                     value={[value]}
-                    onValueChange={(newValue) =>
+                    onValueChange={(newValue: number[]) =>
                       handleParameterChange(config.key, newValue)
                     }
                     min={1}
