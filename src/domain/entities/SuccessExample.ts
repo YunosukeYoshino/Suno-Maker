@@ -1,3 +1,4 @@
+import { generateUUID } from "../../utils/generateUUID";
 import type { Genre } from "../valueObjects/Genre";
 import type { Language } from "../valueObjects/Language";
 import type { StyleField } from "../valueObjects/StyleField";
@@ -97,7 +98,7 @@ export class SuccessExample {
       throw new Error("プロンプトは必須です");
     }
 
-    if (!props.sunoUrl || !this.isValidUrl(props.sunoUrl)) {
+    if (!props.sunoUrl || !SuccessExample.isValidUrl(props.sunoUrl)) {
       throw new Error("有効なSuno URLは必須です");
     }
 
@@ -115,7 +116,7 @@ export class SuccessExample {
 
     const now = new Date();
     return new SuccessExample({
-      id: props.id || crypto.randomUUID(),
+      id: props.id || generateUUID(),
       title: props.title.trim(),
       description: props.description.trim(),
       prompt: props.prompt.trim(),

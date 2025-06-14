@@ -127,11 +127,11 @@ export class SuccessExampleLibraryUseCase {
 
       const queryTerms = query.toLowerCase().split(/\s+/);
       let score = 0;
-      queryTerms.forEach((term) => {
+      for (const term of queryTerms) {
         if (searchText.includes(term)) {
           score += 1;
         }
-      });
+      }
       return score / queryTerms.length;
     });
 

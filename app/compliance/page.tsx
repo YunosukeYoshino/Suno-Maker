@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ComplianceChecker } from "../../src/presentation/components/ComplianceChecker";
 
 export default function CompliancePage() {
@@ -27,21 +28,21 @@ export default function CompliancePage() {
               </h1>
             </div>
             <nav className="flex items-center space-x-6">
-              <a
+              <Link
                 href="/"
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 ホーム
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/success-examples"
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 成功事例
-              </a>
-              <a href="/compliance" className="text-purple-600 font-medium">
+              </Link>
+              <Link href="/compliance" className="text-purple-600 font-medium">
                 コンプライアンス
-              </a>
+              </Link>
             </nav>
           </div>
         </div>

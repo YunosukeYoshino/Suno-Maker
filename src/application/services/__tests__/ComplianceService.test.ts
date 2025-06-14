@@ -293,7 +293,7 @@ describe("ComplianceService", () => {
         },
       ];
 
-      const results = await complianceService.checkMultipleContents(inputs);
+      const results = await complianceService.batchCheckCompliance(inputs);
 
       expect(results).toHaveLength(3);
       expect(results[0].overallLevel).toBe("safe");

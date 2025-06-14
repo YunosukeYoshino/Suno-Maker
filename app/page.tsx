@@ -1,8 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../components/ui/button";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
       {/* ヘッダー */}
@@ -28,18 +32,18 @@ export default function Home() {
               >
                 テンプレート
               </a>
-              <a
+              <Link
                 href="/success-examples"
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 成功事例
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/compliance"
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 コンプライアンス
-              </a>
+              </Link>
             </nav>
           </div>
         </div>
@@ -192,7 +196,7 @@ export default function Home() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  window.location.href = "/success-examples";
+                  router.push("/success-examples");
                 }}
               >
                 成功事例を見る
@@ -227,7 +231,7 @@ export default function Home() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  window.location.href = "/compliance";
+                  router.push("/compliance");
                 }}
               >
                 コンプライアンスチェック
