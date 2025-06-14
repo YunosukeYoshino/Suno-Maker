@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { SuccessExample } from "../SuccessExample";
+import { describe, expect, it } from "vitest";
 import { Genre } from "../../valueObjects/Genre";
 import { Language } from "../../valueObjects/Language";
 import { StyleField } from "../../valueObjects/StyleField";
+import { SuccessExample } from "../SuccessExample";
 
 describe("SuccessExample", () => {
   const validProps = {

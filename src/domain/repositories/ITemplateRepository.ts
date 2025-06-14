@@ -1,7 +1,7 @@
 import type {
   Template,
-  TemplateMatchCriteria,
   TemplateCategory,
+  TemplateMatchCriteria,
 } from "../entities/Template";
 import type { Genre } from "../valueObjects/Genre";
 import type { Language } from "../valueObjects/Language";

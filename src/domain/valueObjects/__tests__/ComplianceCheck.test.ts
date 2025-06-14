@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   ComplianceCheck,
-  type ComplianceIssue,
   type ComplianceCheckProps,
+  type ComplianceIssue,
 } from "../ComplianceCheck";
 
 describe("ComplianceCheck", () => {
