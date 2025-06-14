@@ -394,17 +394,17 @@ export class SuccessExample {
       .filter((word) => word.length > 2 && !commonWords.includes(word));
 
     const wordFreq: Record<string, number> = {};
-    words.forEach((word) => {
+    for (const word of words) {
       wordFreq[word] = (wordFreq[word] || 0) + 1;
-    });
+    }
 
     // 単純な100次元ベクトル（実際の実装ではより高次元）
     const vector = new Array(100).fill(0);
-    Object.keys(wordFreq).forEach((word, index) => {
-      if (index < 100) {
-        vector[index] = wordFreq[word] / words.length;
-      }
-    });
+    const wordKeys = Object.keys(wordFreq);
+    for (let index = 0; index < Math.min(wordKeys.length, 100); index++) {
+      const word = wordKeys[index];
+      vector[index] = wordFreq[word] / words.length;
+    }
 
     return vector;
   }

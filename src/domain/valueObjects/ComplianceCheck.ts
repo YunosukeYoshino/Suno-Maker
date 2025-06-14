@@ -152,9 +152,9 @@ export class ComplianceCheck {
       cultural_sensitivity: 0,
     };
 
-    this._issues.forEach((issue) => {
+    for (const issue of this._issues) {
       counts[issue.category]++;
-    });
+    }
 
     return counts;
   }
@@ -167,9 +167,9 @@ export class ComplianceCheck {
       unsafe: 0,
     };
 
-    this._issues.forEach((issue) => {
+    for (const issue of this._issues) {
       counts[issue.level]++;
-    });
+    }
 
     return counts;
   }
@@ -251,7 +251,7 @@ export class ComplianceCheck {
   private calculateScoreFromIssues(issues: ComplianceIssue[]): number {
     let score = 100;
 
-    issues.forEach((issue) => {
+    for (const issue of issues) {
       switch (issue.level) {
         case "unsafe":
           score -= 30;
@@ -263,10 +263,10 @@ export class ComplianceCheck {
           score -= 10;
           break;
         case "safe":
-          score -= 5;
+          // Safe issues don't reduce score
           break;
       }
-    });
+    }
 
     return Math.max(0, score);
   }
