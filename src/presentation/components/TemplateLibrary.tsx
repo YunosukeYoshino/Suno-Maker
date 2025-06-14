@@ -191,8 +191,8 @@ export function TemplateLibrary({
       );
     }
 
-    // Apply sorting
-    filtered.sort((a, b) => {
+    // Apply sorting (create copy to avoid mutating props)
+    filtered = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case "quality":
           return b.qualityScore - a.qualityScore;

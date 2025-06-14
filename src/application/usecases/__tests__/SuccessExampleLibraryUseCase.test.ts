@@ -6,14 +6,17 @@ import {
   it,
   vi,
 } from "vitest";
-import { SuccessExample } from "../../../domain/entities/SuccessExample";
+import {
+  SuccessExample,
+  type SuccessExampleProps,
+} from "../../../domain/entities/SuccessExample";
 import type { ISuccessExampleRepository } from "../../../domain/repositories/ISuccessExampleRepository";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
 import { StyleField } from "../../../domain/valueObjects/StyleField";
 import { SuccessExampleLibraryUseCase } from "../SuccessExampleLibraryUseCase";
 
-const createMockSuccessExample = (overrides?: Partial<any>) => {
+const createMockSuccessExample = (overrides?: Partial<SuccessExampleProps>) => {
   return SuccessExample.create({
     title: "Amazing Rock Ballad",
     description: "A powerful rock ballad that went viral",
@@ -84,7 +87,7 @@ describe("SuccessExampleLibraryUseCase", () => {
       exists: vi.fn(),
       getLastUpdated: vi.fn(),
       cleanup: vi.fn(),
-    } as any;
+    } satisfies ISuccessExampleRepository;
 
     useCase = new SuccessExampleLibraryUseCase(mockRepository);
   });
@@ -92,7 +95,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("getSuccessExampleById", () => {
     it("IDで成功事例を取得できる", async () => {
       const mockExample = createMockSuccessExample();
-      (mockRepository.findById as any).mockResolvedValue(mockExample);
+      mockRepository.findById.mockResolvedValue(mockExample);
 
       const result = await useCase.getSuccessExampleById("test-id");
 
@@ -101,7 +104,7 @@ describe("SuccessExampleLibraryUseCase", () => {
     });
 
     it("存在しないIDの場合はnullを返す", async () => {
-      (mockRepository.findById as any).mockResolvedValue(null);
+      mockRepository.findById.mockResolvedValue(null);
 
       const result = await useCase.getSuccessExampleById("non-existent-id");
 
@@ -113,7 +116,7 @@ describe("SuccessExampleLibraryUseCase", () => {
     it("指定したジャンルの成功事例を取得できる", async () => {
       const rockGenre = Genre.create("Rock");
       const mockExamples = [createMockSuccessExample()];
-      (mockRepository.findByGenre as any).mockResolvedValue(mockExamples);
+      mockRepository.findByGenre.mockResolvedValue(mockExamples);
 
       const result = await useCase.getSuccessExamplesByGenre(rockGenre, 10);
 
@@ -126,7 +129,7 @@ describe("SuccessExampleLibraryUseCase", () => {
     it("指定した言語の成功事例を取得できる", async () => {
       const englishLanguage = Language.create("en");
       const mockExamples = [createMockSuccessExample()];
-      (mockRepository.findByLanguage as any).mockResolvedValue(mockExamples);
+      mockRepository.findByLanguage.mockResolvedValue(mockExamples);
 
       const result = await useCase.getSuccessExamplesByLanguage(
         englishLanguage,
@@ -144,7 +147,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("getTopRatedExamples", () => {
     it("高評価の成功事例を取得できる", async () => {
       const mockExamples = [createMockSuccessExample({ rating: 5 })];
-      (mockRepository.findTopRated as any).mockResolvedValue(mockExamples);
+      mockRepository.findTopRated.mockResolvedValue(mockExamples);
 
       const result = await useCase.getTopRatedExamples(5);
 
@@ -156,7 +159,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("getMostPopularExamples", () => {
     it("人気の成功事例を取得できる", async () => {
       const mockExamples = [createMockSuccessExample({ playCount: 50000 })];
-      (mockRepository.findMostPlayed as any).mockResolvedValue(mockExamples);
+      mockRepository.findMostPlayed.mockResolvedValue(mockExamples);
 
       const result = await useCase.getMostPopularExamples(5);
 
@@ -168,7 +171,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("getTrendingExamples", () => {
     it("トレンドの成功事例を取得できる", async () => {
       const mockExamples = [createMockSuccessExample()];
-      (mockRepository.findTrending as any).mockResolvedValue(mockExamples);
+      mockRepository.findTrending.mockResolvedValue(mockExamples);
 
       const result = await useCase.getTrendingExamples("week", 10);
 
@@ -186,7 +189,7 @@ describe("SuccessExampleLibraryUseCase", () => {
         totalCount: 1,
         hasMore: false,
       };
-      (mockRepository.findByFilters as any).mockResolvedValue(mockResult);
+      mockRepository.findByFilters.mockResolvedValue(mockResult);
 
       const result = await useCase.searchSuccessExamples(filters, options);
 
@@ -202,7 +205,7 @@ describe("SuccessExampleLibraryUseCase", () => {
     it("テキストクエリで成功事例をセマンティック検索できる", async () => {
       const query = "rock ballad emotional";
       const mockExamples = [createMockSuccessExample()];
-      (mockRepository.searchByText as any).mockResolvedValue(mockExamples);
+      mockRepository.searchByText.mockResolvedValue(mockExamples);
 
       const result = await useCase.semanticSearch(query, 10);
 
@@ -224,9 +227,7 @@ describe("SuccessExampleLibraryUseCase", () => {
       const mockSimilarExamples = [
         createMockSuccessExample({ title: "Similar Rock Song" }),
       ];
-      (mockRepository.searchBySimilarity as any).mockResolvedValue(
-        mockSimilarExamples
-      );
+      mockRepository.searchBySimilarity.mockResolvedValue(mockSimilarExamples);
 
       const result = await useCase.findSimilarExamples(referenceExample, 5);
 
@@ -258,13 +259,11 @@ describe("SuccessExampleLibraryUseCase", () => {
         createMockSuccessExample({ tags: ["ballad", "emotional"] }),
       ];
 
-      (mockRepository.findByGenre as any)
+      mockRepository.findByGenre
         .mockResolvedValueOnce(rockExamples)
         .mockResolvedValueOnce(popExamples);
-      (mockRepository.findByLanguage as any).mockResolvedValue(
-        languageExamples
-      );
-      (mockRepository.findByTags as any).mockResolvedValue(tagExamples);
+      mockRepository.findByLanguage.mockResolvedValue(languageExamples);
+      mockRepository.findByTags.mockResolvedValue(tagExamples);
 
       const result = await useCase.getPersonalizedRecommendations(
         userPreferences,
@@ -288,24 +287,22 @@ describe("SuccessExampleLibraryUseCase", () => {
         createMockSuccessExample({ title: "Similar Song" }),
       ];
 
-      (mockRepository.findById as any).mockResolvedValue(mockExample);
-      (mockRepository.searchBySimilarity as any).mockResolvedValue(
-        mockSimilarExamples
-      );
+      mockRepository.findById.mockResolvedValue(mockExample);
+      mockRepository.searchBySimilarity.mockResolvedValue(mockSimilarExamples);
 
       const result = await useCase.analyzeSuccessExample("test-id");
 
       expect(result).not.toBeNull();
-      expect(result!.example).toBe(mockExample);
-      expect(result!.insights.qualityScore).toBeGreaterThan(0);
-      expect(result!.insights.popularityScore).toBeGreaterThan(0);
-      expect(result!.insights.trendingPotential).toBeGreaterThan(0);
-      expect(result!.insights.similarExamples).toBe(mockSimilarExamples);
-      expect(Array.isArray(result!.insights.recommendations)).toBe(true);
+      expect(result?.example).toBe(mockExample);
+      expect(result?.insights.qualityScore).toBeGreaterThan(0);
+      expect(result?.insights.popularityScore).toBeGreaterThan(0);
+      expect(result?.insights.trendingPotential).toBeGreaterThan(0);
+      expect(result?.insights.similarExamples).toBe(mockSimilarExamples);
+      expect(Array.isArray(result?.insights.recommendations)).toBe(true);
     });
 
     it("存在しないIDの場合はnullを返す", async () => {
-      (mockRepository.findById as any).mockResolvedValue(null);
+      mockRepository.findById.mockResolvedValue(null);
 
       const result = await useCase.analyzeSuccessExample("non-existent-id");
 
@@ -316,9 +313,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("playExample", () => {
     it("成功事例の再生回数を増加できる", async () => {
       const updatedExample = createMockSuccessExample({ playCount: 10001 });
-      (mockRepository.incrementPlayCount as any).mockResolvedValue(
-        updatedExample
-      );
+      mockRepository.incrementPlayCount.mockResolvedValue(updatedExample);
 
       const result = await useCase.playExample("test-id");
 
@@ -330,9 +325,7 @@ describe("SuccessExampleLibraryUseCase", () => {
   describe("likeExample", () => {
     it("成功事例のいいね数を増加できる", async () => {
       const updatedExample = createMockSuccessExample({ likeCount: 501 });
-      (mockRepository.incrementLikeCount as any).mockResolvedValue(
-        updatedExample
-      );
+      mockRepository.incrementLikeCount.mockResolvedValue(updatedExample);
 
       const result = await useCase.likeExample("test-id");
 
@@ -354,7 +347,7 @@ describe("SuccessExampleLibraryUseCase", () => {
         tags: ["pop", "catchy"],
       };
 
-      (mockRepository.save as any).mockResolvedValue(undefined);
+      mockRepository.save.mockResolvedValue(undefined);
 
       const result = await useCase.createSuccessExample(input);
 
@@ -380,7 +373,7 @@ describe("SuccessExampleLibraryUseCase", () => {
         trendingExamples: [createMockSuccessExample()],
       };
 
-      (mockRepository.getStatistics as any).mockResolvedValue(mockStats);
+      mockRepository.getStatistics.mockResolvedValue(mockStats);
 
       const result = await useCase.getStatistics();
 
@@ -421,12 +414,10 @@ describe("SuccessExampleLibraryUseCase", () => {
         trendingExamples: [createMockSuccessExample()],
       };
 
-      (mockRepository.findTrending as any).mockResolvedValue(mockTrending);
-      (mockRepository.getPopularityTrends as any).mockResolvedValue(mockTrends);
-      (mockRepository.getGenreDistribution as any).mockResolvedValue(
-        mockGenreAnalysis
-      );
-      (mockRepository.getStatistics as any).mockResolvedValue(mockStats);
+      mockRepository.findTrending.mockResolvedValue(mockTrending);
+      mockRepository.getPopularityTrends.mockResolvedValue(mockTrends);
+      mockRepository.getGenreDistribution.mockResolvedValue(mockGenreAnalysis);
+      mockRepository.getStatistics.mockResolvedValue(mockStats);
 
       const result = await useCase.getTrendAnalysis("month");
 

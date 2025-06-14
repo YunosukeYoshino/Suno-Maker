@@ -32,7 +32,7 @@ export interface ComplianceServiceConfig {
 }
 
 export class ComplianceService {
-  private readonly config: ComplianceServiceConfig;
+  private config: ComplianceServiceConfig;
   private readonly builtInRules: ComplianceRule[];
 
   constructor(config?: Partial<ComplianceServiceConfig>) {
@@ -448,6 +448,15 @@ export class ComplianceService {
     if (!this.config.customRules) {
       this.config.customRules = [];
     }
+
+    // Check for duplicate rule names
+    const existingRule = this.config.customRules.find(
+      (r) => r.name === rule.name
+    );
+    if (existingRule) {
+      throw new Error(`Custom rule with name "${rule.name}" already exists`);
+    }
+
     this.config.customRules.push(rule);
   }
 

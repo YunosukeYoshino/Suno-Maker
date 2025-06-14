@@ -3,13 +3,16 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Template } from "../../../domain/entities/Template";
+import {
+  Template,
+  type TemplateProps,
+} from "../../../domain/entities/Template";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
 import { StyleField } from "../../../domain/valueObjects/StyleField";
 import { TemplateLibrary } from "../TemplateLibrary";
 
-const createMockTemplate = (overrides?: Partial<any>) => {
+const createMockTemplate = (overrides?: Partial<TemplateProps>) => {
   return Template.create({
     name: "Rock Ballad Template",
     description: "Emotional rock ballad with powerful vocals",
@@ -66,7 +69,7 @@ const createMockTemplates = () => [
   }),
 ];
 
-describe.skip("TemplateLibrary", () => {
+describe("TemplateLibrary", () => {
   const mockOnTemplateSelect = vi.fn();
   const mockTemplates = createMockTemplates();
 
