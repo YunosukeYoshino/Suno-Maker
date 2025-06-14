@@ -51,18 +51,21 @@ src/
 │   │   ├── Lyrics.ts                # 歌詞エンティティ
 │   │   ├── Song.ts                  # 楽曲エンティティ
 │   │   ├── Template.ts              # ✅ Phase 3 テンプレートエンティティ
-│   │   └── __tests__/               # エンティティテスト
+│   │   ├── SuccessExample.ts        # ✅ 成功事例エンティティ
+│   │   └── __tests__/               # エンティティテスト（79テスト）
 │   ├── valueObjects/                # 値オブジェクト
-│   │   ├── Genre.ts                 # ジャンル（240+種類）
+│   │   ├── Genre.ts                 # ジャンル（232種類対応）
 │   │   ├── Language.ts              # 言語（17言語対応）
 │   │   ├── StyleField.ts            # スタイルフィールド（120文字最適化）
 │   │   ├── LyricsStructure.ts       # ✅ Phase 2.2 歌詞構造値オブジェクト
-│   │   └── __tests__/               # 値オブジェクトテスト
+│   │   ├── ComplianceCheck.ts       # ✅ コンプライアンスチェック値オブジェクト
+│   │   └── __tests__/               # 値オブジェクトテスト（68テスト）
 │   ├── repositories/                # リポジトリインターフェース
 │   │   ├── IPromptRepository.ts     # プロンプトリポジトリ契約
 │   │   ├── ILyricsRepository.ts     # 歌詞リポジトリ契約
 │   │   ├── ISongRepository.ts       # 楽曲リポジトリ契約
 │   │   ├── ITemplateRepository.ts   # ✅ Phase 3 テンプレートリポジトリ契約
+│   │   ├── ISuccessExampleRepository.ts # ✅ 成功事例リポジトリ契約
 │   │   └── __tests__/               # リポジトリテスト
 │   └── index.ts                     # ドメイン層エクスポート
 ├── application/                      # アプリケーション層
@@ -71,14 +74,16 @@ src/
 │   │   ├── OptimizeLyricsUseCase.ts # 歌詞最適化ユースケース
 │   │   ├── OptimizePromptUseCase.ts # プロンプト最適化ユースケース
 │   │   ├── TemplateLibraryUseCase.ts # ✅ Phase 3 テンプレートライブラリユースケース
+│   │   ├── SuccessExampleLibraryUseCase.ts # ✅ 成功事例ライブラリユースケース
 │   │   ├── CreateSongUseCase.ts     # 楽曲作成ユースケース
-│   │   └── __tests__/               # ユースケーステスト
+│   │   └── __tests__/               # ユースケーステスト（26テスト）
 │   ├── services/                    # アプリケーションサービス
 │   │   ├── PromptOptimizationService.ts
 │   │   ├── LyricsAnalysisService.ts
 │   │   ├── QualityScoreService.ts
 │   │   ├── TemplateSeederService.ts # ✅ Phase 3 テンプレートシードサービス
-│   │   └── __tests__/               # サービステスト
+│   │   ├── ComplianceService.ts     # ✅ コンプライアンスサービス
+│   │   └── __tests__/               # サービステスト（15テスト）
 │   └── stores/                      # 状態管理
 │       ├── promptStore.ts           # プロンプト状態管理
 │       ├── lyricsStore.ts           # 歌詞状態管理
@@ -96,39 +101,21 @@ src/
 │       └── IndexedDBAdapter.ts      # IndexedDB抽象化
 └── presentation/                     # プレゼンテーション層
     ├── components/                   # UIコンポーネント
-    │   ├── prompt/                  # プロンプト関連コンポーネント
-    │   │   ├── PromptGenerator.tsx
-    │   │   ├── GenreSelector.tsx    # ✅ Phase 2.1実装済み
-    │   │   ├── ParameterSliders.tsx # ✅ Phase 2.1実装済み
-    │   │   ├── InstrumentSelector.tsx # ✅ Phase 2.1実装済み
-    │   │   ├── MoodMatrix.tsx       # ✅ Phase 2.1実装済み
-    │   │   ├── StyleFieldEditor.tsx
-    │   │   └── OptimizationPanel.tsx
-    │   ├── templates/               # ✅ Phase 3 テンプレート関連コンポーネント
-    │   │   ├── TemplateLibrary.tsx  # ✅ Phase 3 テンプレートライブラリ
-    │   │   ├── TemplateCard.tsx     # テンプレートカード表示
-    │   │   ├── TemplateCreator.tsx  # カスタムテンプレート作成
-    │   │   ├── TemplatePreview.tsx  # テンプレートプレビュー
-    │   │   └── __tests__/           # テンプレートコンポーネントテスト
-    │   ├── lyrics/                  # 歌詞関連コンポーネント
-    │   │   ├── LyricsEditor.tsx
-    │   │   ├── StructureTagEditor.tsx # ✅ Phase 2.2実装済み
-    │   │   ├── LanguageOptimizer.tsx  # ✅ Phase 2.2実装済み
-    │   │   └── LyricsPreview.tsx
-    │   ├── song/                    # 楽曲関連コンポーネント
-    │   │   ├── SongBuilder.tsx
-    │   │   ├── QualityScoreDisplay.tsx
-    │   │   └── ExportDialog.tsx
-    │   ├── shared/                  # 共通コンポーネント
-    │   │   ├── Layout.tsx
-    │   │   ├── Navigation.tsx
-    │   │   ├── LoadingSpinner.tsx
-    │   │   └── ErrorBoundary.tsx
-    │   └── ui/                      # shadcn/ui コンポーネント
-    │       ├── button.tsx
-    │       ├── input.tsx
-    │       ├── select.tsx
-    │       └── ... (その他UIコンポーネント)
+    │   ├── GenreSelector.tsx        # ✅ Phase 2.1実装済み（232ジャンル対応）
+    │   ├── ParameterSliders.tsx     # ✅ Phase 2.1実装済み（4パラメータ）
+    │   ├── InstrumentSelector.tsx   # ✅ Phase 2.1実装済み（70+楽器、6カテゴリ）
+    │   ├── MoodMatrix.tsx           # ✅ Phase 2.1実装済み（25ムード二次元配置）
+    │   ├── TemplateLibrary.tsx      # ✅ Phase 3実装済み（25+テンプレート）
+    │   ├── SuccessExamplesLibrary.tsx # ✅ 成功事例ライブラリコンポーネント
+    │   ├── ComplianceChecker.tsx    # ✅ コンプライアンスチェッカーコンポーネント
+    │   └── __tests__/               # プレゼンテーションテスト（7テスト）
+    │       ├── GenreSelector.test.tsx
+    │       ├── ParameterSliders.test.tsx
+    │       ├── InstrumentSelector.test.tsx
+    │       ├── MoodMatrix.test.tsx
+    │       ├── TemplateLibrary.test.tsx
+    │       ├── SuccessExamplesLibrary.test.tsx
+    │       └── ComplianceChecker.test.tsx
     ├── hooks/                       # React Hooks
     │   ├── usePromptGeneration.ts   # プロンプト生成ロジック
     │   ├── useLyricsOptimization.ts # 歌詞最適化ロジック

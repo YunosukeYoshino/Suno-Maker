@@ -1,21 +1,26 @@
 import { beforeEach, expect } from "vitest";
 
 // Export expect for jest-dom
-// biome-ignore lint/suspicious/noExplicitAny: jest compatibility layer
-(globalThis as any).expect = expect;
+(globalThis as typeof globalThis & { expect: typeof expect }).expect = expect;
 
 import "@testing-library/jest-dom";
 
 // VitestでjestのMockedを使用できるようにする
+type MockedFunction<T extends (...args: unknown[]) => unknown> = T;
+
 declare global {
-  // biome-ignore lint/suspicious/noExplicitAny: jest compatibility layer
-  var jest: any;
+  var jest: {
+    Mocked: <T extends (...args: unknown[]) => unknown>(
+      fn: T
+    ) => MockedFunction<T>;
+  };
 }
 
 global.jest = {
   ...global.jest,
-  // biome-ignore lint/suspicious/noExplicitAny: jest compatibility layer
-  Mocked: (fn: any) => fn,
+  Mocked: <T extends (...args: unknown[]) => unknown>(
+    fn: T
+  ): MockedFunction<T> => fn,
 };
 
 // DOM環境のクリーンアップ
