@@ -171,6 +171,8 @@ export default function Home() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  role="img"
+                  aria-label="成功事例ライブラリアイコン"
                 >
                   <path
                     strokeLinecap="round"
@@ -189,7 +191,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => (window.location.href = "/success-examples")}
+                onClick={() => {
+                  window.location.href = "/success-examples";
+                }}
               >
                 成功事例を見る
               </Button>
@@ -202,6 +206,8 @@ export default function Home() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  role="img"
+                  aria-label="リーガルコンプライアンスアイコン"
                 >
                   <path
                     strokeLinecap="round"
@@ -220,7 +226,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => (window.location.href = "/compliance")}
+                onClick={() => {
+                  window.location.href = "/compliance";
+                }}
               >
                 コンプライアンスチェック
               </Button>

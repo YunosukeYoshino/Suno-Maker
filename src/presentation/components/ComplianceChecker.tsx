@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "../../../components/ui/alert";
 import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -16,8 +16,8 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Progress } from "../../../components/ui/progress";
-import type { ComplianceCheck } from "../../domain/valueObjects/ComplianceCheck";
 import type { ComplianceCheckInput } from "../../application/services/ComplianceService";
+import type { ComplianceCheck } from "../../domain/valueObjects/ComplianceCheck";
 
 interface ComplianceCheckerProps {
   content: {

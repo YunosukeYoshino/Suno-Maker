@@ -1,12 +1,23 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { SuccessExamplesLibrary } from "../SuccessExamplesLibrary";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type * as React from "react";
+import { describe, expect, it, vi } from "vitest";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
+import { SuccessExamplesLibrary } from "../SuccessExamplesLibrary";
 
 // モックコンポーネント
 vi.mock("../../../components/ui/button", () => ({
-  Button: ({ children, onClick, disabled, className }: any) => (
+  Button: ({
+    children,
+    onClick,
+    disabled,
+    className,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+    className?: string;
+  }) => (
     <button onClick={onClick} disabled={disabled} className={className}>
       {children}
     </button>
@@ -14,7 +25,17 @@ vi.mock("../../../components/ui/button", () => ({
 }));
 
 vi.mock("../../../components/ui/input", () => ({
-  Input: ({ placeholder, value, onChange, className }: any) => (
+  Input: ({
+    placeholder,
+    value,
+    onChange,
+    className,
+  }: {
+    placeholder?: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    className?: string;
+  }) => (
     <input
       placeholder={placeholder}
       value={value}

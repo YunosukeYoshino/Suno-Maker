@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { TemplateLibraryUseCase } from "../TemplateLibraryUseCase";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Template } from "../../../domain/entities/Template";
+import type { ITemplateRepository } from "../../../domain/repositories/ITemplateRepository";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
 import { StyleField } from "../../../domain/valueObjects/StyleField";
-import type { ITemplateRepository } from "../../../domain/repositories/ITemplateRepository";
+import { TemplateLibraryUseCase } from "../TemplateLibraryUseCase";
 
 const createMockTemplateRepository = (): ITemplateRepository => ({
   save: vi.fn(),

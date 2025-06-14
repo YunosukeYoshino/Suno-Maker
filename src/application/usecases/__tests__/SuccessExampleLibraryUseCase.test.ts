@@ -1,17 +1,17 @@
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   type MockedFunction,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
-import { SuccessExampleLibraryUseCase } from "../SuccessExampleLibraryUseCase";
 import { SuccessExample } from "../../../domain/entities/SuccessExample";
+import type { ISuccessExampleRepository } from "../../../domain/repositories/ISuccessExampleRepository";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
 import { StyleField } from "../../../domain/valueObjects/StyleField";
-import type { ISuccessExampleRepository } from "../../../domain/repositories/ISuccessExampleRepository";
+import { SuccessExampleLibraryUseCase } from "../SuccessExampleLibraryUseCase";
 
 const createMockSuccessExample = (overrides?: Partial<any>) => {
   return SuccessExample.create({

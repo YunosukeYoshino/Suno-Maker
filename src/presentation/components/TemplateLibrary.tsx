@@ -12,19 +12,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Template, TemplateCategory } from "@/domain/entities/Template";
-import { Genre } from "@/domain/valueObjects/Genre";
-import { Language } from "@/domain/valueObjects/Language";
+import type { Template, TemplateCategory } from "@/domain/entities/Template";
+import type { Genre } from "@/domain/valueObjects/Genre";
+import type { Language } from "@/domain/valueObjects/Language";
 import {
-  Star,
-  Search,
-  Filter,
   Clock,
+  Filter,
+  Heart,
+  Search,
+  Star,
   TrendingUp,
   Zap,
-  Heart,
 } from "lucide-react";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface TemplateLibraryProps {
   templates: Template[];

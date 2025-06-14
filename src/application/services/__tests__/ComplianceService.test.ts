@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-  ComplianceService,
   type ComplianceCheckInput,
+  ComplianceService,
 } from "../ComplianceService";
 
 describe("ComplianceService", () => {

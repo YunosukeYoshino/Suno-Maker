@@ -1,7 +1,7 @@
 import {
+  type ComplianceCategory,
   ComplianceCheck,
   type ComplianceIssue,
-  type ComplianceCategory,
   type ComplianceLevel,
 } from "../../domain/valueObjects/ComplianceCheck";
 
@@ -315,7 +315,7 @@ export class ComplianceService {
         return `"${trigger}"は商用利用に制限がある可能性があります。ライセンス条件を確認してください。`;
 
       case "privacy":
-        return `個人情報が含まれている可能性があります。個人を特定できる情報を削除してください。`;
+        return "個人情報が含まれている可能性があります。個人を特定できる情報を削除してください。";
 
       case "cultural_sensitivity":
         return `"${trigger}"は文化的配慮が必要な表現です。より包括的で敬意を示す表現を検討してください。`;

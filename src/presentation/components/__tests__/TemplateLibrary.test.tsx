@@ -1,13 +1,13 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { TemplateLibrary } from "../TemplateLibrary";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Template } from "../../../domain/entities/Template";
 import { Genre } from "../../../domain/valueObjects/Genre";
 import { Language } from "../../../domain/valueObjects/Language";
 import { StyleField } from "../../../domain/valueObjects/StyleField";
+import { TemplateLibrary } from "../TemplateLibrary";
 
 const createMockTemplate = (overrides?: Partial<any>) => {
   return Template.create({

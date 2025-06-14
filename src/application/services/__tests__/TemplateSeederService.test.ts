@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DefaultTemplateSeederService } from "../TemplateSeederService";
-import { Template } from "../../../domain/entities/Template";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Template } from "../../../domain/entities/Template";
 import type { ITemplateRepository } from "../../../domain/repositories/ITemplateRepository";
+import { DefaultTemplateSeederService } from "../TemplateSeederService";
 
 const createMockTemplateRepository = (): ITemplateRepository => ({
   save: vi.fn(),

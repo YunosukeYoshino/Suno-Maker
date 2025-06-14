@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
+import { useEffect, useState } from "react";
 import { Badge } from "../../../components/ui/badge";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../../components/ui/tabs";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,6 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../components/ui/tabs";
 import type { SuccessExample } from "../../domain/entities/SuccessExample";
 import type {
   SuccessExampleSearchFilters,
