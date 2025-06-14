@@ -473,16 +473,10 @@ export class ComplianceService {
   }
 
   // バッチ処理
-  async checkMultipleContents(
+  async batchCheckCompliance(
     inputs: ComplianceCheckInput[]
   ): Promise<ComplianceCheck[]> {
-    const results: ComplianceCheck[] = [];
-
-    for (const input of inputs) {
-      const check = await this.checkCompliance(input);
-      results.push(check);
-    }
-
-    return results;
+    const checks = inputs.map((input) => this.checkCompliance(input));
+    return Promise.all(checks);
   }
 }

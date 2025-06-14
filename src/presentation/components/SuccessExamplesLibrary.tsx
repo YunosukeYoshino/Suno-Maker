@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import {
@@ -32,6 +32,9 @@ interface SuccessExamplesLibraryProps {
   className?: string;
 }
 
+// Mock data for demonstration - in real implementation, this would come from the use case
+const mockExamples: SuccessExample[] = [];
+
 export function SuccessExamplesLibrary({
   onExampleSelect,
   genre,
@@ -47,10 +50,7 @@ export function SuccessExamplesLibrary({
   >("quality");
   const [filters, setFilters] = useState<SuccessExampleSearchFilters>({});
 
-  // Mock data for demonstration - in real implementation, this would come from the use case
-  const mockExamples: SuccessExample[] = [];
-
-  const searchExamples = async () => {
+  const searchExamples = useCallback(async () => {
     setLoading(true);
     try {
       // Mock implementation - in real app, use SuccessExampleLibraryUseCase
@@ -76,11 +76,11 @@ export function SuccessExamplesLibrary({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, genre, language, searchQuery, sortBy]);
 
   useEffect(() => {
     searchExamples();
-  }, [searchQuery, selectedCategory, sortBy, genre, language]);
+  }, [searchExamples]);
 
   const handleExampleClick = (example: SuccessExample) => {
     onExampleSelect?.(example);
@@ -159,6 +159,10 @@ export function SuccessExamplesLibrary({
     </Card>
   );
 
+  const skeletonItems = Array.from({ length: 6 }, (_, i) => ({
+    id: `skeleton-${i}`,
+  }));
+
   return (
     <div className={`w-full max-w-6xl mx-auto ${className}`}>
       <div className="mb-6">
@@ -213,17 +217,17 @@ export function SuccessExamplesLibrary({
         <TabsContent value={selectedCategory} className="mt-6">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
+              {skeletonItems.map((item) => (
+                <Card key={item.id} className="animate-pulse">
                   <CardHeader>
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-gray-300 rounded w-1/2" />
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-300 rounded"></div>
-                      <div className="h-3 bg-gray-300 rounded w-5/6"></div>
-                      <div className="h-3 bg-gray-300 rounded w-4/6"></div>
+                      <div className="h-3 bg-gray-300 rounded" />
+                      <div className="h-3 bg-gray-300 rounded w-5/6" />
+                      <div className="h-3 bg-gray-300 rounded w-4/6" />
                     </div>
                   </CardContent>
                 </Card>
@@ -242,6 +246,7 @@ export function SuccessExamplesLibrary({
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
+                  <title>検索結果なし</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
