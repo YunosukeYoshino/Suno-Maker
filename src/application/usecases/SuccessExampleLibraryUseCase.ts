@@ -386,10 +386,10 @@ export class SuccessExampleLibraryUseCase {
       recommendations: string[];
     };
   }> {
-    const trending = await this.getTrendingExamples(
-      timeRange === "week" ? "week" : timeRange === "month" ? "month" : "day",
-      10
-    );
+    const trendingTimeRange =
+      timeRange === "week" ? "week" : timeRange === "month" ? "month" : "month"; // "year" の場合も "month" にフォールバック
+
+    const trending = await this.getTrendingExamples(trendingTimeRange, 10);
 
     const trends =
       await this.successExampleRepository.getPopularityTrends(timeRange);

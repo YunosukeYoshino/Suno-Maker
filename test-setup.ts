@@ -17,7 +17,7 @@ declare global {
 }
 
 global.jest = {
-  ...global.jest,
+  ...(global.jest ?? {}),
   Mocked: <T extends (...args: unknown[]) => unknown>(
     fn: T
   ): MockedFunction<T> => fn,

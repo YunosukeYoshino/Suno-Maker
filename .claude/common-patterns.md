@@ -531,6 +531,52 @@ export class Entity {
 }
 ```
 
+### 防御的プログラミングパターン
+```typescript
+// ❌ 危険なスプレッド構文（未定義時にエラー）
+global.jest = {
+  ...global.jest,
+  Mocked: (fn: any) => fn,
+};
+
+// ✅ null合体演算子による防御的プログラミング
+global.jest = {
+  ...(global.jest ?? {}),
+  Mocked: (fn: any) => fn,
+};
+
+// ❌ 意図しないフォールバックを持つ三項演算子
+const timeRange = param === "week" ? "week" : param === "month" ? "month" : "day";
+
+// ✅ 明示的な条件分岐
+const timeRange =
+  param === "week"
+    ? "week"
+    : param === "month"
+      ? "month"
+      : "month"; // "year"の場合も明示的に"month"
+```
+
+### テスト環境対応パターン
+```typescript
+// test-setup.ts での型安全な環境設定
+declare global {
+  var jest: {
+    Mocked: <T extends (...args: unknown[]) => unknown>(
+      fn: T
+    ) => MockedFunction<T>;
+  };
+}
+
+// 防御的なグローバル設定
+global.jest = {
+  ...(global.jest ?? {}), // 未定義対応
+  Mocked: <T extends (...args: unknown[]) => unknown>(
+    fn: T
+  ): MockedFunction<T> => fn,
+};
+```
+
 ### プロジェクト完成時の品質基準
 ```bash
 # Phase 3完了時の必須チェック
