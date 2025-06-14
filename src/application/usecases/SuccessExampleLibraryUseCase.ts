@@ -1,3 +1,4 @@
+import { performance } from "node:perf_hooks";
 import {
   SuccessExample,
   type SuccessExampleSearchCriteria,
@@ -231,7 +232,7 @@ export class SuccessExampleLibraryUseCase {
 
     const filteredExamples = uniqueExamples.filter(
       (example) =>
-        !userPreferences.minRating ||
+        userPreferences.minRating == null ||
         example.rating >= userPreferences.minRating
     );
 
