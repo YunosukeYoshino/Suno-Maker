@@ -18,7 +18,12 @@ vi.mock("../../../components/ui/button", () => ({
     disabled?: boolean;
     className?: string;
   }) => (
-    <button onClick={onClick} disabled={disabled} className={className}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={className}
+    >
       {children}
     </button>
   ),
@@ -46,47 +51,63 @@ vi.mock("../../../components/ui/input", () => ({
 }));
 
 vi.mock("../../../components/ui/badge", () => ({
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   Badge: ({ children, variant, className }: any) => (
     <span className={`badge ${variant} ${className}`}>{children}</span>
   ),
 }));
 
 vi.mock("../../../components/ui/tabs", () => ({
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   Tabs: ({ children, value, onValueChange }: any) => (
     <div data-value={value} data-testid="tabs">
       {children}
     </div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   TabsContent: ({ children, value }: any) => (
     <div data-value={value} data-testid="tabs-content">
       {children}
     </div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   TabsList: ({ children }: any) => (
     <div data-testid="tabs-list">{children}</div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   TabsTrigger: ({ children, value, onClick }: any) => (
-    <button data-value={value} onClick={onClick} data-testid="tabs-trigger">
+    <button
+      type="button"
+      data-value={value}
+      onClick={onClick}
+      data-testid="tabs-trigger"
+    >
       {children}
     </button>
   ),
 }));
 
 vi.mock("../../../components/ui/card", () => ({
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   Card: ({ children, className, onClick }: any) => (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: test mock component
     <div className={`card ${className}`} onClick={onClick} data-testid="card">
       {children}
     </div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   CardContent: ({ children }: any) => (
     <div data-testid="card-content">{children}</div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   CardDescription: ({ children }: any) => (
     <div data-testid="card-description">{children}</div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   CardHeader: ({ children }: any) => (
     <div data-testid="card-header">{children}</div>
   ),
+  // biome-ignore lint/suspicious/noExplicitAny: test mock component
   CardTitle: ({ children, className }: any) => (
     <h3 className={className} data-testid="card-title">
       {children}

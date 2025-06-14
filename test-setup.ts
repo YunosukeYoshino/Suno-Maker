@@ -1,5 +1,10 @@
+import { beforeEach, expect } from "vitest";
+
+// Export expect for jest-dom
+// biome-ignore lint/suspicious/noExplicitAny: jest compatibility layer
+(globalThis as any).expect = expect;
+
 import "@testing-library/jest-dom";
-import { beforeEach } from "vitest";
 
 // VitestでjestのMockedを使用できるようにする
 declare global {

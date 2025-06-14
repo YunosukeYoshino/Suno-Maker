@@ -29,6 +29,7 @@ const createMockTemplateRepository = (): ITemplateRepository => ({
   updateQualityScore: vi.fn(),
 });
 
+// biome-ignore lint/suspicious/noExplicitAny: test helper function for flexibility
 const createSampleTemplate = (overrides?: Partial<any>) => {
   return Template.create({
     name: "Rock Ballad Template",
@@ -60,6 +61,7 @@ describe("TemplateLibraryUseCase", () => {
       const rockTemplate = createSampleTemplate();
       const genre = Genre.create("Rock");
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByGenre as any as any).mockResolvedValue([
         rockTemplate,
       ]);
@@ -73,6 +75,7 @@ describe("TemplateLibraryUseCase", () => {
     it("ジャンルにマッチするテンプレートがない場合は空配列を返す", async () => {
       const genre = Genre.create("Jazz");
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByGenre as any as any).mockResolvedValue([]);
 
       const result = await useCase.getTemplatesByGenre(genre);
@@ -93,6 +96,7 @@ describe("TemplateLibraryUseCase", () => {
       });
       const language = Language.create("ja");
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByLanguage as any).mockResolvedValue([
         japaneseTemplate,
       ]);
@@ -114,6 +118,7 @@ describe("TemplateLibraryUseCase", () => {
         usageCount: 1000,
       });
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findPopular as any).mockResolvedValue([
         popularTemplate,
       ]);
@@ -132,6 +137,7 @@ describe("TemplateLibraryUseCase", () => {
         qualityScore: 95,
       });
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findHighQuality as any).mockResolvedValue([
         highQualityTemplate,
       ]);
@@ -152,6 +158,7 @@ describe("TemplateLibraryUseCase", () => {
         hasMore: false,
       };
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByFilters as any).mockResolvedValue(searchResult);
 
       const filters = {
@@ -175,6 +182,7 @@ describe("TemplateLibraryUseCase", () => {
       const template = createSampleTemplate();
       const templateId = template.id;
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findById as any).mockResolvedValue(template);
 
       const result = await useCase.getTemplateById(templateId);
@@ -186,6 +194,7 @@ describe("TemplateLibraryUseCase", () => {
     it("存在しないIDの場合はnullを返す", async () => {
       const templateId = "non-existent-id";
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findById as any).mockResolvedValue(null);
 
       const result = await useCase.getTemplateById(templateId);
@@ -200,6 +209,7 @@ describe("TemplateLibraryUseCase", () => {
       const template = createSampleTemplate();
       const updatedTemplate = template.incrementUsage();
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.incrementUsage as any).mockResolvedValue(
         updatedTemplate
       );
@@ -219,6 +229,7 @@ describe("TemplateLibraryUseCase", () => {
     it("ジャンルと言語に基づいてテンプレートを推奨する", async () => {
       const matchingTemplate = createSampleTemplate();
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByMatch as any).mockResolvedValue(
         matchingTemplate
       );
@@ -237,7 +248,9 @@ describe("TemplateLibraryUseCase", () => {
     it("マッチするテンプレートがない場合は人気テンプレートを返す", async () => {
       const popularTemplate = createSampleTemplate();
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findByMatch as any).mockResolvedValue(null);
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.findPopular as any).mockResolvedValue([
         popularTemplate,
       ]);
@@ -274,6 +287,7 @@ describe("TemplateLibraryUseCase", () => {
         usageCount: 0,
       });
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.save as any).mockResolvedValue(template);
 
       const result = await useCase.createCustomTemplate(templateData);
@@ -306,6 +320,7 @@ describe("TemplateLibraryUseCase", () => {
         ],
       };
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
       (templateRepository.getStatistics as any).mockResolvedValue(statistics);
 
       const result = await useCase.getTemplateStatistics();

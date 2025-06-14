@@ -52,12 +52,14 @@ describe("ComplianceCheck", () => {
       expect(() => {
         ComplianceCheck.create({
           ...validProps,
+          // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
           overallLevel: "invalid" as any,
         });
       }).toThrow("無効なコンプライアンスレベルです");
     });
 
     it("無効な問題レベルでエラーを投げる", () => {
+      // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
       const invalidIssue = { ...validIssue, level: "invalid" as any };
       expect(() => {
         ComplianceCheck.create({ ...validProps, issues: [invalidIssue] });
@@ -304,7 +306,9 @@ describe("ComplianceCheck", () => {
       expect(json).toHaveProperty("recommendations");
       expect(json).toHaveProperty("checkedAt");
       expect(json).toHaveProperty("analysis");
+      // biome-ignore lint/suspicious/noExplicitAny: JSON output test
       expect((json as any).analysis).toHaveProperty("hasIssues", true);
+      // biome-ignore lint/suspicious/noExplicitAny: JSON output test
       expect((json as any).analysis).toHaveProperty("hasCriticalIssues", true);
     });
   });

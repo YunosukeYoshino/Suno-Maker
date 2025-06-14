@@ -131,6 +131,7 @@ describe("Template", () => {
           styleField: StyleField.create("pop, catchy"),
           lyricsStructure: "[Verse]\n{verse}",
           tags: ["pop"],
+          // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
           category: "invalid" as any,
           qualityScore: 80,
           usageCount: 0,

@@ -1,6 +1,6 @@
-import type {
+import {
   SuccessExample,
-  SuccessExampleSearchCriteria,
+  type SuccessExampleSearchCriteria,
 } from "../../domain/entities/SuccessExample";
 import type {
   ISuccessExampleRepository,
@@ -11,6 +11,7 @@ import type {
 } from "../../domain/repositories/ISuccessExampleRepository";
 import type { Genre } from "../../domain/valueObjects/Genre";
 import type { Language } from "../../domain/valueObjects/Language";
+import { StyleField } from "../../domain/valueObjects/StyleField";
 
 export interface CreateSuccessExampleInput {
   title: string;
@@ -195,29 +196,33 @@ export class SuccessExampleLibraryUseCase {
   ): Promise<SuccessExample[]> {
     const recommendations: SuccessExample[] = [];
 
-    // ジャンル別推奨
-    for (const genre of userPreferences.favoriteGenres) {
-      const genreExamples = await this.getSuccessExamplesByGenre(genre, 5);
-      recommendations.push(...genreExamples);
-    }
+    // 並列でジャンル別、言語別、タグベース推奨を取得
+    const [genreResults, languageResults, tagResults] = await Promise.all([
+      // ジャンル別推奨
+      Promise.all(
+        userPreferences.favoriteGenres.map((genre) =>
+          this.getSuccessExamplesByGenre(genre, 5)
+        )
+      ),
+      // 言語別推奨
+      Promise.all(
+        userPreferences.favoriteLanguages.map((language) =>
+          this.getSuccessExamplesByLanguage(language, 5)
+        )
+      ),
+      // タグベース推奨
+      userPreferences.preferredTags.length > 0
+        ? this.successExampleRepository.findByTags(
+            userPreferences.preferredTags,
+            10
+          )
+        : Promise.resolve([]),
+    ]);
 
-    // 言語別推奨
-    for (const language of userPreferences.favoriteLanguages) {
-      const languageExamples = await this.getSuccessExamplesByLanguage(
-        language,
-        5
-      );
-      recommendations.push(...languageExamples);
-    }
-
-    // タグベース推奨
-    if (userPreferences.preferredTags.length > 0) {
-      const tagExamples = await this.successExampleRepository.findByTags(
-        userPreferences.preferredTags,
-        10
-      );
-      recommendations.push(...tagExamples);
-    }
+    // 結果をフラット化して推奨リストに追加
+    recommendations.push(...genreResults.flat());
+    recommendations.push(...languageResults.flat());
+    recommendations.push(...tagResults);
 
     // 重複除去と評価フィルタリング
     const uniqueExamples = Array.from(
@@ -343,11 +348,6 @@ export class SuccessExampleLibraryUseCase {
   async createSuccessExample(
     input: CreateSuccessExampleInput
   ): Promise<SuccessExample> {
-    const { SuccessExample } = await import(
-      "../../domain/entities/SuccessExample"
-    );
-    const { StyleField } = await import("../../domain/valueObjects/StyleField");
-
     const styleField = StyleField.create(input.prompt);
 
     const example = SuccessExample.create({
