@@ -2,12 +2,12 @@ import { Lyrics } from "@/domain/entities/Lyrics";
 import type { ILyricsRepository } from "@/domain/repositories/ILyricsRepository";
 import { Language } from "@/domain/valueObjects/Language";
 import {
+  type MockedFunction,
   beforeEach,
   describe,
   expect,
   it,
   vi,
-  type MockedFunction,
 } from "vitest";
 import {
   type JapaneseOptimizationService,

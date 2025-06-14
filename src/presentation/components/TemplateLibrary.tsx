@@ -12,19 +12,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Template, TemplateCategory } from "@/domain/entities/Template";
-import { Genre } from "@/domain/valueObjects/Genre";
-import { Language } from "@/domain/valueObjects/Language";
+import type { Template, TemplateCategory } from "@/domain/entities/Template";
+import type { Genre } from "@/domain/valueObjects/Genre";
+import type { Language } from "@/domain/valueObjects/Language";
 import {
-  Star,
-  Search,
-  Filter,
   Clock,
+  Filter,
+  Heart,
+  Search,
+  Star,
   TrendingUp,
   Zap,
-  Heart,
 } from "lucide-react";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface TemplateLibraryProps {
   templates: Template[];
@@ -168,7 +168,7 @@ export function TemplateLibrary({
         filtered = filtered.filter((template) => template.qualityScore >= 85);
       } else if (activeTab === "recent") {
         // Show recently created templates (for now, just show all since we don't have date filtering logic)
-        filtered = filtered;
+        // TODO: Implement actual date filtering when createdAt field is available
       } else {
         // Filter by category
         filtered = filtered.filter(
@@ -191,8 +191,8 @@ export function TemplateLibrary({
       );
     }
 
-    // Apply sorting
-    filtered.sort((a, b) => {
+    // Apply sorting (create copy to avoid mutating props)
+    filtered = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case "quality":
           return b.qualityScore - a.qualityScore;
@@ -224,9 +224,9 @@ export function TemplateLibrary({
       custom: [],
     };
 
-    filteredTemplates.forEach((template) => {
+    for (const template of filteredTemplates) {
       categories[template.category].push(template);
-    });
+    }
 
     return categories;
   }, [filteredTemplates]);
@@ -397,7 +397,7 @@ export function TemplateLibrary({
         <TabsContent value="custom" className="mt-6">
           <ScrollArea className="h-[600px]">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {templatesByCategory["custom"].map((template) => (
+              {templatesByCategory.custom.map((template) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
@@ -405,7 +405,7 @@ export function TemplateLibrary({
                 />
               ))}
             </div>
-            {templatesByCategory["custom"].length === 0 && (
+            {templatesByCategory.custom.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
                   No custom templates found.

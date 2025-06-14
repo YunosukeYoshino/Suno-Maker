@@ -1,8 +1,9 @@
+import type { Prompt } from "../../domain/entities/Prompt";
 import { Template } from "../../domain/entities/Template";
-import { Prompt } from "../../domain/entities/Prompt";
-import { Genre } from "../../domain/valueObjects/Genre";
-import { Language } from "../../domain/valueObjects/Language";
-import { StyleField } from "../../domain/valueObjects/StyleField";
+import type {
+  TemplateCategory,
+  TemplateMatchCriteria,
+} from "../../domain/entities/Template";
 import type {
   ITemplateRepository,
   TemplateSearchFilters,
@@ -10,10 +11,9 @@ import type {
   TemplateSearchResult,
   TemplateStatistics,
 } from "../../domain/repositories/ITemplateRepository";
-import type {
-  TemplateMatchCriteria,
-  TemplateCategory,
-} from "../../domain/entities/Template";
+import { Genre } from "../../domain/valueObjects/Genre";
+import { Language } from "../../domain/valueObjects/Language";
+import { StyleField } from "../../domain/valueObjects/StyleField";
 
 export interface CreateCustomTemplateInput {
   name: string;
@@ -141,7 +141,7 @@ export class TemplateLibraryUseCase {
    */
   async recommendTemplates(
     criteria: TemplateMatchCriteria,
-    limit: number = 5
+    limit = 5
   ): Promise<Template[]> {
     // まず完全マッチを試す
     const exactMatch = await this.templateRepository.findByMatch(criteria);

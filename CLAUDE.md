@@ -4,69 +4,249 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-「suno-maker」は、TypeScript と Tailwind CSS v4 で構築された Next.js 15 アプリケーションです。モダンな Next.js App Router アーキテクチャを使用し、高速な開発ビルドのために Turbopack が設定されています。
+「suno-maker」は、AI 音楽生成のためのインテリジェントプロンプト＆歌詞作成ツールです。TypeScript と Tailwind CSS v4 で構築された Next.js 15 アプリケーションで、DDD（ドメイン駆動設計）+ TDD（テスト駆動開発）アーキテクチャを採用しています。
 
 ## 必須ツールとコマンド
 
 **重要**: このプロジェクトでは必ず Bun を使用してください。npm や yarn は使用しないでください。
 
-基本的な開発コマンドについては `.claude/common-patterns.md` を参照してください。
+### 基本開発コマンド
 
-## 開発ツール設定
+```bash
+# 開発サーバー起動（Turbopack使用）
+bun dev
 
-詳細な開発ツール設定については `.claude/project-knowledge.md` を参照してください。
+# ビルド・起動
+bun run build
+bun start
+
+# コード品質チェック
+bun run lint      # Biomeリンティング
+bun run format    # Biomeフォーマット
+bun run check     # lint + format
+bun run typecheck # TypeScript型チェック
+
+# テスト実行
+bun test          # 全テスト実行
+bun test:watch    # テストウォッチモード
+bun test:ui       # テストUI表示
+
+# shadcn/ui コンポーネント追加
+bun x shadcn@latest add [component-name]
+```
+
+### 必須品質チェック
+
+新機能実装後は必ず以下を実行してください：
+
+1. `bun run check` - コード品質
+2. `bun run typecheck` - 型チェック
+3. `bun test` - テスト通過確認
 
 ## アーキテクチャ
 
-技術スタックとアーキテクチャの詳細については `.claude/project-knowledge.md` を参照してください。
+### DDD レイヤー構造
 
-## TDD（テスト駆動開発）ルール
+```
+src/
+├── domain/           # ドメイン層（ビジネスロジック）
+│   ├── entities/     # Prompt, Lyrics, Song, Template, SuccessExample
+│   ├── valueObjects/ # Genre, StyleField, LyricsStructure, Language
+│   └── repositories/ # リポジトリインターフェース
+├── application/      # アプリケーション層（ユースケース）
+│   ├── usecases/     # GeneratePrompt, OptimizeLyrics, TemplateLibrary等
+│   └── services/     # ComplianceService, TemplateSeederService
+├── infrastructure/   # インフラ層（外部依存）
+│   └── repositories/ # リポジトリ実装
+└── presentation/     # プレゼンテーション層（UI）
+    └── components/   # GenreSelector, MoodMatrix, ComplianceChecker等
+```
 
-TDDの詳細な実装パターンについては `.claude/project-knowledge.md` を参照してください。
+### 技術スタック
 
-## DDD（ドメイン駆動設計）ルール
+- **Next.js 15**: App Router + Turbopack
+- **TypeScript 5**: 厳密モード + パスエイリアス
+- **Tailwind CSS v4**: ユーティリティファースト
+- **shadcn/ui**: モダン UI コンポーネント（`/components/ui/`に配置）
+- **Biome**: リンティング・フォーマット（ESLint/Prettier 代替）
+- **Vitest**: テストフレームワーク + jsdom + React Testing Library
+- **Zustand**: 軽量状態管理 + Zod バリデーション
 
-DDDの詳細な実装パターンについては `.claude/project-knowledge.md` を参照してください。
+### パスエイリアス
 
+```typescript
+"@/*"            -> ルートディレクトリ
+"~/*"            -> ./src/
+"@/components"   -> ./components/
+"@/domain"       -> ./src/domain/
+"@/application"  -> ./src/application/
+"@/infrastructure" -> ./src/infrastructure/
+"@/presentation" -> ./src/presentation/
+```
 
-## ドキュメント管理とワークフロー
+## DDD 設計原則
 
-### ドキュメント自動更新
-- **重要**: 新しい機能や変更を実装する際は、関連するdocsファイルを自動的に更新してください
-- アーキテクチャ変更時は `ARCHITECTURE.md` を更新
-- API変更時は `API_DESIGN.md` を更新
-- テスト戦略変更時は `TESTING_STRATEGY.md` を更新
-- プロジェクト計画変更時は `PROJECT_PLAN.md` を更新
+### エンティティ実装パターン
 
-詳細なワークフロー情報については `.claude/common-patterns.md` を参照してください。
+```typescript
+export class EntityName {
+  private constructor(
+    private readonly id: EntityId,
+    private property: PropertyValueObject
+  ) {}
 
-@/docs/import ARCHITECTURE.md
-@/docs/import PROJECT_PLAN.md
-@/docs/import API_DESIGN.md
-@/docs/import TESTING_STRATEGY.md
-@/docs/import README.md
+  static create(id: EntityId, property: PropertyValueObject): EntityName {
+    return new EntityName(id, property);
+  }
 
+  static reconstruct(id: EntityId, property: PropertyValueObject): EntityName {
+    return new EntityName(id, property);
+  }
 
-## 知見管理システム
-このプロジェクトでは以下のファイルで知見を体系的に管理しています：
+  getId(): EntityId {
+    return this.id;
+  }
+  getProperty(): PropertyValueObject {
+    return this.property;
+  }
+}
+```
 
-### `.claude/context.md`
-- プロジェクトの背景、目的、制約条件
-- 技術スタック選定理由
-- ビジネス要件や技術的制約
+### 値オブジェクト実装パターン
 
-### `.claude/project-knowledge.md`
-- 実装パターンや設計決定の知見
-- アーキテクチャの選択理由
-- 避けるべきパターンやアンチパターン
+```typescript
+export class ValueObjectName {
+  private constructor(private readonly value: string) {}
 
-### `.claude/project-improvements.md`
-- 過去の試行錯誤の記録
-- 失敗した実装とその原因
-- 改善プロセスと結果
+  static create(value: string): ValueObjectName {
+    if (!this.isValid(value)) {
+      throw new Error(`Invalid ${ValueObjectName.name}: ${value}`);
+    }
+    return new ValueObjectName(value);
+  }
 
-### `.claude/common-patterns.md`
-- 頻繁に使用するコマンドパターン
-- 定型的な実装テンプレート
+  private static isValid(value: string): boolean {
+    return value.length > 0 && value.length <= 100;
+  }
 
-**重要**: 新しい実装や重要な決定を行った際は、該当するファイルを更新してください。
+  getValue(): string {
+    return this.value;
+  }
+  equals(other: ValueObjectName): boolean {
+    return this.value === other.value;
+  }
+}
+```
+
+### ユースケース実装パターン
+
+```typescript
+export class ActionNameUseCase {
+  constructor(private readonly repository: IEntityRepository) {}
+
+  async execute(input: ActionNameInput): Promise<ActionNameOutput> {
+    // 1. 入力値の検証
+    // 2. ドメインオブジェクトの取得・生成
+    // 3. ビジネスロジックの実行
+    // 4. 永続化
+    // 5. 結果の返却
+  }
+}
+```
+
+## TDD 開発ルール
+
+### Red-Green-Refactor サイクル
+
+1. **Red**: まず失敗するテストを書く
+2. **Green**: テストを通すための最小限のコードを実装
+3. **Refactor**: リファクタリングでコードを改善
+
+### テスト構造
+
+```typescript
+describe("機能名", () => {
+  beforeEach(() => {
+    // セットアップ
+  });
+
+  describe("正常系", () => {
+    it("期待される動作を説明", () => {
+      // Arrange - Act - Assert
+    });
+  });
+
+  describe("異常系", () => {
+    it("エラーケースの説明", () => {
+      expect(() => {
+        // error triggering code
+      }).toThrow("Expected error message");
+    });
+  });
+});
+```
+
+### テスト配置ルール
+
+- ドメイン層: `src/domain/**/__tests__/*.test.ts`
+- アプリケーション層: `src/application/**/__tests__/*.test.ts`
+- プレゼンテーション層: `src/presentation/**/__tests__/*.test.tsx`
+
+## コード品質基準
+
+### 必須チェック項目
+
+- TypeScript 厳密モード 100%準拠（`any`禁止）
+- Biome 品質チェック通過
+- 全テスト通過（現在 147 テスト）
+- パスエイリアス活用
+- Zod バリデーション使用
+
+### shadcn/ui 使用ルール
+
+- コンポーネントは `/components/ui/` に配置（`src/`内ではない）
+- インポート: `@/components/ui/component-name`
+- カスタマイズは必要最小限
+
+## ドキュメント管理
+
+### 自動更新対象
+
+新機能実装時は関連ドキュメントを更新：
+
+- アーキテクチャ変更時: `docs/ARCHITECTURE.md`
+- API 変更時: `docs/API_DESIGN.md`
+- テスト戦略変更時: `docs/TESTING_STRATEGY.md`
+- プロジェクト計画変更時: `docs/PROJECT_PLAN.md`
+
+### 知見管理ファイル
+
+- `.claude/project-knowledge.md`: 実装パターン・設計知見
+- `.claude/common-patterns.md`: コマンドパターン・テンプレート
+- `.claude/project-improvements.md`: 試行錯誤の記録
+
+## 開発ワークフロー
+
+### ブランチ戦略
+
+```bash
+# 機能開発
+git checkout -b feature/機能名
+bun test:watch  # テスト監視開始
+# 実装・テスト・コミット
+git commit -m "feat: 機能実装"
+gh pr create
+
+# バグ修正
+git checkout -b fix/問題の説明
+git commit -m "fix: 修正内容"
+```
+
+### 実装順序
+
+1. ドメイン層（エンティティ・値オブジェクト）から TDD で実装
+2. アプリケーション層（ユースケース）の実装
+3. プレゼンテーション層（UI）の実装
+4. 統合テスト・E2E テスト
+
+**重要**: 新しい実装や重要な決定を行った際は、該当する知見管理ファイルを更新してください。

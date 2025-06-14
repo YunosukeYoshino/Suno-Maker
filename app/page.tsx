@@ -1,6 +1,12 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../components/ui/button";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
       {/* ヘッダー */}
@@ -26,12 +32,18 @@ export default function Home() {
               >
                 テンプレート
               </a>
-              <a
-                href="#guide"
+              <Link
+                href="/success-examples"
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
-                使い方
-              </a>
+                成功事例
+              </Link>
+              <Link
+                href="/compliance"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                コンプライアンス
+              </Link>
             </nav>
           </div>
         </div>
@@ -147,6 +159,84 @@ export default function Home() {
             <p className="text-gray-600 dark:text-gray-300">
               120文字制限、メタタグ、v4.5新機能まで完全対応。最高品質の楽曲生成を実現。
             </p>
+          </div>
+        </div>
+
+        {/* Phase 3 新機能 */}
+        <div className="mb-16">
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+            新機能：コミュニティ＆コンプライアンス
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+              <div className="h-12 w-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  role="img"
+                  aria-label="成功事例ライブラリアイコン"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V9l6 3v8"
+                  />
+                </svg>
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                成功事例ライブラリ
+              </h4>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                高評価を獲得したプロンプトと歌詞を分析。セマンティック検索とトレンド分析で最適な創作をサポート。
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  router.push("/success-examples");
+                }}
+              >
+                成功事例を見る
+              </Button>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+              <div className="h-12 w-12 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg flex items-center justify-center mb-4">
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  role="img"
+                  aria-label="リーガルコンプライアンスアイコン"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                リーガルコンプライアンス
+              </h4>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                著作権・商標権・不適切コンテンツを自動検出。AIによる4段階リスク評価で安全な音楽制作を保証。
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  router.push("/compliance");
+                }}
+              >
+                コンプライアンスチェック
+              </Button>
+            </div>
           </div>
         </div>
 

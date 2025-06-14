@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { Template } from "../Template";
+import { describe, expect, it } from "vitest";
 import { Genre } from "../../valueObjects/Genre";
 import { Language } from "../../valueObjects/Language";
 import { StyleField } from "../../valueObjects/StyleField";
+import { Template } from "../Template";
 
 describe("Template", () => {
   describe("create", () => {
@@ -131,6 +131,7 @@ describe("Template", () => {
           styleField: StyleField.create("pop, catchy"),
           lyricsStructure: "[Verse]\n{verse}",
           tags: ["pop"],
+          // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
           category: "invalid" as any,
           qualityScore: 80,
           usageCount: 0,

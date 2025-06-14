@@ -4,12 +4,12 @@ import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { StyleField } from "@/domain/valueObjects/StyleField";
 import {
+  type MockedFunction,
   beforeEach,
   describe,
   expect,
   it,
   vi,
-  type MockedFunction,
 } from "vitest";
 import {
   type GenreConflictDetector,

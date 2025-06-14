@@ -1,33 +1,43 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DefaultTemplateSeederService } from "../TemplateSeederService";
-import { Template } from "../../../domain/entities/Template";
+import {
+  type MockedFunction,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import type { Template } from "../../../domain/entities/Template";
 import type { ITemplateRepository } from "../../../domain/repositories/ITemplateRepository";
+import { DefaultTemplateSeederService } from "../TemplateSeederService";
 
-const createMockTemplateRepository = (): ITemplateRepository => ({
-  save: vi.fn(),
-  findById: vi.fn(),
-  findByFilters: vi.fn(),
-  findByMatch: vi.fn(),
-  findPopular: vi.fn(),
-  findHighQuality: vi.fn(),
-  findRecent: vi.fn(),
-  findByCategory: vi.fn(),
-  findByGenre: vi.fn(),
-  findByLanguage: vi.fn(),
-  findByTags: vi.fn(),
-  delete: vi.fn(),
-  saveMany: vi.fn(),
-  getStatistics: vi.fn(),
-  exists: vi.fn(),
-  count: vi.fn(),
-  semanticSearch: vi.fn(),
-  findSimilar: vi.fn(),
-  incrementUsage: vi.fn(),
-  updateQualityScore: vi.fn(),
-});
+const createMockTemplateRepository = () =>
+  ({
+    save: vi.fn(),
+    findById: vi.fn(),
+    findByFilters: vi.fn(),
+    findByMatch: vi.fn(),
+    findPopular: vi.fn(),
+    findHighQuality: vi.fn(),
+    findRecent: vi.fn(),
+    findByCategory: vi.fn(),
+    findByGenre: vi.fn(),
+    findByLanguage: vi.fn(),
+    findByTags: vi.fn(),
+    delete: vi.fn(),
+    saveMany: vi.fn(),
+    getStatistics: vi.fn(),
+    exists: vi.fn(),
+    count: vi.fn(),
+    semanticSearch: vi.fn(),
+    findSimilar: vi.fn(),
+    incrementUsage: vi.fn(),
+    updateQualityScore: vi.fn(),
+  }) satisfies ITemplateRepository;
 
 describe("DefaultTemplateSeederService", () => {
-  let templateRepository: ITemplateRepository;
+  let templateRepository: {
+    [K in keyof ITemplateRepository]: MockedFunction<ITemplateRepository[K]>;
+  };
   let seederService: DefaultTemplateSeederService;
 
   beforeEach(() => {
@@ -38,7 +48,7 @@ describe("DefaultTemplateSeederService", () => {
   describe("seedInitialTemplates", () => {
     it("初期テンプレートを正常に作成して保存する", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       const result = await seederService.seedInitialTemplates();
 
@@ -46,20 +56,20 @@ describe("DefaultTemplateSeederService", () => {
       expect(result).toBe(mockTemplates);
 
       // saveManyが呼ばれた引数をチェック
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       expect(Array.isArray(savedTemplates)).toBe(true);
       expect(savedTemplates.length).toBeGreaterThan(0);
     });
 
     it("ジャンル別、言語別、ムード別のテンプレートが含まれている", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedInitialTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
       // カテゴリ別にテンプレートが含まれているかチェック
       const categories = savedTemplates.map(
@@ -74,30 +84,30 @@ describe("DefaultTemplateSeederService", () => {
   describe("seedGenreSpecificTemplates", () => {
     it("ジャンル特化テンプレートを作成する", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       const result = await seederService.seedGenreSpecificTemplates();
 
       expect(templateRepository.saveMany).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockTemplates);
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
       // 全てのテンプレートがgenre-specificカテゴリであることを確認
-      savedTemplates.forEach((template: Template) => {
+      for (const template of savedTemplates) {
         expect(template.category).toBe("genre-specific");
-      });
+      }
     });
 
     it("多様なジャンルのテンプレートが含まれている", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedGenreSpecificTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       const genreNames = savedTemplates.map((template: Template) => {
         const genreValue = template.genre.value;
         return typeof genreValue === "string" ? genreValue : genreValue[0];
@@ -115,30 +125,30 @@ describe("DefaultTemplateSeederService", () => {
   describe("seedLanguageSpecificTemplates", () => {
     it("言語特化テンプレートを作成する", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       const result = await seederService.seedLanguageSpecificTemplates();
 
       expect(templateRepository.saveMany).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockTemplates);
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
       // 全てのテンプレートがlanguage-specificカテゴリであることを確認
-      savedTemplates.forEach((template: Template) => {
+      for (const template of savedTemplates) {
         expect(template.category).toBe("language-specific");
-      });
+      }
     });
 
     it("多言語のテンプレートが含まれている", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedLanguageSpecificTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       const languages = savedTemplates.map(
         (template: Template) => template.language.value
       );
@@ -152,12 +162,12 @@ describe("DefaultTemplateSeederService", () => {
 
     it("日本語テンプレートに適切な構造が含まれている", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedLanguageSpecificTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       const japaneseTemplates = savedTemplates.filter(
         (template: Template) => template.language.value === "ja"
       );
@@ -173,30 +183,30 @@ describe("DefaultTemplateSeederService", () => {
   describe("seedMoodSpecificTemplates", () => {
     it("ムード特化テンプレートを作成する", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       const result = await seederService.seedMoodSpecificTemplates();
 
       expect(templateRepository.saveMany).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockTemplates);
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
       // 全てのテンプレートがmood-specificカテゴリであることを確認
-      savedTemplates.forEach((template: Template) => {
+      for (const template of savedTemplates) {
         expect(template.category).toBe("mood-specific");
-      });
+      }
     });
 
     it("多様なムードのテンプレートが含まれている", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedMoodSpecificTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       const allTags = savedTemplates.flatMap(
         (template: Template) => template.tags
       );
@@ -222,29 +232,29 @@ describe("DefaultTemplateSeederService", () => {
   describe("テンプレートの品質", () => {
     it("全てのテンプレートが有効な品質スコアを持つ", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedInitialTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
-      savedTemplates.forEach((template: Template) => {
+      for (const template of savedTemplates) {
         expect(template.qualityScore).toBeGreaterThanOrEqual(0);
         expect(template.qualityScore).toBeLessThanOrEqual(100);
-      });
+      }
     });
 
     it("全てのテンプレートが必要なプロパティを持つ", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedInitialTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
 
-      savedTemplates.forEach((template: Template) => {
+      for (const template of savedTemplates) {
         expect(template.name).toBeTruthy();
         expect(template.description).toBeTruthy();
         expect(template.genre).toBeDefined();
@@ -254,17 +264,17 @@ describe("DefaultTemplateSeederService", () => {
         expect(Array.isArray(template.tags)).toBe(true);
         expect(template.category).toBeTruthy();
         expect(typeof template.usageCount).toBe("number");
-      });
+      }
     });
 
     it("テンプレート名が一意である", async () => {
       const mockTemplates: Template[] = [];
-      (templateRepository.saveMany as any).mockResolvedValue(mockTemplates);
+      templateRepository.saveMany.mockResolvedValue(mockTemplates);
 
       await seederService.seedInitialTemplates();
 
-      const savedTemplates = (templateRepository.saveMany as any).mock
-        .calls[0][0];
+      const savedTemplates = templateRepository.saveMany.mock
+        .calls[0][0] as Template[];
       const templateNames = savedTemplates.map(
         (template: Template) => template.name
       );
