@@ -1,3 +1,5 @@
+"use client";
+
 import { SuccessExamplesLibrary } from "../../src/presentation/components/SuccessExamplesLibrary";
 
 export default function SuccessExamplesPage() {

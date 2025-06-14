@@ -1,3 +1,5 @@
+"use client";
+
 import { ComplianceChecker } from "../../src/presentation/components/ComplianceChecker";
 
 export default function CompliancePage() {
