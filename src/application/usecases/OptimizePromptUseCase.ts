@@ -308,11 +308,7 @@ export class OptimizePromptUseCase {
     let optimizedValue = styleField.value;
     const originalValue = optimizedValue;
 
-    if (optimizedValue.length <= targetLength) {
-      return { styleField, optimizations };
-    }
-
-    // 1. 重複する単語の除去
+    // 1. 重複する単語の除去（常に実行）
     const words = optimizedValue.split(/[,\s]+/).filter((w) => w.length > 0);
     const uniqueWords = [...new Set(words)];
 
@@ -324,6 +320,15 @@ export class OptimizePromptUseCase {
         originalText: originalValue,
         optimizedText: optimizedValue,
       });
+    }
+
+    // 重複除去後に長さをチェック
+    if (optimizedValue.length <= targetLength) {
+      const optimizedStyleField = StyleField.create(optimizedValue);
+      return {
+        styleField: optimizedStyleField,
+        optimizations,
+      };
     }
 
     // 2. 冗長な修飾語の除去
@@ -584,7 +589,7 @@ export class OptimizePromptUseCase {
       improvements: string[];
     }
   ): number {
-    let score = 100;
+    let score = 0;
 
     // 最適化の効果性（40点満点）
     const lengthReduction =
@@ -597,14 +602,14 @@ export class OptimizePromptUseCase {
     if (reductionRatio > 0.2) score += 10; // 20%以上の短縮
     if (optimizations.length > 0) score += 10; // 最適化実行
 
-    // 成功率予測スコア（30点満点）
-    score += (successPrediction.overallScore / 100) * 30;
+    // 成功率予測スコア（60点満点）
+    score += (successPrediction.overallScore / 100) * 60;
 
     // 警告の影響（-30点まで）
     score -= Math.min(warnings.length * 5, 30);
 
-    // 下限設定
-    score = Math.max(0, score);
+    // 上下限設定
+    score = Math.max(0, Math.min(100, score));
 
     return Math.round(score);
   }

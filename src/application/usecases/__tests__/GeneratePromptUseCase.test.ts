@@ -9,7 +9,7 @@ import {
   type PromptOptimizationService,
 } from "../GeneratePromptUseCase";
 
-describe.skip("GeneratePromptUseCase", () => {
+describe("GeneratePromptUseCase", () => {
   let useCase: GeneratePromptUseCase;
   let mockRepository: IPromptRepository;
   let mockOptimizationService: PromptOptimizationService;

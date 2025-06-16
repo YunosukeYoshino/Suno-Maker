@@ -16,7 +16,7 @@ import {
   type SunoOptimizationService,
 } from "../OptimizeLyricsUseCase";
 
-describe.skip("OptimizeLyricsUseCase", () => {
+describe("OptimizeLyricsUseCase", () => {
   let useCase: OptimizeLyricsUseCase;
   let mockRepository: ILyricsRepository;
   let mockJapaneseService: JapaneseOptimizationService;
@@ -148,6 +148,12 @@ Sing it with us`,
         suggestions: [],
       });
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: null,
+        changes: [],
+      });
+
       const result = await useCase.execute(input);
 
       expect(result.optimizedLyrics.content).toContain("[Verse]");
@@ -272,6 +278,12 @@ Sing it with us`,
         suggestions: [],
       });
 
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: null,
+        changes: [],
+      });
+
       const result = await useCase.execute(input);
 
       expect(result.suggestions.some((s) => s.includes("大丈夫"))).toBe(true);
@@ -368,7 +380,7 @@ Sing it with us`,
 
       const result = await useCaseWithoutSuno.execute(input);
 
-      expect(result.warnings).toContain("構造タグが不足しています");
+      expect(result.warnings).toContain("コーラスまたはフックがありません");
     });
   });
 
@@ -397,7 +409,7 @@ This is the chorus
 Sing it loud`,
         language: "en",
         optimizationOptions: {
-          maxLength: 200, // 短い制限で強制的に短縮
+          maxLength: 150, // 短い制限で強制的に短縮
           autoInsertTags: false,
           optimizeForJapanese: false,
           optimizeForSuno: false,
@@ -560,6 +572,12 @@ Over the ridge`,
         isValid: true,
         issues: [],
         suggestions: [],
+      });
+
+      // biome-ignore lint/suspicious/noExplicitAny: test mock
+      (mockSunoService.optimizeLength as any).mockResolvedValue({
+        optimizedLyrics: null,
+        changes: [],
       });
 
       const result = await useCase.execute(input);

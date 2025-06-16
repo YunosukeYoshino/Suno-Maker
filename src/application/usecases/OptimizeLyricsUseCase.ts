@@ -379,7 +379,7 @@ export class OptimizeLyricsUseCase {
       // 長さ最適化
       const lengthOptimization =
         await this.sunoOptimizationService.optimizeLength(lyrics);
-      const optimizedLyrics = lengthOptimization.optimizedLyrics;
+      const optimizedLyrics = lengthOptimization.optimizedLyrics || lyrics;
       optimizations.push(...lengthOptimization.changes);
 
       return { lyrics: optimizedLyrics, optimizations, warnings };
