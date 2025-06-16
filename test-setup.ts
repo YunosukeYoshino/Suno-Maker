@@ -4,6 +4,7 @@ import { beforeEach, expect } from "vitest";
 (globalThis as typeof globalThis & { expect: typeof expect }).expect = expect;
 
 // Setup DOM environment for bun test
+// @ts-ignore - jsdom types not needed for this setup
 import { JSDOM } from "jsdom";
 
 if (typeof document === "undefined") {
