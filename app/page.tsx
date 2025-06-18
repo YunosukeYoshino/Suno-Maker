@@ -67,13 +67,14 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
+              asChild
               size="lg"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full"
             >
-              プロンプトを作成
+              <Link href="/prompt">プロンプトを作成</Link>
             </Button>
-            <Button size="lg" variant="outline">
-              歌詞を作成
+            <Button asChild size="lg" variant="outline" className="w-full">
+              <Link href="/lyrics">歌詞を作成</Link>
             </Button>
           </div>
         </div>
