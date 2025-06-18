@@ -589,6 +589,7 @@ export class OptimizePromptUseCase {
       improvements: string[];
     }
   ): number {
+    // 最適化の品質を加点方式で評価（0から100点まで）
     let score = 0;
 
     // 最適化の効果性（40点満点）
