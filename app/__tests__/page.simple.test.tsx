@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 describe("Home Page - Static Content Tests", () => {
   // Create a simplified version of the component for testing
@@ -41,12 +41,17 @@ describe("Home Page - Static Content Tests", () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/prompt" data-testid="prompt-link">
-              <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full">
+              <button
+                type="button"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full"
+              >
                 プロンプトを作成
               </button>
             </a>
             <a href="/lyrics" data-testid="lyrics-link">
-              <button className="w-full">歌詞を作成</button>
+              <button type="button" className="w-full">
+                歌詞を作成
+              </button>
             </a>
           </div>
         </div>

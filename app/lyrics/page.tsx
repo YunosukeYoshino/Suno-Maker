@@ -206,15 +206,17 @@ export default function LyricsPage() {
                       selectedGenres.includes(genre) ? "default" : "outline"
                     }
                     className="cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900"
-                    onClick={() => {
-                      if (selectedGenres.includes(genre)) {
-                        setSelectedGenres(
-                          selectedGenres.filter((g) => g !== genre)
-                        );
-                      } else if (selectedGenres.length < 3) {
-                        setSelectedGenres([...selectedGenres, genre]);
-                      }
-                    }}
+                    onClick={() =>
+                      setSelectedGenres((prev) => {
+                        if (prev.includes(genre)) {
+                          return prev.filter((g) => g !== genre);
+                        }
+                        if (prev.length < 3) {
+                          return [...prev, genre];
+                        }
+                        return prev;
+                      })
+                    }
                   >
                     {genre}
                   </Badge>

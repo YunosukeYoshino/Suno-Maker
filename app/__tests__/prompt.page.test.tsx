@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Mock } from "vitest";
 import PromptPage from "../prompt/page";
 
@@ -17,12 +17,23 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock presentation components
+interface GenreSelectorProps {
+  selectedGenres: string[];
+  onGenreChange: (genres: string[]) => void;
+  maxSelection: number;
+}
+
 vi.mock("~/presentation/components/GenreSelector", () => ({
-  GenreSelector: ({ selectedGenres, onGenreChange, maxSelection }: any) => (
+  GenreSelector: ({
+    selectedGenres,
+    onGenreChange,
+    maxSelection,
+  }: GenreSelectorProps) => (
     <div data-testid="genre-selector">
       <div>Selected: {selectedGenres.join(", ")}</div>
       <div>Max: {maxSelection}</div>
       <button
+        type="button"
         onClick={() => onGenreChange([...selectedGenres, "Rock"])}
         data-testid="add-genre"
       >
@@ -32,12 +43,23 @@ vi.mock("~/presentation/components/GenreSelector", () => ({
   ),
 }));
 
+interface MoodMatrixProps {
+  selectedMoods: string[];
+  onMoodChange: (moods: string[]) => void;
+  maxSelection: number;
+}
+
 vi.mock("~/presentation/components/MoodMatrix", () => ({
-  MoodMatrix: ({ selectedMoods, onMoodChange, maxSelection }: any) => (
+  MoodMatrix: ({
+    selectedMoods,
+    onMoodChange,
+    maxSelection,
+  }: MoodMatrixProps) => (
     <div data-testid="mood-matrix">
       <div>Selected Moods: {selectedMoods.join(", ")}</div>
       <div>Max: {maxSelection}</div>
       <button
+        type="button"
         onClick={() => onMoodChange([...selectedMoods, "Energetic"])}
         data-testid="add-mood"
       >
@@ -47,16 +69,23 @@ vi.mock("~/presentation/components/MoodMatrix", () => ({
   ),
 }));
 
+interface InstrumentSelectorProps {
+  selectedInstruments: string[];
+  onInstrumentChange: (instruments: string[]) => void;
+  maxSelection: number;
+}
+
 vi.mock("~/presentation/components/InstrumentSelector", () => ({
   InstrumentSelector: ({
     selectedInstruments,
     onInstrumentChange,
     maxSelection,
-  }: any) => (
+  }: InstrumentSelectorProps) => (
     <div data-testid="instrument-selector">
       <div>Selected Instruments: {selectedInstruments.join(", ")}</div>
       <div>Max: {maxSelection}</div>
       <button
+        type="button"
         onClick={() => onInstrumentChange([...selectedInstruments, "Guitar"])}
         data-testid="add-instrument"
       >
@@ -66,14 +95,33 @@ vi.mock("~/presentation/components/InstrumentSelector", () => ({
   ),
 }));
 
+interface ParameterSlidersProps {
+  parameters: {
+    energy: number;
+    tempo: number;
+    complexity: number;
+    emotional_intensity: number;
+  };
+  onParameterChange: (parameters: {
+    energy: number;
+    tempo: number;
+    complexity: number;
+    emotional_intensity: number;
+  }) => void;
+}
+
 vi.mock("~/presentation/components/ParameterSliders", () => ({
-  ParameterSliders: ({ parameters, onParameterChange }: any) => (
+  ParameterSliders: ({
+    parameters,
+    onParameterChange,
+  }: ParameterSlidersProps) => (
     <div data-testid="parameter-sliders">
       <div>Energy: {parameters.energy}</div>
       <div>Tempo: {parameters.tempo}</div>
       <div>Complexity: {parameters.complexity}</div>
       <div>Emotional Intensity: {parameters.emotional_intensity}</div>
       <button
+        type="button"
         onClick={() => onParameterChange({ ...parameters, energy: 8 })}
         data-testid="change-energy"
       >
@@ -83,11 +131,17 @@ vi.mock("~/presentation/components/ParameterSliders", () => ({
   ),
 }));
 
+interface TemplateLibraryProps {
+  templates: Array<{ id: string; name: string }>;
+  onTemplateSelect: (template: { id: string; name: string }) => void;
+}
+
 vi.mock("~/presentation/components/TemplateLibrary", () => ({
-  TemplateLibrary: ({ templates, onTemplateSelect }: any) => (
+  TemplateLibrary: ({ templates, onTemplateSelect }: TemplateLibraryProps) => (
     <div data-testid="template-library">
       <div>Templates count: {templates.length}</div>
       <button
+        type="button"
         onClick={() => onTemplateSelect({ id: "1", name: "Test Template" })}
         data-testid="select-template"
       >

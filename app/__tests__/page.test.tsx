@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import the component that uses useRouter
 import Home from "../page";

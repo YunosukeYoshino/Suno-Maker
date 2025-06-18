@@ -66,19 +66,16 @@ export default function Home() {
             ジャンル特化、言語対応、120文字制限に完全対応。
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/prompt">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full"
-              >
-                プロンプトを作成
-              </Button>
-            </Link>
-            <Link href="/lyrics">
-              <Button size="lg" variant="outline" className="w-full">
-                歌詞を作成
-              </Button>
-            </Link>
+            <Button
+              asChild
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full"
+            >
+              <Link href="/prompt">プロンプトを作成</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="w-full">
+              <Link href="/lyrics">歌詞を作成</Link>
+            </Button>
           </div>
         </div>
 
