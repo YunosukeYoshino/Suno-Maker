@@ -66,17 +66,15 @@ describe("Home Page", () => {
     const promptButton = screen.getByRole("link", { name: "プロンプトを作成" });
     const lyricsButton = screen.getByRole("link", { name: "歌詞を作成" });
 
-    // プロンプトボタンは gradient background
-    const promptButtonElement = promptButton.querySelector("button");
-    expect(promptButtonElement).toHaveClass(
+    // プロンプトボタンは gradient background (asChildパターンでLinkがButtonスタイルを継承)
+    expect(promptButton).toHaveClass(
       "bg-gradient-to-r",
       "from-purple-600",
       "to-blue-600"
     );
 
-    // 歌詞ボタンは outline variant
-    const lyricsButtonElement = lyricsButton.querySelector("button");
-    expect(lyricsButtonElement).toHaveClass("w-full");
+    // 歌詞ボタンは outline variant (asChildパターンでLinkがButtonスタイルを継承)
+    expect(lyricsButton).toHaveClass("w-full");
   });
 
   it("レスポンシブレイアウトが適用されている", () => {
