@@ -5,7 +5,11 @@
  * これにより、ビジネスルールの変更に対してテストが自動的に追従できます。
  */
 
-import { BUSINESS_RULES, type QualityLevel } from "~/config/business-rules";
+import {
+  BUSINESS_RULES,
+  type QualityLevel,
+  type SafetyLevel,
+} from "~/config/business-rules";
 
 /**
  * テストデータ生成クラス
@@ -48,7 +52,7 @@ export class TestDataGenerator {
    * 最大長のスタイルフィールドを生成（境界値テスト用）
    */
   static generateMaxLengthStyleField(): string {
-    return this.generateStyleFieldWithLength(
+    return TestDataGenerator.generateStyleFieldWithLength(
       BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH
     );
   }
@@ -57,7 +61,7 @@ export class TestDataGenerator {
    * 長すぎるスタイルフィールドを生成（エラーテスト用）
    */
   static generateTooLongStyleField(): string {
-    return this.generateStyleFieldWithLength(
+    return TestDataGenerator.generateStyleFieldWithLength(
       BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH + 1
     );
   }
@@ -97,7 +101,7 @@ export class TestDataGenerator {
   /**
    * 指定された安全レベルのコンプライアンススコアを生成
    */
-  static generateComplianceScoreForLevel(level: string): number {
+  static generateComplianceScoreForLevel(level: SafetyLevel): number {
     const { LEVEL_THRESHOLDS } = BUSINESS_RULES.COMPLIANCE_SCORE;
 
     switch (level) {

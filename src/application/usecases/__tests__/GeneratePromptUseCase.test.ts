@@ -189,7 +189,7 @@ describe("GeneratePromptUseCase", () => {
       expect(result.qualityScore).toBeGreaterThanOrEqual(highQualityRange.min);
     });
 
-    it("複数ジャンルは中程度のスコアを得る", async () => {
+    it("複数ジャンルは適度な品質スコアを得る", async () => {
       const input: GeneratePromptInput = {
         genres: ["Rock", "Blues"],
         language: "en",
@@ -201,7 +201,7 @@ describe("GeneratePromptUseCase", () => {
       });
 
       const result = await useCase.execute(input);
-      // 複数ジャンルは適度な品質スコアを得ることを確認
+      // 複数ジャンルは中程度以上の適度な品質スコアを得ることを確認
       expect(result.qualityScore).toBeGreaterThanOrEqual(
         BUSINESS_RULES.QUALITY_SCORE.MEDIUM_THRESHOLD
       );
