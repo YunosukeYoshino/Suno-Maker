@@ -12,4 +12,4 @@ bun test || true
 
 # Claude Code Review（知見更新チェック付き）
 echo "🤖 Claude Code Review & Learning Check..."
-claude --print "/learnings - Check if staged changes contain new learnings that should be documented. Review code for DDD/TDD compliance and suggest improvements." --allowedTools "Bash(git:*) Read Grep Edit" || echo "⚠️ Claude analysis unavailable, continuing..."
+claude -p "/learnings"

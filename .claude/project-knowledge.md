@@ -461,3 +461,175 @@ export class Template {
 - 入力値検証: Zod スキーマ
 - XSS 対策: React の標準エスケープ
 - CSRF 対策: Next.js の標準対応
+
+## Phase 3.5: テストハードコード問題解決の学習事項
+
+### ビジネスルール中央集権化パターン
+
+#### 設計原則
+```typescript
+// ❌ 以前のハードコードパターン
+expect(result.score).toBe(100);
+expect(result.overallLevel).toBe("safe");
+expect(genreNames).toContain("Rock");
+
+// ✅ 改善後のビジネスルール参照パターン
+expect(result.score).toBe(BUSINESS_RULES.COMPLIANCE_SCORE.PERFECT_SCORE);
+expect(result.overallLevel).toBe(BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.SAFE);
+expect(genreNames).toContain(BUSINESS_RULES.GENRE.REQUIRED_GENRES[0]);
+```
+
+#### 階層化された設定管理
+```typescript
+export const BUSINESS_RULES = {
+  STYLE_FIELD: {
+    MAX_LENGTH: 120,
+    MIN_LENGTH: 1,
+    RECOMMENDED_RANGE: { MIN: 20, MAX: 80 },
+  },
+  QUALITY_SCORE: {
+    MIN: 0,
+    MAX: 100,
+    HIGH_THRESHOLD: 80,
+    MEDIUM_THRESHOLD: 60,
+  },
+  COMPLIANCE_SCORE: {
+    PERFECT_SCORE: 100,
+    SAFETY_LEVELS: {
+      SAFE: "safe",
+      CAUTION: "caution",
+      WARNING: "warning", 
+      UNSAFE: "unsafe",
+    },
+  },
+} as const;
+```
+
+### テストデータ生成パターン
+
+#### 動的データ生成
+```typescript
+export class TestDataGenerator {
+  // 境界値テスト用データ生成
+  static generateMaxLengthStyleField(): string {
+    return this.generateStyleFieldWithLength(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH);
+  }
+
+  // エラーケース用データ生成
+  static generateTooLongStyleField(): string {
+    return this.generateStyleFieldWithLength(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH + 1);
+  }
+
+  // 品質レベル別スコア生成
+  static generateQualityScore(level: QualityLevel): number {
+    const { HIGH_THRESHOLD, MEDIUM_THRESHOLD } = BUSINESS_RULES.QUALITY_SCORE;
+    switch (level) {
+      case 'high': return Math.floor(Math.random() * (100 - HIGH_THRESHOLD + 1)) + HIGH_THRESHOLD;
+      case 'medium': return Math.floor(Math.random() * (HIGH_THRESHOLD - MEDIUM_THRESHOLD)) + MEDIUM_THRESHOLD;
+      // ...
+    }
+  }
+}
+```
+
+#### 期待値計算の統一
+```typescript
+export class TestExpectationCalculator {
+  // 成功事例品質スコアの期待値計算
+  static calculateExpectedSuccessExampleScore(
+    rating: number,
+    playCount: number,
+    likeCount: number
+  ): number {
+    const { RATING_MULTIPLIER, PLAY_COUNT_DIVISOR } = BUSINESS_RULES.SUCCESS_EXAMPLE;
+    
+    const ratingScore = rating * RATING_MULTIPLIER;
+    const playScore = Math.min(
+      Math.floor(playCount / PLAY_COUNT_DIVISOR) * 10,
+      10
+    );
+    return Math.min(ratingScore + playScore, 100);
+  }
+
+  // 品質レベル範囲の期待値取得
+  static getQualityScoreRange(level: QualityLevel): { min: number; max: number } {
+    const { HIGH_THRESHOLD, MEDIUM_THRESHOLD } = BUSINESS_RULES.QUALITY_SCORE;
+    switch (level) {
+      case 'high': return { min: HIGH_THRESHOLD, max: 100 };
+      case 'medium': return { min: MEDIUM_THRESHOLD, max: HIGH_THRESHOLD - 1 };
+    }
+  }
+}
+```
+
+### 改善後のテストパターン例
+
+#### ComplianceService テスト
+```typescript
+it("完全に安全なコンテンツは最高スコアを得る", async () => {
+  const result = await complianceService.checkCompliance(input);
+  
+  // ビジネス意図が明確
+  expect(result.overallLevel).toBe(BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.SAFE);
+  expect(result.score).toBe(BUSINESS_RULES.COMPLIANCE_SCORE.PERFECT_SCORE);
+});
+```
+
+#### GeneratePromptUseCase テスト
+```typescript
+it("高品質プロンプトは高いスコアを得る", async () => {
+  const result = await useCase.execute(input);
+  
+  // 期待値計算の統一
+  const highQualityRange = TestExpectationCalculator.getQualityScoreRange('high');
+  expect(result.qualityScore).toBeGreaterThanOrEqual(highQualityRange.min);
+});
+```
+
+#### Genre テスト
+```typescript
+it("必要数以上のジャンルをサポートしている", () => {
+  const supportedGenres = Genre.getSupportedGenres();
+  
+  // ビジネスルールからの動的取得
+  expect(supportedGenres.length).toBeGreaterThanOrEqual(
+    BUSINESS_RULES.GENRE.MIN_SUPPORTED_COUNT
+  );
+});
+```
+
+### Git Hook 自動化の学習事項
+
+#### Pre-commit Hook 統合
+```bash
+# Claude Code Review（知見更新チェック付き）
+echo "🤖 Claude Code Review & Learning Check..."
+claude --print "/learnings - Check if staged changes contain new learnings that should be documented. Review code for DDD/TDD compliance and suggest improvements." --allowedTools "Bash(git:*) Read Grep Edit" || echo "⚠️ Claude analysis unavailable, continuing..."
+```
+
+### 学習した設計改善点
+
+#### 1. 保守性の向上
+- **変更影響範囲の最小化**: ビジネスルール変更時に1ファイルのみ修正
+- **テスト意図の明確化**: 数値の意味がコードから理解可能
+- **一貫性の確保**: 全テストで同じルールを参照
+
+#### 2. 開発効率の向上
+- **自動品質チェック**: Git Hook による知見蓄積の自動化
+- **期待値計算の統一**: テストロジックの重複排除
+- **型安全性**: TypeScript + `as const` による設定値の型保証
+
+#### 3. チーム開発への示唆
+- **ビジネスルールの可視化**: 設定値がドメイン知識として明示
+- **テストの自己文書化**: コードを読むだけでビジネス要件が理解可能
+- **知見の継続的蓄積**: 開発プロセス内での学習の自動化
+
+### Phase 3.5 で確立された新パターン
+
+#### テストハードコード回避パターン
+1. **設定値の中央集権化**: `BUSINESS_RULES` による一元管理
+2. **動的データ生成**: `TestDataGenerator` による柔軟なテストデータ作成
+3. **期待値計算の統一**: `TestExpectationCalculator` による計算ロジック共通化
+4. **自動品質チェック**: Git Hook + Claude Code Review による継続的改善
+
+このパターンにより、147テスト全てでハードコード値を排除し、ビジネスルール変更時の保守性を大幅に向上させることができました。

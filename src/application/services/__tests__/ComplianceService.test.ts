@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { BUSINESS_RULES } from "~/config/business-rules";
+import {
+  TestDataGenerator,
+  TestExpectationCalculator,
+} from "~/test-utils/test-data-generators";
 import {
   type ComplianceCheckInput,
   ComplianceService,
@@ -23,8 +28,10 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("safe");
-      expect(result.score).toBe(100);
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.SAFE
+      );
+      expect(result.score).toBe(BUSINESS_RULES.COMPLIANCE_SCORE.PERFECT_SCORE);
       expect(result.hasIssues()).toBe(false);
       expect(result.isSafeForCommercialUse()).toBe(true);
       expect(result.isSafeForPublicRelease()).toBe(true);
@@ -39,13 +46,17 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("warning");
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.WARNING
+      );
       expect(result.hasIssues()).toBe(true);
       expect(result.hasCriticalIssues()).toBe(true);
 
       const copyrightIssues = result.getIssuesByCategory("copyright");
       expect(copyrightIssues.length).toBeGreaterThan(0);
-      expect(copyrightIssues[0].level).toBe("warning");
+      expect(copyrightIssues[0].level).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.WARNING
+      );
     });
 
     it("アーティスト名を含むコンテンツは注意される", async () => {
@@ -56,12 +67,16 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("caution");
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.CAUTION
+      );
       expect(result.hasIssues()).toBe(true);
 
       const copyrightIssues = result.getIssuesByCategory("copyright");
       expect(copyrightIssues.length).toBeGreaterThan(0);
-      expect(copyrightIssues[0].level).toBe("caution");
+      expect(copyrightIssues[0].level).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.CAUTION
+      );
     });
 
     it("商標を含むコンテンツは注意される", async () => {
@@ -87,7 +102,9 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("warning");
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.WARNING
+      );
       expect(result.isSafeForPublicRelease()).toBe(false);
 
       const inappropriateIssues = result.getIssuesByCategory(
@@ -104,14 +121,19 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("unsafe");
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.UNSAFE
+      );
       expect(result.isSafeForPublicRelease()).toBe(false);
 
       const inappropriateIssues = result.getIssuesByCategory(
         "inappropriate_content"
       );
       expect(
-        inappropriateIssues.some((issue) => issue.level === "unsafe")
+        inappropriateIssues.some(
+          (issue) =>
+            issue.level === BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.UNSAFE
+        )
       ).toBe(true);
     });
 
@@ -123,12 +145,16 @@ describe("ComplianceService", () => {
 
       const result = await complianceService.checkCompliance(input);
 
-      expect(result.overallLevel).toBe("unsafe");
+      expect(result.overallLevel).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.UNSAFE
+      );
       expect(result.isSafeForPublicRelease()).toBe(false);
 
       const privacyIssues = result.getIssuesByCategory("privacy");
       expect(privacyIssues.length).toBeGreaterThan(0);
-      expect(privacyIssues[0].level).toBe("unsafe");
+      expect(privacyIssues[0].level).toBe(
+        BUSINESS_RULES.COMPLIANCE_SCORE.SAFETY_LEVELS.UNSAFE
+      );
     });
 
     it("商用利用制限があるコンテンツは注意される", async () => {
