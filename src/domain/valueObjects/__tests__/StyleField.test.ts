@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { BUSINESS_RULES } from "~/config/business-rules";
+import { TestDataGenerator } from "~/test-utils/test-data-generators";
 import { StyleField } from "../StyleField";
 
 describe("StyleField", () => {
@@ -8,16 +10,17 @@ describe("StyleField", () => {
       expect(style.value).toBe("Rock, energetic, electric guitar");
     });
 
-    it("120文字以内の文字列で作成できる", () => {
-      const longStyle = "A".repeat(120);
+    it("最大文字数以内の文字列で作成できる", () => {
+      const longStyle = TestDataGenerator.generateMaxLengthStyleField();
       const style = StyleField.create(longStyle);
       expect(style.value).toBe(longStyle);
+      expect(style.value.length).toBe(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH);
     });
 
-    it("120文字を超える文字列では作成できない", () => {
-      const tooLongStyle = "A".repeat(121);
+    it("最大文字数を超える文字列では作成できない", () => {
+      const tooLongStyle = TestDataGenerator.generateTooLongStyleField();
       expect(() => StyleField.create(tooLongStyle)).toThrow(
-        "スタイルフィールドは120文字以内で入力してください"
+        `スタイルフィールドは${BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH}文字以内で入力してください`
       );
     });
 
@@ -54,7 +57,9 @@ describe("StyleField", () => {
         "Rock, Progressive Rock, energetic, electric guitar, bass guitar, synthesizer, powerful vocals"
       );
       const optimized = longStyle.optimize();
-      expect(optimized.length).toBeLessThanOrEqual(120);
+      expect(optimized.length).toBeLessThanOrEqual(
+        BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH
+      );
     });
 
     it("優先度に基づいて要素を並び替えできる", () => {
@@ -73,7 +78,11 @@ describe("StyleField", () => {
   describe("バリデーション", () => {
     it("文字数制限をチェックできる", () => {
       const validStyle = StyleField.create("Rock, energetic");
-      const longButValidStyle = StyleField.create(`${"A".repeat(115)}, t`);
+      const longButValidStyle = StyleField.create(
+        TestDataGenerator.generateStyleFieldWithLength(
+          BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH - 10
+        ) + ", test"
+      );
 
       expect(validStyle.isWithinLimit()).toBe(true);
       expect(longButValidStyle.isWithinLimit()).toBe(true);

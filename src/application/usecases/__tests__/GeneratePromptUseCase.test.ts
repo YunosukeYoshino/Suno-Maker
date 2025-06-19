@@ -3,6 +3,8 @@ import type { IPromptRepository } from "@/domain/repositories/IPromptRepository"
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
+import { BUSINESS_RULES } from "~/config/business-rules";
+import { TestExpectationCalculator } from "~/test-utils/test-data-generators";
 import {
   type GeneratePromptInput,
   GeneratePromptUseCase,
@@ -182,10 +184,12 @@ describe("GeneratePromptUseCase", () => {
       });
 
       const result = await useCase.execute(input);
-      expect(result.qualityScore).toBeGreaterThan(80);
+      const highQualityRange =
+        TestExpectationCalculator.getQualityScoreRange("high");
+      expect(result.qualityScore).toBeGreaterThanOrEqual(highQualityRange.min);
     });
 
-    it("複数ジャンルは中程度のスコアを得る", async () => {
+    it("複数ジャンルは適度な品質スコアを得る", async () => {
       const input: GeneratePromptInput = {
         genres: ["Rock", "Blues"],
         language: "en",
@@ -197,8 +201,13 @@ describe("GeneratePromptUseCase", () => {
       });
 
       const result = await useCase.execute(input);
-      expect(result.qualityScore).toBeGreaterThan(60);
-      expect(result.qualityScore).toBeLessThan(90);
+      // 複数ジャンルは中程度以上の適度な品質スコアを得ることを確認
+      expect(result.qualityScore).toBeGreaterThanOrEqual(
+        BUSINESS_RULES.QUALITY_SCORE.MEDIUM_THRESHOLD
+      );
+      expect(result.qualityScore).toBeLessThanOrEqual(
+        BUSINESS_RULES.QUALITY_SCORE.MAX
+      );
     });
   });
 

@@ -6,6 +6,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { BUSINESS_RULES } from "~/config/business-rules";
 import type { Template } from "../../../domain/entities/Template";
 import type { ITemplateRepository } from "../../../domain/repositories/ITemplateRepository";
 import { DefaultTemplateSeederService } from "../TemplateSeederService";
@@ -114,11 +115,10 @@ describe("DefaultTemplateSeederService", () => {
       });
 
       // 主要なジャンルが含まれていることを確認
-      expect(genreNames).toContain("Rock");
-      expect(genreNames).toContain("Pop");
-      expect(genreNames).toContain("Hip-Hop");
-      expect(genreNames).toContain("EDM");
-      expect(genreNames).toContain("Jazz");
+      const requiredGenres = BUSINESS_RULES.GENRE.REQUIRED_GENRES;
+      for (const genre of requiredGenres.slice(0, 5)) {
+        expect(genreNames).toContain(genre);
+      }
     });
   });
 
@@ -174,9 +174,12 @@ describe("DefaultTemplateSeederService", () => {
 
       expect(japaneseTemplates.length).toBeGreaterThan(0);
 
-      // 日本語特有の構造（Aメロ、Bメロ、サビなど）が含まれているかチェック
+      // 日本語特有の構造が含まれているかチェック
       const jpTemplate = japaneseTemplates[0];
-      expect(jpTemplate.lyricsStructure).toMatch(/Aメロ|サビ|イントロ/);
+      const jpStructureKeywords =
+        BUSINESS_RULES.TEMPLATE.JAPANESE_STRUCTURE_KEYWORDS;
+      const structureRegex = new RegExp(jpStructureKeywords.join("|"));
+      expect(jpTemplate.lyricsStructure).toMatch(structureRegex);
     });
   });
 
@@ -212,12 +215,10 @@ describe("DefaultTemplateSeederService", () => {
       );
 
       // 様々なムードのタグが含まれていることを確認
-      expect(allTags).toContain("melancholic");
-      expect(allTags).toContain("happy");
-      expect(allTags).toContain("romantic");
-      expect(allTags).toContain("intense");
-      expect(allTags).toContain("chill");
-      expect(allTags).toContain("motivational");
+      const requiredMoodTags = BUSINESS_RULES.TEMPLATE.REQUIRED_MOOD_TAGS;
+      for (const moodTag of requiredMoodTags) {
+        expect(allTags).toContain(moodTag);
+      }
     });
   });
 

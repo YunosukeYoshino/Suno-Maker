@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { BUSINESS_RULES } from "~/config/business-rules";
 import { Genre } from "../Genre";
 
 describe("Genre", () => {
@@ -72,14 +73,18 @@ describe("Genre", () => {
   });
 
   describe("ジャンル数要件", () => {
-    it("120種類以上のジャンルをサポートしている", () => {
+    it("必要数以上のジャンルをサポートしている", () => {
       const supportedGenres = Genre.getSupportedGenres();
-      expect(supportedGenres.length).toBeGreaterThanOrEqual(120);
+      expect(supportedGenres.length).toBeGreaterThanOrEqual(
+        BUSINESS_RULES.GENRE.MIN_SUPPORTED_COUNT
+      );
     });
 
     it("階層化されたジャンル分類を提供している", () => {
       const mainGenres = Genre.getMainGenres();
-      expect(mainGenres.length).toBeGreaterThan(15);
+      expect(mainGenres.length).toBeGreaterThanOrEqual(
+        BUSINESS_RULES.GENRE.MIN_MAIN_GENRES
+      );
 
       // 各メインジャンルにサブジャンルが存在することを確認
       const hasSubGenres = mainGenres.some(
@@ -90,13 +95,7 @@ describe("Genre", () => {
 
     it("地域別・文化的ジャンルを含んでいる", () => {
       const supportedGenres = Genre.getSupportedGenres();
-      const culturalGenres = [
-        "J-Pop",
-        "K-Pop",
-        "Afrobeat",
-        "Reggaeton",
-        "Flamenco",
-      ] as const;
+      const culturalGenres = BUSINESS_RULES.GENRE.CULTURAL_GENRES;
 
       for (const genre of culturalGenres) {
         expect(supportedGenres.includes(genre)).toBe(true);
@@ -105,13 +104,7 @@ describe("Genre", () => {
 
     it("モダンなジャンルを含んでいる", () => {
       const supportedGenres = Genre.getSupportedGenres();
-      const modernGenres = [
-        "Future Bass",
-        "Phonk",
-        "Drill",
-        "Hyperpop",
-        "Vaporwave",
-      ] as const;
+      const modernGenres = BUSINESS_RULES.GENRE.MODERN_GENRES;
 
       for (const genre of modernGenres) {
         expect(supportedGenres.includes(genre)).toBe(true);
