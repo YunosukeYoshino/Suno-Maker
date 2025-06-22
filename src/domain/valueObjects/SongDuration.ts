@@ -14,6 +14,11 @@ export class SongDuration {
     Object.freeze(this);
   }
 
+  // Standardized factory method
+  static create(seconds: number): SongDuration {
+    return SongDuration.fromSeconds(seconds);
+  }
+
   static fromSeconds(seconds: number): SongDuration {
     return new SongDuration(Math.round(seconds));
   }

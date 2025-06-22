@@ -93,7 +93,10 @@ export class EntityName {
   private constructor(
     private readonly id: EntityId,
     private property: PropertyValueObject
-  ) {}
+  ) {
+    Object.freeze(this);
+    Object.freeze(property);
+  }
 
   static create(id: EntityId, property: PropertyValueObject): EntityName {
     return new EntityName(id, property);
@@ -116,7 +119,9 @@ export class EntityName {
 
 ```typescript
 export class ValueObjectName {
-  private constructor(private readonly value: string) {}
+  private constructor(private readonly value: string) {
+    Object.freeze(this);
+  }
 
   static create(value: string): ValueObjectName {
     if (!this.isValid(value)) {

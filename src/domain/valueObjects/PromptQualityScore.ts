@@ -24,6 +24,25 @@ export class PromptQualityScore {
     Object.freeze(this);
   }
 
+  // Standardized factory method
+  static create(
+    genre: Genre,
+    styleField: StyleField,
+    language: Language,
+    title: string,
+    description: string,
+    tags: readonly string[]
+  ): PromptQualityScore {
+    return PromptQualityScore.calculate(
+      genre,
+      styleField,
+      language,
+      title,
+      description,
+      tags
+    );
+  }
+
   static calculate(
     genre: Genre,
     styleField: StyleField,

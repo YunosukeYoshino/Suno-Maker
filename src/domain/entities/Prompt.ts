@@ -293,7 +293,7 @@ export class Prompt {
   }
 
   calculateQualityScore(): QualityScore {
-    const qualityScore = PromptQualityScore.calculate(
+    const qualityScore = PromptQualityScore.create(
       this.genre,
       this.styleField,
       this.language,

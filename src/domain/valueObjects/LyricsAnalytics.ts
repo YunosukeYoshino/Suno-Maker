@@ -43,6 +43,11 @@ export class LyricsAnalytics {
     Object.freeze(this.cachedStats);
   }
 
+  // Standardized factory method
+  static create(content: string, language: Language): LyricsAnalytics {
+    return LyricsAnalytics.analyze(content, language);
+  }
+
   static analyze(content: string, language: Language): LyricsAnalytics {
     const sections = LyricsAnalytics.extractSections(content);
     const stats = LyricsAnalytics.calculateStats(content, sections);

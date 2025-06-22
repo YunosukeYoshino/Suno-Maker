@@ -186,7 +186,7 @@ export class Lyrics {
   }
 
   private getAnalytics(): LyricsAnalytics {
-    return LyricsAnalytics.analyze(this.content, this.language);
+    return LyricsAnalytics.create(this.content, this.language);
   }
 
   // バリデーション
