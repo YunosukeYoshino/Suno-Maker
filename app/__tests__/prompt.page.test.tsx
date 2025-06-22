@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PromptPage from "../prompt/page";
 
+// Use existing global mock from __mocks__/next/navigation.ts
+
 // Mock presentation components
 interface GenreSelectorProps {
   selectedGenres: string[];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TestExpectationCalculator } from "~/test-utils/test-data-generators";
+import { calculateExpectedSuccessExampleScore } from "~/test-utils/test-data-generators";
 import { Genre } from "../../valueObjects/Genre";
 import { Language } from "../../valueObjects/Language";
 import { StyleField } from "../../valueObjects/StyleField";
@@ -277,12 +277,11 @@ describe("SuccessExample", () => {
       const example = SuccessExample.create(validProps);
 
       const score = example.calculateQualityScore();
-      const expectedScore =
-        TestExpectationCalculator.calculateExpectedSuccessExampleScore(
-          validProps.rating,
-          validProps.playCount,
-          validProps.likeCount
-        );
+      const expectedScore = calculateExpectedSuccessExampleScore(
+        validProps.rating,
+        validProps.playCount,
+        validProps.likeCount
+      );
 
       expect(score).toBe(expectedScore);
     });
@@ -297,12 +296,11 @@ describe("SuccessExample", () => {
       const example = SuccessExample.create(lowStatsProps);
 
       const score = example.calculateQualityScore();
-      const expectedScore =
-        TestExpectationCalculator.calculateExpectedSuccessExampleScore(
-          lowStatsProps.rating,
-          lowStatsProps.playCount,
-          lowStatsProps.likeCount
-        );
+      const expectedScore = calculateExpectedSuccessExampleScore(
+        lowStatsProps.rating,
+        lowStatsProps.playCount,
+        lowStatsProps.likeCount
+      );
 
       expect(score).toBeCloseTo(expectedScore, 1);
     });

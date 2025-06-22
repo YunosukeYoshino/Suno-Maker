@@ -2,18 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LyricsPage from "../lyrics/page";
 
-// Mock Next.js router
-const mockPush = vi.fn();
-const mockRouter = {
-  push: mockPush,
-  back: vi.fn(),
-  forward: vi.fn(),
-  refresh: vi.fn(),
-};
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => mockRouter,
-}));
+// Use existing global mock from __mocks__/next/navigation.ts
 
 describe("LyricsPage", () => {
   beforeEach(() => {
