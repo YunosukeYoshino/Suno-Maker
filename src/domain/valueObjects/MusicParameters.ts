@@ -1,3 +1,34 @@
+export type EnergyKeyword =
+  | "high energy"
+  | "intense"
+  | "energetic"
+  | "moderate"
+  | "calm"
+  | "relaxed";
+export type ComplexityKeyword =
+  | "complex"
+  | "intricate"
+  | "layered"
+  | "simple"
+  | "minimalist";
+export type TempoKeyword =
+  | "fast tempo"
+  | "driving"
+  | "upbeat"
+  | "slow tempo"
+  | "ballad";
+export type EmotionalKeyword =
+  | "emotionally intense"
+  | "passionate"
+  | "expressive"
+  | "subtle"
+  | "understated";
+export type StyleKeyword =
+  | EnergyKeyword
+  | ComplexityKeyword
+  | TempoKeyword
+  | EmotionalKeyword;
+
 export interface MusicParameters {
   energy: number; // 1-10 (低エネルギーから高エネルギー)
   complexity: number; // 1-10 (シンプルから複雑)
@@ -39,8 +70,8 @@ export function validateMusicParameters(
  */
 export function musicParametersToStyleKeywords(
   parameters: Partial<MusicParameters>
-): string[] {
-  const keywords: string[] = [];
+): StyleKeyword[] {
+  const keywords: StyleKeyword[] = [];
 
   const { energy, complexity, tempo, emotional_intensity } = parameters;
 

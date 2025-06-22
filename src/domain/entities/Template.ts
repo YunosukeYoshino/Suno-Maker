@@ -1,5 +1,5 @@
 import { generateUUID } from "~/utils/generateUUID";
-import { Genre } from "../valueObjects/Genre";
+import { Genre, type GenreValue } from "../valueObjects/Genre";
 import { Language } from "../valueObjects/Language";
 import { StyleField } from "../valueObjects/StyleField";
 import { Prompt } from "./Prompt";
@@ -299,19 +299,20 @@ export class Template {
     };
   }
 
+  private static parseGenreFromJSON(genreStr: string): GenreValue {
+    if (genreStr.includes(",")) {
+      return genreStr.split(",") as GenreValue;
+    }
+    return genreStr as GenreValue;
+  }
+
   // JSON deserialization
   static fromJSON(json: TemplateJSON): Template {
     return Template.create({
       id: json.id,
       name: json.name,
       description: json.description,
-      genre: Genre.create(
-        json.genre.includes(",")
-          ? // biome-ignore lint/suspicious/noExplicitAny: Genre.create() type handling for JSON deserialization
-            (json.genre.split(",") as any)
-          : // biome-ignore lint/suspicious/noExplicitAny: Genre.create() type handling for JSON deserialization
-            (json.genre as any)
-      ),
+      genre: Genre.create(Template.parseGenreFromJSON(json.genre)),
       language: Language.create(json.language),
       styleField: StyleField.create(json.styleField),
       lyricsStructure: json.lyricsStructure,

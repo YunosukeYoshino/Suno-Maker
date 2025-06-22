@@ -366,8 +366,16 @@ export class SuccessExampleLibraryUseCase {
       likeCount: 0,
       tags: input.tags || [],
       metadata: {
-        ...input.metadata,
+        duration: input.metadata?.duration,
+        tempo: input.metadata?.tempo,
+        key: input.metadata?.key as
+          | import("~/domain/entities/SuccessExample").MusicalKey
+          | undefined,
+        mood: input.metadata?.mood as
+          | import("~/domain/entities/SuccessExample").MoodCategory[]
+          | undefined,
         createdAt: new Date(),
+        verifiedAt: undefined,
       },
     });
 

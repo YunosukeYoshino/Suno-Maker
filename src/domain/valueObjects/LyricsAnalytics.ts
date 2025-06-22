@@ -1,7 +1,32 @@
 import type { Language } from "./Language";
 
+export type LyricSectionType =
+  | "Intro"
+  | "Verse"
+  | "Pre-Chorus"
+  | "Chorus"
+  | "Bridge"
+  | "Hook"
+  | "Outro"
+  | "Big Finish"
+  | "Guitar Solo"
+  | "Piano Interlude"
+  | "Drum Break"
+  | "Whispered Verse"
+  | "Powerful Chorus"
+  | "Spoken Word"
+  | "Unstructured";
+
+export type LanguagePattern =
+  | "hiragana-dominant"
+  | "katakana-heavy"
+  | "kanji-heavy"
+  | "balanced"
+  | "mixed"
+  | "alphabetic";
+
 export interface LyricSection {
-  type: string;
+  type: LyricSectionType;
   content: string;
   lineNumber: number;
 }
@@ -72,8 +97,13 @@ export class LyricsAnalytics {
         }
 
         // 新しいセクションを開始
+        const sectionType = tagMatch[1] as LyricSectionType;
         currentSection = {
-          type: tagMatch[1],
+          type: STRUCTURE_TAGS.includes(
+            sectionType as (typeof STRUCTURE_TAGS)[number]
+          )
+            ? sectionType
+            : "Unstructured",
           content: "",
           lineNumber: i + 1,
         };
@@ -152,7 +182,7 @@ export class LyricsAnalytics {
     return hasVerse && hasChorus;
   }
 
-  getDominantLanguagePattern(): string {
+  getDominantLanguagePattern(): LanguagePattern {
     if (this.language.value === "ja") {
       // 日本語の特徴を分析
       const hiraganaCount = (this.content.match(/[\u3040-\u309F]/g) || [])

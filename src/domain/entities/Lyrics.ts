@@ -31,10 +31,26 @@ const LyricsSchema = z.object({
 export type LyricsProps = z.infer<typeof LyricsSchema>;
 export type { LyricSection, LyricsStats };
 
+export type LyricsError =
+  | { type: "CONTENT_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "CONTENT_EMPTY"; minLength: number }
+  | { type: "TITLE_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "COMPLEX_KANJI_SEQUENCE"; position: number; text: string };
+
+export type LyricsWarning =
+  | {
+      type: "LINE_TOO_LONG";
+      maxLength: number;
+      lineNumber: number;
+      currentLength: number;
+    }
+  | { type: "NO_STRUCTURE_TAGS"; suggestion: string[] }
+  | { type: "COMPLEX_KANJI_DETECTED"; suggestion: string };
+
 export interface LyricsValidationResult {
   isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: LyricsError[];
+  warnings: LyricsWarning[];
 }
 
 export interface LyricsJSON {
@@ -191,36 +207,68 @@ export class Lyrics {
 
   // バリデーション
   validate(): LyricsValidationResult {
-    const errors: string[] = [];
-    const warnings: string[] = [];
+    const errors: LyricsError[] = [];
+    const warnings: LyricsWarning[] = [];
     const stats = this.getStats();
 
-    // 文字数チェック
-    if (stats.totalCharacters > 3000) {
-      errors.push("歌詞が3000文字を超えています");
+    // コンテンツの基本チェック
+    if (this.content.length === 0) {
+      errors.push({
+        type: "CONTENT_EMPTY",
+        minLength: 1,
+      });
+    } else if (stats.totalCharacters > 3000) {
+      errors.push({
+        type: "CONTENT_TOO_LONG",
+        maxLength: 3000,
+        currentLength: stats.totalCharacters,
+      });
+    }
+
+    // タイトルの長さチェック
+    if (this.title.length > 100) {
+      errors.push({
+        type: "TITLE_TOO_LONG",
+        maxLength: 100,
+        currentLength: this.title.length,
+      });
     }
 
     // 構造タグのチェック
     if (!stats.hasStructureTags) {
-      warnings.push("Verse や Chorus などの構造タグの使用を推奨します");
+      warnings.push({
+        type: "NO_STRUCTURE_TAGS",
+        suggestion: ["[Verse]", "[Chorus]", "[Bridge]"],
+      });
     }
 
     // 言語特有のバリデーション
     if (this.language.value === "ja") {
       const complexKanjiPattern = /[一-龯]{3,}/g;
-      if (complexKanjiPattern.test(this.content)) {
-        warnings.push(
-          "複雑な漢字の連続使用は発音の問題を引き起こす可能性があります"
-        );
+      const match: RegExpExecArray | null = complexKanjiPattern.exec(
+        this.content
+      );
+      if (match !== null) {
+        warnings.push({
+          type: "COMPLEX_KANJI_DETECTED",
+          suggestion:
+            "複雑な漢字の連続使用は発音の問題を引き起こす可能性があります",
+        });
       }
     }
 
     // 行の長さチェック
-    if (stats.averageLineLength > 50) {
-      warnings.push(
-        "行が長すぎる可能性があります。短い行に分割することを推奨します"
-      );
-    }
+    const lines = this.content.split("\n");
+    lines.forEach((line, index) => {
+      if (line.length > 50) {
+        warnings.push({
+          type: "LINE_TOO_LONG",
+          maxLength: 50,
+          lineNumber: index + 1,
+          currentLength: line.length,
+        });
+      }
+    });
 
     return {
       isValid: errors.length === 0,

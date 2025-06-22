@@ -30,6 +30,10 @@ bun run typecheck # TypeScript型チェック
 bun test          # 全テスト実行
 bun test:watch    # テストウォッチモード
 bun test:ui       # テストUI表示
+bun test:e2e      # E2Eテスト（Playwright）
+
+# 単一ファイルのテスト実行
+bun test src/domain/entities/__tests__/Prompt.test.ts
 
 # shadcn/ui コンポーネント追加
 bun x shadcn@latest add [component-name]
@@ -203,7 +207,7 @@ describe("機能名", () => {
 
 - TypeScript 厳密モード 100%準拠（`any`禁止）
 - Biome 品質チェック通過
-- 全テスト通過（現在 147 テスト）
+- 全テスト通過（現在 356 テスト合格、一部修正中）
 - パスエイリアス活用
 - Zod バリデーション使用
 

@@ -1,7 +1,47 @@
 import { generateUUID } from "../../utils/generateUUID";
-import { Genre } from "../valueObjects/Genre";
+import { Genre, type GenreValue } from "../valueObjects/Genre";
 import { Language } from "../valueObjects/Language";
 import { StyleField } from "../valueObjects/StyleField";
+
+export type MusicalKey =
+  | "C"
+  | "C#"
+  | "D"
+  | "D#"
+  | "E"
+  | "F"
+  | "F#"
+  | "G"
+  | "G#"
+  | "A"
+  | "A#"
+  | "B"
+  | "Cm"
+  | "C#m"
+  | "Dm"
+  | "D#m"
+  | "Em"
+  | "Fm"
+  | "F#m"
+  | "Gm"
+  | "G#m"
+  | "Am"
+  | "A#m"
+  | "Bm";
+
+export type MoodCategory =
+  | "energetic"
+  | "calm"
+  | "dark"
+  | "bright"
+  | "melancholic"
+  | "uplifting"
+  | "aggressive"
+  | "peaceful"
+  | "intense"
+  | "relaxed"
+  | "mysterious"
+  | "joyful";
 
 export interface SuccessExampleProps {
   title: string;
@@ -20,8 +60,8 @@ export interface SuccessExampleProps {
   metadata: {
     duration?: number; // seconds
     tempo?: number; // BPM
-    key?: string; // Musical key
-    mood?: string[];
+    key?: MusicalKey; // Musical key
+    mood?: MoodCategory[];
     createdAt: Date;
     verifiedAt?: Date;
   };
@@ -487,6 +527,13 @@ export class SuccessExample {
     };
   }
 
+  private static parseGenreFromJSON(genreStr: string): GenreValue {
+    if (genreStr.includes(",")) {
+      return genreStr.split(",") as GenreValue;
+    }
+    return genreStr as GenreValue;
+  }
+
   // JSON deserialization
   static fromJSON(json: SuccessExampleJSON): SuccessExample {
     return SuccessExample.create({
@@ -495,13 +542,7 @@ export class SuccessExample {
       description: json.description,
       prompt: json.prompt,
       lyrics: json.lyrics,
-      genre: Genre.create(
-        json.genre.includes(",")
-          ? // biome-ignore lint/suspicious/noExplicitAny: Genre.create() type handling for JSON deserialization
-            (json.genre.split(",") as any)
-          : // biome-ignore lint/suspicious/noExplicitAny: Genre.create() type handling for JSON deserialization
-            (json.genre as any)
-      ),
+      genre: Genre.create(SuccessExample.parseGenreFromJSON(json.genre)),
       language: Language.create(json.language),
       styleField: StyleField.create(json.styleField),
       sunoUrl: json.sunoUrl,
@@ -513,8 +554,8 @@ export class SuccessExample {
       metadata: {
         duration: json.metadata.duration,
         tempo: json.metadata.tempo,
-        key: json.metadata.key,
-        mood: json.metadata.mood,
+        key: json.metadata.key as MusicalKey | undefined,
+        mood: json.metadata.mood as MoodCategory[] | undefined,
         createdAt: new Date(json.metadata.createdAt),
         verifiedAt: json.metadata.verifiedAt
           ? new Date(json.metadata.verifiedAt)

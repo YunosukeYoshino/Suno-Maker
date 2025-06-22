@@ -47,10 +47,29 @@ export interface OptimizedPrompt {
   qualityScore: number;
 }
 
+export type ValidationError =
+  | { type: "STYLE_FIELD_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "TITLE_TOO_SHORT"; minLength: number; currentLength: number }
+  | { type: "TITLE_TOO_LONG"; maxLength: number; currentLength: number }
+  | {
+      type: "INVALID_GENRE_LANGUAGE_COMBINATION";
+      genre: string;
+      language: string;
+    };
+
+export type ValidationWarning =
+  | {
+      type: "TITLE_TOO_SHORT_FOR_QUALITY";
+      recommended: number;
+      current: number;
+    }
+  | { type: "GENRE_LANGUAGE_MISMATCH"; suggestion: string }
+  | { type: "STYLE_FIELD_COMPLEXITY_HIGH"; score: number };
+
 export interface ValidationResult {
   isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
 }
 
 export interface QualityScore {
@@ -265,24 +284,60 @@ export class Prompt {
 
   // 検証
   validate(): ValidationResult {
-    const errors: string[] = [];
-    const warnings: string[] = [];
+    const errors: ValidationError[] = [];
+    const warnings: ValidationWarning[] = [];
 
     // スタイルフィールドの検証
-    const styleIssues = this.styleField.getValidationIssues();
-    errors.push(...styleIssues);
+    const styleStats = this.styleField.getStats();
+    if (styleStats.length > 120) {
+      errors.push({
+        type: "STYLE_FIELD_TOO_LONG",
+        maxLength: 120,
+        currentLength: styleStats.length,
+      });
+    }
+
+    // タイトルの検証
+    if (this.title.length < 1) {
+      errors.push({
+        type: "TITLE_TOO_SHORT",
+        minLength: 1,
+        currentLength: this.title.length,
+      });
+    } else if (this.title.length > 100) {
+      errors.push({
+        type: "TITLE_TOO_LONG",
+        maxLength: 100,
+        currentLength: this.title.length,
+      });
+    }
 
     // ジャンルと言語の組み合わせ検証
     if (
       this.language.value === "ja" &&
       !this.genre.value.toString().includes("J-")
     ) {
-      warnings.push("日本語歌詞にはJ-PopやJ-Rockジャンルの使用を推奨します");
+      warnings.push({
+        type: "GENRE_LANGUAGE_MISMATCH",
+        suggestion: "日本語歌詞にはJ-PopやJ-Rockジャンルの使用を推奨します",
+      });
     }
 
-    // タイトルの検証
+    // タイトルの品質検証
     if (this.title.length < 5) {
-      warnings.push("より具体的なタイトルの使用を推奨します");
+      warnings.push({
+        type: "TITLE_TOO_SHORT_FOR_QUALITY",
+        recommended: 5,
+        current: this.title.length,
+      });
+    }
+
+    // スタイルフィールドの複雑度チェック（要素数ベース）
+    if (styleStats.elementCount > 8) {
+      warnings.push({
+        type: "STYLE_FIELD_COMPLEXITY_HIGH",
+        score: styleStats.elementCount,
+      });
     }
 
     return {

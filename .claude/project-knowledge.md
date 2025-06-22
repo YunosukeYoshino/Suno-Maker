@@ -742,3 +742,130 @@ const highQualityRange = getQualityScoreRange("high");
 - **保守性**: ビジネスルール変更への適応性
 
 この改善により、テストコードの品質と保守性が向上し、将来的な機能拡張にも対応しやすくなりました。
+
+## SOLID原則アーキテクチャ改善（Phase 3.6完了）
+
+### 構造化エラーハンドリングパターン
+
+#### Discriminated Union による型安全なエラー処理
+```typescript
+// ❌ 改善前: 文字列配列による曖昧なエラー情報
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+// ✅ 改善後: 構造化されたエラーオブジェクト
+export type ValidationError =
+  | { type: "STYLE_FIELD_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "TITLE_TOO_SHORT"; minLength: number; currentLength: number }
+  | { type: "INVALID_GENRE_LANGUAGE_COMBINATION"; genre: string; language: string };
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+}
+```
+
+#### エラー処理の型安全性向上の利点
+1. **コンパイル時の型チェック**: 不正なエラー処理を事前に検出
+2. **詳細情報の構造化**: エラー種別に応じた適切な情報提供
+3. **エラーハンドリングの統一**: 同一パターンによる一貫した処理
+4. **IDE支援の向上**: 型補完によるエラー処理コードの記述支援
+
+### 音楽ドメイン型定義の厳密化
+
+#### Union Type による制約の明確化
+```typescript
+export type MusicalKey =
+  | "C" | "C#" | "D" | "D#" | "E" | "F" | "F#" | "G" | "G#" | "A" | "A#" | "B"
+  | "Cm" | "C#m" | "Dm" | "D#m" | "Em" | "Fm" | "F#m" | "Gm" | "G#m" | "Am" | "A#m" | "Bm";
+
+export type MoodCategory =
+  | "energetic" | "calm" | "dark" | "bright" | "melancholic" | "uplifting"
+  | "aggressive" | "peaceful" | "intense" | "relaxed" | "mysterious" | "joyful";
+```
+
+#### ドメイン特化型の設計原則
+1. **ビジネスルールの型レベル表現**: 不正値の型レベル排除
+2. **可読性の向上**: 型名からドメイン知識が理解可能
+3. **保守性**: 新しい値の追加時に一箇所での管理
+4. **型安全性**: ランタイムエラーの事前防止
+
+### JSON Deserialization の型安全パターン
+
+#### 共通化メソッドによる重複解消
+```typescript
+// DRYパターン: 共通ロジックの抽出
+private static parseGenreFromJSON(genreStr: string): GenreValue {
+  if (genreStr.includes(",")) {
+    return genreStr.split(",") as GenreValue;
+  }
+  return genreStr as GenreValue;
+}
+
+// biome-ignore コメント除去による型安全性確保
+genre: Genre.create(SuccessExample.parseGenreFromJSON(json.genre)),
+```
+
+#### 型安全なデシリアライゼーションの効果
+1. **any型の完全排除**: 型アサーションによる安全な変換
+2. **重複コードの削減**: 共通メソッドによるDRY原則遵守
+3. **Lintエラーの解消**: 不要なignoreコメント除去
+4. **メンテナンス性**: 変換ロジックの一元管理
+
+### バリデーション強化パターン
+
+#### 詳細情報付きバリデーション
+```typescript
+// 改善前: 単純な文字列メッセージ
+if (this.title.length < 5) {
+  warnings.push("より具体的なタイトルの使用を推奨します");
+}
+
+// 改善後: 構造化された警告オブジェクト
+if (this.title.length < 5) {
+  warnings.push({
+    type: "TITLE_TOO_SHORT_FOR_QUALITY",
+    recommended: 5,
+    current: this.title.length,
+  });
+}
+```
+
+#### 行レベル詳細エラー情報
+```typescript
+// 行ごとの詳細な検証
+const lines = this.content.split("\n");
+lines.forEach((line, index) => {
+  if (line.length > 50) {
+    warnings.push({
+      type: "LINE_TOO_LONG",
+      maxLength: 50,
+      lineNumber: index + 1,
+      currentLength: line.length,
+    });
+  }
+});
+```
+
+### 型駆動開発のベストプラクティス
+
+#### 1. Type-First アプローチ
+- エラー型定義から実装を駆動
+- ドメイン制約の型レベル表現
+- コンパイル時検証による品質確保
+
+#### 2. 構造化データの活用
+- Primitive Obsession の回避
+- 意味のある型による表現力向上
+- ビジネスロジックの型による文書化
+
+#### 3. 段階的型安全性向上
+- 文字列から構造化オブジェクトへの移行
+- any型の段階的排除
+- 型アサーションの適切な使用
+
+この改善により、型安全性が大幅に向上し、エラーハンドリングの品質と保守性が向上しました。
