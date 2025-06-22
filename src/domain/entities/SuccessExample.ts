@@ -82,6 +82,10 @@ export class SuccessExample {
     this._metadata = { ...props.metadata };
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
+
+    Object.freeze(this);
+    Object.freeze(this._tags);
+    Object.freeze(this._metadata);
   }
 
   static create(props: SuccessExampleProps): SuccessExample {

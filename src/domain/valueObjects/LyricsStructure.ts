@@ -45,7 +45,13 @@ export class LyricsStructure {
   private constructor(
     public readonly sections: LyricsSection[],
     public readonly template?: StructureTemplate
-  ) {}
+  ) {
+    Object.freeze(this);
+    Object.freeze(this.sections);
+    if (this.template) {
+      Object.freeze(this.template);
+    }
+  }
 
   static create(
     sections: LyricsSection[],

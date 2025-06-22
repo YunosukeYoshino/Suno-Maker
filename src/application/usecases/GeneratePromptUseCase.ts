@@ -3,7 +3,8 @@ import type { IPromptRepository } from "@/domain/repositories/IPromptRepository"
 import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { StyleField } from "@/domain/valueObjects/StyleField";
-import type { MusicParameters } from "@/presentation/components/ParameterSliders";
+import type { MusicParameters } from "~/domain/valueObjects/MusicParameters";
+import { musicParametersToStyleKeywords } from "~/domain/valueObjects/MusicParameters";
 
 export interface GeneratePromptInput {
   genres: string[]; // Will be validated at runtime by Genre.create
@@ -118,54 +119,8 @@ export class GeneratePromptUseCase {
 
     // パラメータベースのキーワード追加
     if (input.parameters) {
-      const { energy, complexity, tempo, emotional_intensity } =
-        input.parameters;
-
-      // エネルギーレベルを追加
-      if (energy !== undefined) {
-        if (energy >= 8) {
-          parts.push("high energy", "intense");
-        } else if (energy >= 6) {
-          parts.push("energetic");
-        } else if (energy >= 4) {
-          parts.push("moderate");
-        } else {
-          parts.push("calm", "relaxed");
-        }
-      }
-
-      // 複雑さレベルを追加
-      if (complexity !== undefined) {
-        if (complexity >= 8) {
-          parts.push("complex", "intricate");
-        } else if (complexity >= 6) {
-          parts.push("layered");
-        } else if (complexity <= 3) {
-          parts.push("simple", "minimalist");
-        }
-      }
-
-      // テンポを追加
-      if (tempo !== undefined) {
-        if (tempo >= 8) {
-          parts.push("fast tempo", "driving");
-        } else if (tempo >= 6) {
-          parts.push("upbeat");
-        } else if (tempo <= 3) {
-          parts.push("slow tempo", "ballad");
-        }
-      }
-
-      // 感情的強度を追加
-      if (emotional_intensity !== undefined) {
-        if (emotional_intensity >= 8) {
-          parts.push("emotionally intense", "passionate");
-        } else if (emotional_intensity >= 6) {
-          parts.push("expressive");
-        } else if (emotional_intensity <= 3) {
-          parts.push("subtle", "understated");
-        }
-      }
+      const keywords = musicParametersToStyleKeywords(input.parameters);
+      parts.push(...keywords);
     }
 
     // カスタムスタイルを追加

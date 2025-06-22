@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { generateUUID } from "~/utils/generateUUID";
 import { Genre } from "../valueObjects/Genre";
 import { Language } from "../valueObjects/Language";
+import { PromptQualityScore } from "../valueObjects/PromptQualityScore";
 import { StyleField } from "../valueObjects/StyleField";
 
 const PromptSchema = z.object({
@@ -86,7 +88,10 @@ export interface PromptJSON {
 }
 
 export class Prompt {
-  private constructor(private readonly props: PromptProps) {}
+  private constructor(private readonly props: PromptProps) {
+    Object.freeze(this);
+    Object.freeze(props);
+  }
 
   static create(
     input: Partial<PromptProps> & {
@@ -98,9 +103,7 @@ export class Prompt {
   ): Prompt {
     const now = new Date();
     const props: PromptProps = {
-      id:
-        input.id ||
-        `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: input.id || generateUUID(),
       title: input.title,
       genre: input.genre,
       language: input.language,
@@ -290,46 +293,16 @@ export class Prompt {
   }
 
   calculateQualityScore(): QualityScore {
-    const styleStats = this.styleField.getStats();
-
-    // ジャンル明確度 (0-100)
-    const genreClarity = this.genre.value ? 100 : 0;
-
-    // スタイル最適化度 (0-100)
-    let styleOptimization = 50;
-    if (styleStats.elementCount >= 2 && styleStats.elementCount <= 6) {
-      styleOptimization += 30;
-    }
-    if (styleStats.length <= 120) {
-      styleOptimization += 20;
-    }
-    styleOptimization = Math.min(100, styleOptimization);
-
-    // 言語最適化度 (0-100)
-    const languageOptimization = this.language.isHighQuality() ? 100 : 60;
-
-    // 完成度 (0-100)
-    let completeness = 40;
-    if (this.description.length > 0) completeness += 20;
-    if (this.tags.length > 0) completeness += 20;
-    if (this.title.length >= 5) completeness += 20;
-
-    const overall = Math.round(
-      genreClarity * 0.3 +
-        styleOptimization * 0.4 +
-        languageOptimization * 0.2 +
-        completeness * 0.1
+    const qualityScore = PromptQualityScore.calculate(
+      this.genre,
+      this.styleField,
+      this.language,
+      this.title,
+      this.description,
+      this.tags
     );
 
-    return {
-      overall,
-      breakdown: {
-        genreClarity,
-        styleOptimization,
-        languageOptimization,
-        completeness,
-      },
-    };
+    return qualityScore.toQualityScore();
   }
 
   // 使用統計

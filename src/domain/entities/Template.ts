@@ -62,6 +62,9 @@ export class Template {
     this._usageCount = props.usageCount;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
+
+    Object.freeze(this);
+    Object.freeze(this._tags);
   }
 
   static create(props: TemplateProps): Template {

@@ -38,8 +38,10 @@ describe("Lyrics", () => {
       propsWithoutId.id = undefined;
 
       const lyrics = Lyrics.create(propsWithoutId);
-      expect(lyrics.id).toMatch(/^lyrics-/);
-      expect(lyrics.id.length).toBeGreaterThan(10);
+      expect(lyrics.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
+      expect(lyrics.id.length).toBe(36);
     });
 
     it("日本語の歌詞を作成できる", () => {

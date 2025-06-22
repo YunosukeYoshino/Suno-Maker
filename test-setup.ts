@@ -1,10 +1,10 @@
-import { beforeEach, expect } from "vitest";
+import { beforeEach, expect, vi } from "vitest";
 
-// Export expect for jest-dom
+// Export expect and vi for jest-dom and mocking
 (globalThis as typeof globalThis & { expect: typeof expect }).expect = expect;
+(globalThis as typeof globalThis & { vi: typeof vi }).vi = vi;
 
 // Setup DOM environment for bun test
-// @ts-ignore - jsdom types not needed for this setup
 import { JSDOM } from "jsdom";
 
 if (typeof document === "undefined") {
@@ -15,7 +15,7 @@ if (typeof document === "undefined") {
   });
 
   // Type assertion to properly assign window globals
-  const win = dom.window as typeof window;
+  const win = dom.window as unknown as typeof window;
   Object.assign(global, {
     document: win.document,
     window: win,

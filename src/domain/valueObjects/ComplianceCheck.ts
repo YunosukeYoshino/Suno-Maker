@@ -38,6 +38,10 @@ export class ComplianceCheck {
     this._score = props.score;
     this._recommendations = [...props.recommendations];
     this._checkedAt = props.checkedAt;
+
+    Object.freeze(this);
+    Object.freeze(this._issues);
+    Object.freeze(this._recommendations);
   }
 
   static create(props: ComplianceCheckProps): ComplianceCheck {

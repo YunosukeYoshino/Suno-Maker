@@ -254,7 +254,12 @@ const GenreSchema = z.union([
 export type GenreValue = z.infer<typeof GenreSchema>;
 
 export class Genre {
-  private constructor(private readonly _value: GenreValue) {}
+  private constructor(private readonly _value: GenreValue) {
+    Object.freeze(this);
+    if (Array.isArray(this._value)) {
+      Object.freeze(this._value);
+    }
+  }
 
   static create(value: GenreValue): Genre {
     // 空配列のチェック
