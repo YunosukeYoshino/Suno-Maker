@@ -297,6 +297,24 @@ export function ComponentName({ ...props }: ComponentNameProps) {
 }
 ```
 
+### テスト最適化パターン（新学習事項）
+```typescript
+// ❌ 過剰なモック
+import { Mock } from "vitest";
+const mockPush = vi.fn();
+const mockRouter = { push: mockPush, back: vi.fn(), forward: vi.fn() };
+vi.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
+
+// ✅ 必要最小限のモック
+// 実際に使用するコンポーネントのみモック化
+
+// ❌ 複雑な文字列結合
+TestDataGenerator.generateStyleFieldWithLength(MAX_LENGTH - 10) + ", test"
+
+// ✅ テンプレートリテラル
+`${TestDataGenerator.generateStyleFieldWithLength(MAX_LENGTH - 10)}, test`
+```
+
 ### テストテンプレート（Phase 3 完成版）
 ```typescript
 // __tests__/[TestTarget].test.ts
