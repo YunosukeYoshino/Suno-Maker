@@ -79,9 +79,9 @@ describe("StyleField", () => {
     it("文字数制限をチェックできる", () => {
       const validStyle = StyleField.create("Rock, energetic");
       const longButValidStyle = StyleField.create(
-        TestDataGenerator.generateStyleFieldWithLength(
+        `${TestDataGenerator.generateStyleFieldWithLength(
           BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH - 10
-        ) + ", test"
+        )}, test`
       );
 
       expect(validStyle.isWithinLimit()).toBe(true);
