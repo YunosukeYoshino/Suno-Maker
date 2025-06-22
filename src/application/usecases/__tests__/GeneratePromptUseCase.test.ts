@@ -4,7 +4,7 @@ import { Genre } from "@/domain/valueObjects/Genre";
 import { Language } from "@/domain/valueObjects/Language";
 import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
 import { BUSINESS_RULES } from "~/config/business-rules";
-import { TestExpectationCalculator } from "~/test-utils/test-data-generators";
+import { getQualityScoreRange } from "~/test-utils/test-data-generators";
 import {
   type GeneratePromptInput,
   GeneratePromptUseCase,
@@ -184,8 +184,7 @@ describe("GeneratePromptUseCase", () => {
       });
 
       const result = await useCase.execute(input);
-      const highQualityRange =
-        TestExpectationCalculator.getQualityScoreRange("high");
+      const highQualityRange = getQualityScoreRange("high");
       expect(result.qualityScore).toBeGreaterThanOrEqual(highQualityRange.min);
     });
 

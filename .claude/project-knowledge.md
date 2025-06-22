@@ -638,3 +638,107 @@ claude --print "/learnings - Check if staged changes contain new learnings that 
 4. **自動品質チェック**: Git Hook + Claude Code Review による継続的改善
 
 このパターンにより、147テスト全てでハードコード値を排除し、ビジネスルール変更時の保守性を大幅に向上させることができました。
+
+## Phase 8: テストコード品質向上とアーキテクチャ改善
+
+### テストユーティリティの関数型リファクタリング
+
+#### 改善前（クラスベース）vs 改善後（関数ベース）
+
+```typescript
+// ❌ 改善前: クラスベースの静的メソッド
+export class TestDataGenerator {
+  static generateMaxLengthStyleField(): string {
+    return this.generateStyleFieldWithLength(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH);
+  }
+}
+
+export class TestExpectationCalculator {
+  static getQualityScoreRange(level: QualityLevel): { min: number; max: number } {
+    // 実装
+  }
+}
+
+// ✅ 改善後: 純粋関数によるシンプル設計
+export function generateMaxLengthStyleField(): string {
+  return generateStyleFieldWithLength(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH);
+}
+
+export function getQualityScoreRange(level: QualityLevel): { min: number; max: number } {
+  // 実装
+}
+```
+
+#### 関数型設計の利点
+1. **インポート効率**: 必要な関数のみ個別インポート可能
+2. **テスト容易性**: 静的メソッドよりも純粋関数の方がテストしやすい
+3. **Tree Shaking**: 未使用関数の自動排除による最適化
+4. **型推論**: TypeScript での型推論がより正確
+
+### Next.js Navigation Mock 統一パターン
+
+#### 改善内容
+```typescript
+// ❌ 各テストファイルでの重複Mock定義
+const mockPush = vi.fn();
+const mockRouter = { push: mockPush, back: vi.fn(), forward: vi.fn(), refresh: vi.fn() };
+vi.mock("next/navigation", () => ({ useRouter: () => mockRouter }));
+
+// ✅ グローバルMock活用による統一
+// Use existing global mock from __mocks__/next/navigation.ts
+```
+
+### 依存関係管理の最適化
+
+#### 不要依存の識別・除去パターン
+```typescript
+// ❌ 改善前: 未使用インポート
+import {
+  TestDataGenerator,
+  TestExpectationCalculator,
+} from "~/test-utils/test-data-generators";
+
+// ✅ 改善後: 必要な関数のみインポート
+import { getQualityScoreRange } from "~/test-utils/test-data-generators";
+
+// または完全削除
+// 不要なインポートを削除 - 現在未使用
+```
+
+### テストコード保守性向上パターン
+
+#### 1. 命名の明確化
+```typescript
+// 関数名がより直接的で理解しやすい
+calculateExpectedSuccessExampleScore() // クラスメソッド
+↓
+calculateSuccessExampleQualityScore()  // 関数名
+```
+
+#### 2. インポート文の簡潔性
+```typescript
+// 改善前
+import { TestExpectationCalculator } from "~/test-utils/test-data-generators";
+const highQualityRange = TestExpectationCalculator.getQualityScoreRange("high");
+
+// 改善後  
+import { getQualityScoreRange } from "~/test-utils/test-data-generators";
+const highQualityRange = getQualityScoreRange("high");
+```
+
+### コードの再利用性・モジュール性向上
+
+#### 関数型アプローチによる利点
+1. **高度なコンポーザビリティ**: 小さな関数の組み合わせによる複雑な処理
+2. **副作用の最小化**: 純粋関数による予測可能な動作
+3. **単体テストの簡易性**: 入力→出力の明確な関係
+
+### 新しい品質指標
+
+#### テストコード品質メトリクス
+- **依存関係の最小化**: 必要最小限のインポートのみ
+- **命名の一貫性**: 動詞+名詞パターンの統一
+- **再利用性**: 関数の組み合わせによる柔軟性
+- **保守性**: ビジネスルール変更への適応性
+
+この改善により、テストコードの品質と保守性が向上し、将来的な機能拡張にも対応しやすくなりました。

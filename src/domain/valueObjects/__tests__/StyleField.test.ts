@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { BUSINESS_RULES } from "~/config/business-rules";
-import { TestDataGenerator } from "~/test-utils/test-data-generators";
+import {
+  generateMaxLengthStyleField,
+  generateStyleFieldWithLength,
+  generateTooLongStyleField,
+} from "~/test-utils/test-data-generators";
 import { StyleField } from "../StyleField";
 
 describe("StyleField", () => {
@@ -11,14 +15,14 @@ describe("StyleField", () => {
     });
 
     it("最大文字数以内の文字列で作成できる", () => {
-      const longStyle = TestDataGenerator.generateMaxLengthStyleField();
+      const longStyle = generateMaxLengthStyleField();
       const style = StyleField.create(longStyle);
       expect(style.value).toBe(longStyle);
       expect(style.value.length).toBe(BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH);
     });
 
     it("最大文字数を超える文字列では作成できない", () => {
-      const tooLongStyle = TestDataGenerator.generateTooLongStyleField();
+      const tooLongStyle = generateTooLongStyleField();
       expect(() => StyleField.create(tooLongStyle)).toThrow(
         `スタイルフィールドは${BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH}文字以内で入力してください`
       );
@@ -79,7 +83,7 @@ describe("StyleField", () => {
     it("文字数制限をチェックできる", () => {
       const validStyle = StyleField.create("Rock, energetic");
       const longButValidStyle = StyleField.create(
-        `${TestDataGenerator.generateStyleFieldWithLength(
+        `${generateStyleFieldWithLength(
           BUSINESS_RULES.STYLE_FIELD.MAX_LENGTH - 10
         )}, test`
       );
