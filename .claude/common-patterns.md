@@ -196,12 +196,13 @@ export interface IEntityRepository {
 }
 ```
 
-### ユースケーステンプレート
+### ユースケーステンプレート（SOLID原則準拠）
 ```typescript
 // src/application/usecases/[ActionName]UseCase.ts
 export class ActionNameUseCase {
   constructor(
-    private readonly repository: IEntityRepository
+    private readonly repository: IEntityRepository,
+    private readonly externalService?: ExternalService
   ) {}
 
   async execute(input: ActionNameInput): Promise<ActionNameOutput> {
@@ -219,6 +220,11 @@ export interface ActionNameInput {
 
 export interface ActionNameOutput {
   // 出力結果
+}
+
+// サービスインターフェース統一命名規則
+export interface ExternalService {
+  processData(data: string): Promise<ProcessResult>;
 }
 ```
 

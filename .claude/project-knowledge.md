@@ -743,6 +743,107 @@ const highQualityRange = getQualityScoreRange("high");
 
 この改善により、テストコードの品質と保守性が向上し、将来的な機能拡張にも対応しやすくなりました。
 
+## SOLID原則とFactory統一化（最新アーキテクチャ改善）
+
+### SOLID原則の厳密適用パターン
+
+#### 1. Single Responsibility Principle（単一責任原則）
+各クラスが明確に定義された単一の責任を持つパターンの確立：
+
+```typescript
+// ❌ 複数責任を持つ改善前のクラス
+export class OptimizePromptUseCase {
+  // ユースケース実行
+  // + プロンプト最適化
+  // + ジャンル競合検出
+  // + 成功率予測
+}
+
+// ✅ 責任分離後の設計
+export class OptimizePromptUseCase {
+  constructor(
+    private readonly promptRepository: IPromptRepository,
+    private readonly styleFieldOptimizer?: StyleFieldOptimizerService,
+    private readonly genreConflictDetector?: GenreConflictDetectorService,
+    private readonly successRatePredictor?: SuccessRatePredictorService
+  ) {}
+}
+```
+
+#### 2. Interface Segregation Principle（インターフェース分離原則）
+サービス命名規則の統一とインターフェース特化：
+
+```typescript
+// ❌ 曖昧な命名
+export interface StyleFieldOptimizer { ... }
+export interface GenreConflictDetector { ... }
+
+// ✅ Service接尾辞による明確化
+export interface StyleFieldOptimizerService { ... }
+export interface GenreConflictDetectorService { ... }
+export interface SuccessRatePredictorService { ... }
+```
+
+#### 3. Dependency Inversion Principle（依存性逆転原則）
+readonly修飾子による不変性とDI設計の強化：
+
+```typescript
+// ❌ 可変依存関係
+constructor(
+  private lyricsRepository: ILyricsRepository,
+  private japaneseOptimizationService?: JapaneseOptimizationService
+) {}
+
+// ✅ 不変依存関係の徹底
+constructor(
+  private readonly lyricsRepository: ILyricsRepository,
+  private readonly japaneseOptimizationService?: JapaneseOptimizationService,
+  private readonly sunoOptimizationService?: SunoOptimizationService
+) {}
+```
+
+### Factory パターン統一の学習事項
+
+#### 統一されたオブジェクト生成パターン
+全エンティティ・値オブジェクトで一貫したファクトリーメソッド：
+
+- `create()`: 新規作成時（完全バリデーション実行）
+- `reconstruct()`: 永続化からの復元時（最小バリデーション）
+
+```typescript
+// 統一パターンの適用例
+export class Entity {
+  static create(props: EntityProps): Entity {
+    // 新規作成時の包括的バリデーション
+    this.validateAllProperties(props);
+    return new Entity(props);
+  }
+
+  static reconstruct(props: EntityProps): Entity {
+    // 復元時の必要最小限バリデーション
+    this.validateEssentialProperties(props);
+    return new Entity(props);
+  }
+}
+```
+
+### アーキテクチャ品質向上の効果
+
+#### 1. 型安全性の向上
+- インターフェース命名の一貫性確保
+- 依存注入における型制約の明確化
+- コンパイル時型チェックの精度向上
+
+#### 2. 保守性の向上
+- 責任境界の明確化によるコード理解しやすさ
+- サービス層の疎結合設計
+- テスト時のモック対象の明確化
+
+#### 3. 拡張性の向上
+- 新サービスの追加が容易
+- インターフェース契約による安全な実装変更
+- 依存関係の可視化による影響範囲の把握
+
 ## SOLID原則アーキテクチャ改善（Phase 3.6完了）
 
 ### 構造化エラーハンドリングパターン
