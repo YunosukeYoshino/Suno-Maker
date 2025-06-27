@@ -31,6 +31,10 @@ bun test          # 全テスト実行
 bun test:watch    # テストウォッチモード
 bun test:ui       # テストUI表示
 bun test:e2e      # E2Eテスト（Playwright）
+bun test:e2e:ui   # PlaywrightテストUI表示
+bun test:e2e:headed # ブラウザ表示でE2Eテスト実行
+bun test:vrt      # ビジュアル回帰テスト（VRT）
+bun test:vrt:update # VRTベースライン更新
 
 # 単一ファイルのテスト実行
 bun test src/domain/entities/__tests__/Prompt.test.ts
@@ -46,6 +50,7 @@ bun x shadcn@latest add [component-name]
 1. `bun run check` - コード品質
 2. `bun run typecheck` - 型チェック
 3. `bun test` - テスト通過確認
+4. `bun test:e2e` - E2Eテスト実行（UI変更時は必須）
 
 ## アーキテクチャ
 

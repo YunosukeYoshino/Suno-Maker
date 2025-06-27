@@ -1,0 +1,159 @@
+name: Visual Regression Testing
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  visual-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: bun playwright install --with-deps chromium
+    
+    - name: Build application
+      run: bun run build
+    
+    - name: Run Visual Regression Tests
+      run: bun playwright test e2e/visual/ --project=chromium
+      env:
+        CI: true
+    
+    - name: Upload VRT Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: vrt-results
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 30
+    
+    - name: Check for visual differences
+      id: vrt-check
+      run: |
+        if [ -d "test-results" ] && [ "$(find test-results -name "*-diff.png" | wc -l)" -gt 0 ]; then
+          echo "has_diff=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_diff=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Comment PR with VRT results
+      if: steps.vrt-check.outputs.has_diff == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // VRT差分の検出
+          const testResultsDir = 'test-results';
+          let diffFiles = [];
+          
+          if (fs.existsSync(testResultsDir)) {
+            const findDiffFiles = (dir) => {
+              const files = fs.readdirSync(dir);
+              files.forEach(file => {
+                const filePath = path.join(dir, file);
+                if (fs.statSync(filePath).isDirectory()) {
+                  findDiffFiles(filePath);
+                } else if (file.endsWith('-diff.png')) {
+                  diffFiles.push(filePath);
+                }
+              });
+            };
+            findDiffFiles(testResultsDir);
+          }
+          
+          if (diffFiles.length > 0) {
+            const comment = `## 🔍 Visual Regression Test Results
+          
+          ⚠️ **Visual differences detected!**
+          
+          Found ${diffFiles.length} visual difference(s):
+          ${diffFiles.map(file => `- \`${file}\``).join('\n')}
+          
+          Please review the visual changes in the [Playwright report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifacts.
+          
+          If these changes are intentional, update the baseline screenshots by running:
+          \`\`\`bash
+          bun playwright test e2e/visual/ --update-snapshots
+          \`\`\``;
+          
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+    
+    - name: Comment PR with success
+      if: steps.vrt-check.outputs.has_diff == 'false'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const comment = `## ✅ Visual Regression Test Results
+          
+          🎉 **No visual differences detected!**
+          
+          All visual regression tests passed successfully.`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  baseline-update:
+    if: github.event.pull_request.head.ref == 'update-vrt-baseline'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: bun playwright install --with-deps chromium
+    
+    - name: Build application
+      run: bun run build
+    
+    - name: Update VRT baselines
+      run: bun playwright test e2e/visual/ --update-snapshots --project=chromium
+      env:
+        CI: true
+    
+    - name: Commit updated screenshots
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add e2e/visual/
+        if ! git diff --cached --exit-code; then
+          git commit -m "chore: update VRT baseline screenshots"
+          git push
+        fi

@@ -13,6 +13,10 @@
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:vrt": "playwright test e2e/visual/",
+    "test:vrt:update": "playwright test e2e/visual/ --update-snapshots",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
