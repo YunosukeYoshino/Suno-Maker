@@ -6,13 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { RotateCcw } from "lucide-react";
 import { useCallback, useState } from "react";
-
-export interface MusicParameters {
-  energy: number; // 1-10 (低エネルギーから高エネルギー)
-  complexity: number; // 1-10 (シンプルから複雑)
-  tempo: number; // 1-10 (スローからファスト)
-  emotional_intensity: number; // 1-10 (穏やかから激しい)
-}
+import type { MusicParameters } from "~/domain/valueObjects/MusicParameters";
+import { DEFAULT_MUSIC_PARAMETERS } from "~/domain/valueObjects/MusicParameters";
 
 interface ParameterSlidersProps {
   parameters: MusicParameters;
@@ -130,12 +125,7 @@ const PRESETS: { name: string; parameters: MusicParameters }[] = [
   },
 ];
 
-const DEFAULT_PARAMETERS: MusicParameters = {
-  energy: 5,
-  complexity: 5,
-  tempo: 5,
-  emotional_intensity: 5,
-};
+const DEFAULT_PARAMETERS = DEFAULT_MUSIC_PARAMETERS;
 
 export function ParameterSliders({
   parameters,

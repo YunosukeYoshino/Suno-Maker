@@ -3,7 +3,11 @@ import { calculateExpectedSuccessExampleScore } from "~/test-utils/test-data-gen
 import { Genre } from "../../valueObjects/Genre";
 import { Language } from "../../valueObjects/Language";
 import { StyleField } from "../../valueObjects/StyleField";
-import { SuccessExample } from "../SuccessExample";
+import {
+  type MoodCategory,
+  type MusicalKey,
+  SuccessExample,
+} from "../SuccessExample";
 
 describe("SuccessExample", () => {
   const validProps = {
@@ -24,8 +28,8 @@ describe("SuccessExample", () => {
     metadata: {
       duration: 240,
       tempo: 120,
-      key: "Am",
-      mood: ["emotional", "powerful"],
+      key: "Am" as MusicalKey,
+      mood: ["intense", "energetic"] as MoodCategory[],
       createdAt: new Date("2024-01-01"),
       verifiedAt: new Date("2024-01-02"),
     },
@@ -236,8 +240,12 @@ describe("SuccessExample", () => {
     it("ムードが一致する場合trueを返す", () => {
       const example = SuccessExample.create(validProps);
 
-      expect(example.matches({ mood: ["emotional"] })).toBe(true);
-      expect(example.matches({ mood: ["happy"] })).toBe(false);
+      expect(example.matches({ mood: ["intense"] as MoodCategory[] })).toBe(
+        true
+      );
+      expect(example.matches({ mood: ["joyful"] as MoodCategory[] })).toBe(
+        false
+      );
     });
 
     it("テキスト検索が一致する場合trueを返す", () => {

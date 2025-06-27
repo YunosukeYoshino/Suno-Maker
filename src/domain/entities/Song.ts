@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { generateUUID } from "~/utils/generateUUID";
 import { Lyrics, type LyricsJSON } from "./Lyrics";
 import { Prompt, type PromptJSON } from "./Prompt";
 
@@ -73,7 +74,10 @@ export interface SongJSON {
 }
 
 export class Song {
-  private constructor(private readonly props: SongProps) {}
+  private constructor(private readonly props: SongProps) {
+    Object.freeze(this);
+    Object.freeze(props);
+  }
 
   static create(
     input: Partial<SongProps> & {
@@ -83,9 +87,7 @@ export class Song {
   ): Song {
     const now = new Date();
     const props: SongProps = {
-      id:
-        input.id ||
-        `song-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: input.id || generateUUID(),
       title: input.title,
       prompt: input.prompt,
       lyrics: input.lyrics || null,

@@ -1,7 +1,47 @@
 import { generateUUID } from "../../utils/generateUUID";
-import type { Genre } from "../valueObjects/Genre";
-import type { Language } from "../valueObjects/Language";
-import type { StyleField } from "../valueObjects/StyleField";
+import { Genre, type GenreValue } from "../valueObjects/Genre";
+import { Language } from "../valueObjects/Language";
+import { StyleField } from "../valueObjects/StyleField";
+
+export type MusicalKey =
+  | "C"
+  | "C#"
+  | "D"
+  | "D#"
+  | "E"
+  | "F"
+  | "F#"
+  | "G"
+  | "G#"
+  | "A"
+  | "A#"
+  | "B"
+  | "Cm"
+  | "C#m"
+  | "Dm"
+  | "D#m"
+  | "Em"
+  | "Fm"
+  | "F#m"
+  | "Gm"
+  | "G#m"
+  | "Am"
+  | "A#m"
+  | "Bm";
+
+export type MoodCategory =
+  | "energetic"
+  | "calm"
+  | "dark"
+  | "bright"
+  | "melancholic"
+  | "uplifting"
+  | "aggressive"
+  | "peaceful"
+  | "intense"
+  | "relaxed"
+  | "mysterious"
+  | "joyful";
 
 export interface SuccessExampleProps {
   title: string;
@@ -20,8 +60,8 @@ export interface SuccessExampleProps {
   metadata: {
     duration?: number; // seconds
     tempo?: number; // BPM
-    key?: string; // Musical key
-    mood?: string[];
+    key?: MusicalKey; // Musical key
+    mood?: MoodCategory[];
     createdAt: Date;
     verifiedAt?: Date;
   };
@@ -38,6 +78,33 @@ export interface SuccessExampleSearchCriteria {
   minPlayCount?: number;
   mood?: string[];
   textQuery?: string;
+}
+
+export interface SuccessExampleJSON {
+  id: string;
+  title: string;
+  description: string;
+  prompt: string;
+  lyrics?: string;
+  genre: string;
+  language: string;
+  styleField: string;
+  sunoUrl: string;
+  audioUrl?: string;
+  rating: number;
+  playCount: number;
+  likeCount: number;
+  tags: string[];
+  metadata: {
+    duration?: number;
+    tempo?: number;
+    key?: string;
+    mood?: string[];
+    createdAt: string;
+    verifiedAt?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class SuccessExample {
@@ -82,6 +149,10 @@ export class SuccessExample {
     this._metadata = { ...props.metadata };
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
+
+    Object.freeze(this);
+    Object.freeze(this._tags);
+    Object.freeze(this._metadata);
   }
 
   static create(props: SuccessExampleProps): SuccessExample {
@@ -412,5 +483,86 @@ export class SuccessExample {
 
   equals(other: SuccessExample): boolean {
     return this._id === other._id;
+  }
+
+  // Reconstruction method for persistence layer
+  static reconstruct(
+    props: Required<Omit<SuccessExampleProps, "lyrics" | "audioUrl">> & {
+      lyrics?: string;
+      audioUrl?: string;
+    }
+  ): SuccessExample {
+    return new SuccessExample(props);
+  }
+
+  // JSON serialization
+  toJSON(): SuccessExampleJSON {
+    return {
+      id: this._id,
+      title: this._title,
+      description: this._description,
+      prompt: this._prompt,
+      lyrics: this._lyrics,
+      genre: Array.isArray(this._genre.value)
+        ? this._genre.value.join(",")
+        : this._genre.value,
+      language: this._language.value,
+      styleField: this._styleField.value,
+      sunoUrl: this._sunoUrl,
+      audioUrl: this._audioUrl,
+      rating: this._rating,
+      playCount: this._playCount,
+      likeCount: this._likeCount,
+      tags: [...this._tags],
+      metadata: {
+        duration: this._metadata.duration,
+        tempo: this._metadata.tempo,
+        key: this._metadata.key,
+        mood: this._metadata.mood ? [...this._metadata.mood] : undefined,
+        createdAt: this._metadata.createdAt.toISOString(),
+        verifiedAt: this._metadata.verifiedAt?.toISOString(),
+      },
+      createdAt: this._createdAt.toISOString(),
+      updatedAt: this._updatedAt.toISOString(),
+    };
+  }
+
+  private static parseGenreFromJSON(genreStr: string): GenreValue {
+    if (genreStr.includes(",")) {
+      return genreStr.split(",") as GenreValue;
+    }
+    return genreStr as GenreValue;
+  }
+
+  // JSON deserialization
+  static fromJSON(json: SuccessExampleJSON): SuccessExample {
+    return SuccessExample.create({
+      id: json.id,
+      title: json.title,
+      description: json.description,
+      prompt: json.prompt,
+      lyrics: json.lyrics,
+      genre: Genre.create(SuccessExample.parseGenreFromJSON(json.genre)),
+      language: Language.create(json.language),
+      styleField: StyleField.create(json.styleField),
+      sunoUrl: json.sunoUrl,
+      audioUrl: json.audioUrl,
+      rating: json.rating,
+      playCount: json.playCount,
+      likeCount: json.likeCount,
+      tags: json.tags,
+      metadata: {
+        duration: json.metadata.duration,
+        tempo: json.metadata.tempo,
+        key: json.metadata.key as MusicalKey | undefined,
+        mood: json.metadata.mood as MoodCategory[] | undefined,
+        createdAt: new Date(json.metadata.createdAt),
+        verifiedAt: json.metadata.verifiedAt
+          ? new Date(json.metadata.verifiedAt)
+          : undefined,
+      },
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt),
+    });
   }
 }

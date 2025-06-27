@@ -1,6 +1,7 @@
-import type { Genre } from "../valueObjects/Genre";
-import type { Language } from "../valueObjects/Language";
-import type { StyleField } from "../valueObjects/StyleField";
+import { generateUUID } from "~/utils/generateUUID";
+import { Genre, type GenreValue } from "../valueObjects/Genre";
+import { Language } from "../valueObjects/Language";
+import { StyleField } from "../valueObjects/StyleField";
 import { Prompt } from "./Prompt";
 
 export type TemplateCategory =
@@ -33,6 +34,22 @@ export interface TemplateMatchCriteria {
   minQualityScore?: number;
 }
 
+export interface TemplateJSON {
+  id: string;
+  name: string;
+  description: string;
+  genre: string;
+  language: string;
+  styleField: string;
+  lyricsStructure: string;
+  tags: string[];
+  category: TemplateCategory;
+  qualityScore: number;
+  usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export class Template {
   private readonly _id: string;
   private readonly _name: string;
@@ -62,6 +79,9 @@ export class Template {
     this._usageCount = props.usageCount;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
+
+    Object.freeze(this);
+    Object.freeze(this._tags);
   }
 
   static create(props: TemplateProps): Template {
@@ -94,7 +114,7 @@ export class Template {
 
     const now = new Date();
     return new Template({
-      id: props.id || crypto.randomUUID(),
+      id: props.id || generateUUID(),
       name: props.name.trim(),
       description: props.description.trim(),
       genre: props.genre,
@@ -251,5 +271,57 @@ export class Template {
 
   equals(other: Template): boolean {
     return this._id === other._id;
+  }
+
+  // Reconstruction method for persistence layer
+  static reconstruct(props: Required<TemplateProps>): Template {
+    return new Template(props);
+  }
+
+  // JSON serialization
+  toJSON(): TemplateJSON {
+    return {
+      id: this._id,
+      name: this._name,
+      description: this._description,
+      genre: Array.isArray(this._genre.value)
+        ? this._genre.value.join(",")
+        : this._genre.value,
+      language: this._language.value,
+      styleField: this._styleField.value,
+      lyricsStructure: this._lyricsStructure,
+      tags: [...this._tags],
+      category: this._category,
+      qualityScore: this._qualityScore,
+      usageCount: this._usageCount,
+      createdAt: this._createdAt.toISOString(),
+      updatedAt: this._updatedAt.toISOString(),
+    };
+  }
+
+  private static parseGenreFromJSON(genreStr: string): GenreValue {
+    if (genreStr.includes(",")) {
+      return genreStr.split(",") as GenreValue;
+    }
+    return genreStr as GenreValue;
+  }
+
+  // JSON deserialization
+  static fromJSON(json: TemplateJSON): Template {
+    return Template.create({
+      id: json.id,
+      name: json.name,
+      description: json.description,
+      genre: Genre.create(Template.parseGenreFromJSON(json.genre)),
+      language: Language.create(json.language),
+      styleField: StyleField.create(json.styleField),
+      lyricsStructure: json.lyricsStructure,
+      tags: json.tags,
+      category: json.category,
+      qualityScore: json.qualityScore,
+      usageCount: json.usageCount,
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt),
+    });
   }
 }

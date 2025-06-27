@@ -7,6 +7,8 @@ import {
   vi,
 } from "vitest";
 import {
+  type MoodCategory,
+  type MusicalKey,
   SuccessExample,
   type SuccessExampleProps,
 } from "../../../domain/entities/SuccessExample";
@@ -35,8 +37,8 @@ const createMockSuccessExample = (overrides?: Partial<SuccessExampleProps>) => {
     metadata: {
       duration: 240,
       tempo: 120,
-      key: "Am",
-      mood: ["emotional", "powerful"],
+      key: "Am" as MusicalKey,
+      mood: ["intense", "energetic"] as MoodCategory[],
       createdAt: new Date("2024-01-01"),
     },
     ...overrides,

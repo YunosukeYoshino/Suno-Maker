@@ -12,19 +12,19 @@ import {
   vi,
 } from "vitest";
 import {
-  type GenreConflictDetector,
+  type GenreConflictDetectorService,
   type OptimizePromptInput,
   OptimizePromptUseCase,
-  type StyleFieldOptimizer,
-  type SuccessRatePredictor,
+  type StyleFieldOptimizerService,
+  type SuccessRatePredictorService,
 } from "../OptimizePromptUseCase";
 
 describe("OptimizePromptUseCase", () => {
   let useCase: OptimizePromptUseCase;
   let mockRepository: IPromptRepository;
-  let mockStyleOptimizer: StyleFieldOptimizer;
-  let mockConflictDetector: GenreConflictDetector;
-  let mockSuccessPredictor: SuccessRatePredictor;
+  let mockStyleOptimizer: StyleFieldOptimizerService;
+  let mockConflictDetector: GenreConflictDetectorService;
+  let mockSuccessPredictor: SuccessRatePredictorService;
 
   beforeEach(() => {
     mockRepository = {
@@ -59,16 +59,16 @@ describe("OptimizePromptUseCase", () => {
     mockStyleOptimizer = {
       optimize: vi.fn(),
       optimizeForLength: vi.fn(),
-    } as StyleFieldOptimizer;
+    } as StyleFieldOptimizerService;
 
     mockConflictDetector = {
       detectConflicts: vi.fn(),
-    } as GenreConflictDetector;
+    } as GenreConflictDetectorService;
 
     mockSuccessPredictor = {
       predict: vi.fn(),
       predictSuccessRate: vi.fn(),
-    } as SuccessRatePredictor;
+    } as SuccessRatePredictorService;
 
     useCase = new OptimizePromptUseCase(
       mockRepository,

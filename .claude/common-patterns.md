@@ -196,12 +196,13 @@ export interface IEntityRepository {
 }
 ```
 
-### ユースケーステンプレート
+### ユースケーステンプレート（SOLID原則準拠）
 ```typescript
 // src/application/usecases/[ActionName]UseCase.ts
 export class ActionNameUseCase {
   constructor(
-    private readonly repository: IEntityRepository
+    private readonly repository: IEntityRepository,
+    private readonly externalService?: ExternalService
   ) {}
 
   async execute(input: ActionNameInput): Promise<ActionNameOutput> {
@@ -219,6 +220,11 @@ export interface ActionNameInput {
 
 export interface ActionNameOutput {
   // 出力結果
+}
+
+// サービスインターフェース統一命名規則
+export interface ExternalService {
+  processData(data: string): Promise<ProcessResult>;
 }
 ```
 
@@ -618,6 +624,32 @@ global.jest = {
     fn: T
   ): MockedFunction<T> => fn,
 };
+```
+
+### Git・PR関連パターン（新学習事項）
+
+#### git-commitコマンドパターン
+```bash
+# 0. 事前確認（必須ステップ）
+git status
+
+# 1. ブランチ作成（すでにブランチがある場合はスキップ）
+# "feature/awesome-change" は任意のブランチ名に変更
+
+# 2. 変更をステージングしてコミット
+git add .
+
+# 3. リモートに push（初回の場合は -u をつけて upstream 設定）
+
+# 4. PR 作成（server-github MCPを使用）
+- 必ず日本語で書いてください。
+- Assignees: yourself
+- Labels: "bug", "enhancement", "feature" など適切なもの
+
+# 5. PR後200秒待ってください。
+
+# 6. PRの内容を確認
+- AIレビュワーがいるので、レヴュワーのコメントを取得し、改善するかどうか計画してください。
 ```
 
 ### プロジェクト完成時の品質基準

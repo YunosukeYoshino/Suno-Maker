@@ -63,9 +63,9 @@ export interface SunoOptimizationService {
 
 export class OptimizeLyricsUseCase {
   constructor(
-    private lyricsRepository: ILyricsRepository,
-    private japaneseOptimizationService?: JapaneseOptimizationService,
-    private sunoOptimizationService?: SunoOptimizationService
+    private readonly lyricsRepository: ILyricsRepository,
+    private readonly japaneseOptimizationService?: JapaneseOptimizationService,
+    private readonly sunoOptimizationService?: SunoOptimizationService
   ) {}
 
   async execute(input: OptimizeLyricsInput): Promise<OptimizeLyricsOutput> {

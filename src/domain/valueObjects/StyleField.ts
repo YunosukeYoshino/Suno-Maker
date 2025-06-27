@@ -166,7 +166,9 @@ export interface StructuredStyle {
 }
 
 export class StyleField {
-  private constructor(private readonly _value: string) {}
+  private constructor(private readonly _value: string) {
+    Object.freeze(this);
+  }
 
   static create(value: string): StyleField {
     const trimmedValue = value.trim();

@@ -1,5 +1,12 @@
 import { z } from "zod";
+import { generateUUID } from "~/utils/generateUUID";
 import { Language } from "../valueObjects/Language";
+import {
+  type LyricSection,
+  LyricsAnalytics,
+  type LyricsStats,
+} from "../valueObjects/LyricsAnalytics";
+import { SongDuration } from "../valueObjects/SongDuration";
 
 const LyricsSchema = z.object({
   id: z.string().min(1),
@@ -22,25 +29,28 @@ const LyricsSchema = z.object({
 });
 
 export type LyricsProps = z.infer<typeof LyricsSchema>;
+export type { LyricSection, LyricsStats };
 
-export interface LyricSection {
-  type: string;
-  content: string;
-  lineNumber: number;
-}
+export type LyricsError =
+  | { type: "CONTENT_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "CONTENT_EMPTY"; minLength: number }
+  | { type: "TITLE_TOO_LONG"; maxLength: number; currentLength: number }
+  | { type: "COMPLEX_KANJI_SEQUENCE"; position: number; text: string };
 
-export interface LyricsStats {
-  totalCharacters: number;
-  totalLines: number;
-  sectionCount: number;
-  averageLineLength: number;
-  hasStructureTags: boolean;
-}
+export type LyricsWarning =
+  | {
+      type: "LINE_TOO_LONG";
+      maxLength: number;
+      lineNumber: number;
+      currentLength: number;
+    }
+  | { type: "NO_STRUCTURE_TAGS"; suggestion: string[] }
+  | { type: "COMPLEX_KANJI_DETECTED"; suggestion: string };
 
 export interface LyricsValidationResult {
   isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: LyricsError[];
+  warnings: LyricsWarning[];
 }
 
 export interface LyricsJSON {
@@ -73,7 +83,10 @@ const STRUCTURE_TAGS = [
 ] as const;
 
 export class Lyrics {
-  private constructor(private readonly props: LyricsProps) {}
+  private constructor(private readonly props: LyricsProps) {
+    Object.freeze(this);
+    Object.freeze(props);
+  }
 
   static create(
     input: Partial<LyricsProps> & {
@@ -84,9 +97,7 @@ export class Lyrics {
   ): Lyrics {
     const now = new Date();
     const props: LyricsProps = {
-      id:
-        input.id ||
-        `lyrics-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: input.id || generateUUID(),
       title: input.title,
       content: input.content,
       language: input.language,
@@ -181,103 +192,83 @@ export class Lyrics {
 
   // 構造分析
   extractSections(): LyricSection[] {
-    const lines = this.content.split("\n");
-    const sections: LyricSection[] = [];
-    let currentSection: LyricSection | null = null;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-
-      // 構造タグを検出
-      const tagMatch = line.match(/^\[(.+?)\]$/);
-      if (tagMatch) {
-        // 前のセクションを保存
-        if (currentSection?.content.trim()) {
-          sections.push(currentSection);
-        }
-
-        // 新しいセクションを開始
-        currentSection = {
-          type: tagMatch[1],
-          content: "",
-          lineNumber: i + 1,
-        };
-      } else if (currentSection && line) {
-        // 現在のセクションにコンテンツを追加
-        currentSection.content += (currentSection.content ? "\n" : "") + line;
-      } else if (!currentSection && line) {
-        // セクションタグなしのコンテンツ
-        currentSection = {
-          type: "Unstructured",
-          content: line,
-          lineNumber: i + 1,
-        };
-      }
-    }
-
-    // 最後のセクションを保存
-    if (currentSection?.content.trim()) {
-      sections.push(currentSection);
-    }
-
-    return sections;
+    const analytics = this.getAnalytics();
+    return [...analytics.getSections()];
   }
 
   getStats(): LyricsStats {
-    const lines = this.content.split("\n").filter((line) => line.trim());
-    const sections = this.extractSections();
-    const hasStructureTags = sections.some((section) =>
-      STRUCTURE_TAGS.includes(section.type as (typeof STRUCTURE_TAGS)[number])
-    );
+    const analytics = this.getAnalytics();
+    return analytics.getStats();
+  }
 
-    const averageLineLength =
-      lines.length > 0
-        ? Math.round(
-            lines.reduce((sum, line) => sum + line.length, 0) / lines.length
-          )
-        : 0;
-
-    return {
-      totalCharacters: this.content.length,
-      totalLines: lines.length,
-      sectionCount: sections.length,
-      averageLineLength,
-      hasStructureTags,
-    };
+  private getAnalytics(): LyricsAnalytics {
+    return LyricsAnalytics.create(this.content, this.language);
   }
 
   // バリデーション
   validate(): LyricsValidationResult {
-    const errors: string[] = [];
-    const warnings: string[] = [];
+    const errors: LyricsError[] = [];
+    const warnings: LyricsWarning[] = [];
     const stats = this.getStats();
 
-    // 文字数チェック
-    if (stats.totalCharacters > 3000) {
-      errors.push("歌詞が3000文字を超えています");
+    // コンテンツの基本チェック
+    if (this.content.length === 0) {
+      errors.push({
+        type: "CONTENT_EMPTY",
+        minLength: 1,
+      });
+    } else if (stats.totalCharacters > 3000) {
+      errors.push({
+        type: "CONTENT_TOO_LONG",
+        maxLength: 3000,
+        currentLength: stats.totalCharacters,
+      });
+    }
+
+    // タイトルの長さチェック
+    if (this.title.length > 100) {
+      errors.push({
+        type: "TITLE_TOO_LONG",
+        maxLength: 100,
+        currentLength: this.title.length,
+      });
     }
 
     // 構造タグのチェック
     if (!stats.hasStructureTags) {
-      warnings.push("Verse や Chorus などの構造タグの使用を推奨します");
+      warnings.push({
+        type: "NO_STRUCTURE_TAGS",
+        suggestion: ["[Verse]", "[Chorus]", "[Bridge]"],
+      });
     }
 
     // 言語特有のバリデーション
     if (this.language.value === "ja") {
       const complexKanjiPattern = /[一-龯]{3,}/g;
-      if (complexKanjiPattern.test(this.content)) {
-        warnings.push(
-          "複雑な漢字の連続使用は発音の問題を引き起こす可能性があります"
-        );
+      const match: RegExpExecArray | null = complexKanjiPattern.exec(
+        this.content
+      );
+      if (match !== null) {
+        warnings.push({
+          type: "COMPLEX_KANJI_DETECTED",
+          suggestion:
+            "複雑な漢字の連続使用は発音の問題を引き起こす可能性があります",
+        });
       }
     }
 
     // 行の長さチェック
-    if (stats.averageLineLength > 50) {
-      warnings.push(
-        "行が長すぎる可能性があります。短い行に分割することを推奨します"
-      );
-    }
+    const lines = this.content.split("\n");
+    lines.forEach((line, index) => {
+      if (line.length > 50) {
+        warnings.push({
+          type: "LINE_TOO_LONG",
+          maxLength: 50,
+          lineNumber: index + 1,
+          currentLength: line.length,
+        });
+      }
+    });
 
     return {
       isValid: errors.length === 0,
@@ -405,40 +396,13 @@ export class Lyrics {
 
   // ユーティリティメソッド
   getWordCount(): number {
-    const plainText = this.toPlainText();
-    if (this.language.value === "ja" || this.language.value === "zh") {
-      // 日本語・中国語は文字数でカウント
-      return plainText.replace(/\s+/g, "").length;
-    }
-    // その他の言語は単語数でカウント
-    return plainText.split(/\s+/).filter((word) => word.length > 0).length;
+    const analytics = this.getAnalytics();
+    return analytics.getWordCount();
   }
 
   getDuration(): number {
-    // 歌詞の予想演奏時間（秒）を算出
-    const wordCount = this.getWordCount();
-    const sections = this.extractSections();
-
-    // 基本的な計算（言語によって調整）
-    let wordsPerSecond = 2.5; // デフォルト（英語）
-
-    if (this.language.value === "ja") {
-      wordsPerSecond = 4; // 日本語は文字ベース
-    } else if (this.language.value === "es" || this.language.value === "it") {
-      wordsPerSecond = 3; // ラテン語系は少し速い
-    }
-
-    // セクション構造による調整
-    const hasSlowSections = sections.some((section) =>
-      ["Ballad", "Slow", "Whispered"].some((slow) =>
-        section.type.includes(slow)
-      )
-    );
-
-    if (hasSlowSections) {
-      wordsPerSecond *= 0.7;
-    }
-
-    return Math.round(wordCount / wordsPerSecond);
+    const analytics = this.getAnalytics();
+    const duration = SongDuration.estimateFromLyrics(analytics, this.language);
+    return duration.getSeconds();
   }
 }

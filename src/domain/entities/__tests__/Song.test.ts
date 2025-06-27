@@ -77,8 +77,10 @@ describe("Song", () => {
       propsWithoutId.id = undefined;
 
       const song = Song.create(propsWithoutId);
-      expect(song.id).toMatch(/^song-/);
-      expect(song.id.length).toBeGreaterThan(10);
+      expect(song.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
+      expect(song.id.length).toBe(36);
     });
 
     it("プロンプトのみでSongを作成できる", () => {

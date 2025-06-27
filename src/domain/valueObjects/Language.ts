@@ -251,7 +251,9 @@ const LANGUAGE_INFO: Record<SupportedLanguage, LanguageInfo> = {
 };
 
 export class Language {
-  private constructor(private readonly _value: SupportedLanguage) {}
+  private constructor(private readonly _value: SupportedLanguage) {
+    Object.freeze(this);
+  }
 
   static create(value: string): Language {
     try {

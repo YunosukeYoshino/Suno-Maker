@@ -30,6 +30,10 @@ bun run typecheck # TypeScript型チェック
 bun test          # 全テスト実行
 bun test:watch    # テストウォッチモード
 bun test:ui       # テストUI表示
+bun test:e2e      # E2Eテスト（Playwright）
+
+# 単一ファイルのテスト実行
+bun test src/domain/entities/__tests__/Prompt.test.ts
 
 # shadcn/ui コンポーネント追加
 bun x shadcn@latest add [component-name]
@@ -86,6 +90,22 @@ src/
 
 ## DDD 設計原則
 
+### SOLID原則の適用
+
+このプロジェクトではSOLID原則を厳密に適用しています：
+- **S**ingle Responsibility: 各クラスは単一の責任を持つ
+- **O**pen/Closed: 拡張に開いて、修正に閉じている
+- **L**iskov Substitution: 基底クラスは派生クラスに置換可能
+- **I**nterface Segregation: インターフェースは小さく、具体的に
+- **D**ependency Inversion: 抽象に依存し、具象に依存しない
+
+### Factory パターンの統一
+
+オブジェクト生成には統一されたFactoryパターンを使用：
+- `create()`: 新規作成時（バリデーション含む）
+- `reconstruct()`: 永続化データからの復元時
+- すべてのエンティティ・値オブジェクトで一貫した生成方法
+
 ### エンティティ実装パターン
 
 ```typescript
@@ -93,7 +113,10 @@ export class EntityName {
   private constructor(
     private readonly id: EntityId,
     private property: PropertyValueObject
-  ) {}
+  ) {
+    Object.freeze(this);
+    Object.freeze(property);
+  }
 
   static create(id: EntityId, property: PropertyValueObject): EntityName {
     return new EntityName(id, property);
@@ -116,7 +139,9 @@ export class EntityName {
 
 ```typescript
 export class ValueObjectName {
-  private constructor(private readonly value: string) {}
+  private constructor(private readonly value: string) {
+    Object.freeze(this);
+  }
 
   static create(value: string): ValueObjectName {
     if (!this.isValid(value)) {
@@ -198,7 +223,7 @@ describe("機能名", () => {
 
 - TypeScript 厳密モード 100%準拠（`any`禁止）
 - Biome 品質チェック通過
-- 全テスト通過（現在 147 テスト）
+- 全テスト通過（現在 151 テスト合格）
 - パスエイリアス活用
 - Zod バリデーション使用
 

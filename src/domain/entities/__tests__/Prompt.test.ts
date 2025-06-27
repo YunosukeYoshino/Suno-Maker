@@ -53,8 +53,10 @@ describe("Prompt", () => {
       propsWithoutId.id = undefined;
 
       const prompt = Prompt.create(propsWithoutId);
-      expect(prompt.id).toMatch(/^prompt-/);
-      expect(prompt.id.length).toBeGreaterThan(10);
+      expect(prompt.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      );
+      expect(prompt.id.length).toBe(36);
     });
 
     it("作成日時が自動設定される", () => {
