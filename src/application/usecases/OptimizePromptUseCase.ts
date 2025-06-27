@@ -34,7 +34,7 @@ export interface OptimizePromptOutput {
   suggestions: string[];
 }
 
-export interface StyleFieldOptimizer {
+export interface StyleFieldOptimizerService {
   optimizeForLength(
     styleField: StyleField,
     targetLength: number,
@@ -49,7 +49,7 @@ export interface StyleFieldOptimizer {
   }>;
 }
 
-export interface GenreConflictDetector {
+export interface GenreConflictDetectorService {
   detectConflicts(genres: string[]): Promise<{
     conflicts: Array<{
       genre1: string;
@@ -61,7 +61,7 @@ export interface GenreConflictDetector {
   }>;
 }
 
-export interface SuccessRatePredictor {
+export interface SuccessRatePredictorService {
   predictSuccessRate(prompt: Prompt): Promise<{
     overallScore: number;
     factors: {
@@ -76,10 +76,10 @@ export interface SuccessRatePredictor {
 
 export class OptimizePromptUseCase {
   constructor(
-    private promptRepository: IPromptRepository,
-    private styleFieldOptimizer?: StyleFieldOptimizer,
-    private genreConflictDetector?: GenreConflictDetector,
-    private successRatePredictor?: SuccessRatePredictor
+    private readonly promptRepository: IPromptRepository,
+    private readonly styleFieldOptimizer?: StyleFieldOptimizerService,
+    private readonly genreConflictDetector?: GenreConflictDetectorService,
+    private readonly successRatePredictor?: SuccessRatePredictorService
   ) {}
 
   async execute(input: OptimizePromptInput): Promise<OptimizePromptOutput> {
