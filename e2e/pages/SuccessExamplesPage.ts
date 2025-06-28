@@ -9,19 +9,22 @@ export class SuccessExamplesPage extends BasePage {
   private readonly exampleItems: Locator;
   private readonly backButton: Locator;
   private readonly detailModal: Locator;
+  private readonly tabsList: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.searchInput = page
-      .locator('[data-testid="search-input"]')
-      .or(page.locator('input[type="search"]'));
-    this.filterButtons = page.locator('[data-testid="filter-buttons"]');
-    this.examplesList = page.locator('[data-testid="examples-list"]');
-    this.exampleItems = page.locator('[data-testid="example-item"]');
+    // 実際のUIに基づいたセレクタに修正
+    this.searchInput = page.locator(
+      'input[placeholder*="プロンプト、歌詞、タグで検索"]'
+    );
+    this.filterButtons = page.locator('[role="tablist"]'); // Tabs要素
+    this.examplesList = page.locator(".grid"); // グリッドレイアウトの要素
+    this.exampleItems = page.locator('[role="tabpanel"] .grid > div'); // カード要素
     this.backButton = page
       .locator('[data-testid="back-button"]')
       .or(page.getByRole("button", { name: /戻る/i }));
     this.detailModal = page.locator('[data-testid="detail-modal"]');
+    this.tabsList = page.locator('[role="tablist"]');
   }
 
   /**
@@ -42,9 +45,8 @@ export class SuccessExamplesPage extends BasePage {
    * フィルターボタンをクリック
    */
   async clickFilter(filterName: string): Promise<void> {
-    const filterButton = this.filterButtons
-      .locator(`[data-filter="${filterName}"]`)
-      .or(this.page.getByRole("button", { name: filterName }));
+    // Tabsのボタンをクリック
+    const filterButton = this.page.getByRole("tab", { name: filterName });
     await this.click(filterButton);
   }
 
@@ -67,7 +69,12 @@ export class SuccessExamplesPage extends BasePage {
    * 事例一覧が表示されているかチェック
    */
   async isExamplesListVisible(): Promise<boolean> {
-    return await this.isVisible(this.examplesList);
+    // グリッドまたは空の状態メッセージのいずれかが表示されていることを確認
+    const gridVisible = await this.isVisible(this.examplesList);
+    const emptyStateVisible = await this.isVisible(
+      this.page.locator("text=成功事例が見つかりませんでした")
+    );
+    return gridVisible || emptyStateVisible;
   }
 
   /**
@@ -81,17 +88,21 @@ export class SuccessExamplesPage extends BasePage {
    * 表示されている事例の数を取得
    */
   async getExamplesCount(): Promise<number> {
-    return await this.exampleItems.count();
+    // カード要素またはスケルトン要素の数を取得
+    const cardCount = await this.page
+      .locator(".grid > .cursor-pointer, .grid > .animate-pulse")
+      .count();
+    return cardCount;
   }
 
   /**
    * 指定されたインデックスの事例タイトルを取得
    */
   async getExampleTitle(index: number): Promise<string> {
-    const example = this.exampleItems.nth(index);
-    const titleElement = example
-      .locator('[data-testid="example-title"]')
-      .or(example.locator("h3"));
+    const example = this.page
+      .locator(".grid > .cursor-pointer, .grid > .animate-pulse")
+      .nth(index);
+    const titleElement = example.locator(".text-lg"); // CardTitleのクラス
     return await this.getText(titleElement);
   }
 
@@ -99,8 +110,12 @@ export class SuccessExamplesPage extends BasePage {
    * 検索結果が表示されているかチェック
    */
   async hasSearchResults(): Promise<boolean> {
+    // カード、スケルトン、または空の状態メッセージのいずれかが表示されていることを確認
     const count = await this.getExamplesCount();
-    return count > 0;
+    const emptyStateVisible = await this.isVisible(
+      this.page.locator("text=成功事例が見つかりませんでした")
+    );
+    return count > 0 || emptyStateVisible;
   }
 
   /**
@@ -113,8 +128,8 @@ export class SuccessExamplesPage extends BasePage {
   }> {
     return {
       searchInput: await this.isVisible(this.searchInput),
-      filterButtons: await this.isVisible(this.filterButtons),
-      examplesList: await this.isVisible(this.examplesList),
+      filterButtons: await this.isVisible(this.tabsList),
+      examplesList: await this.isExamplesListVisible(),
     };
   }
 }

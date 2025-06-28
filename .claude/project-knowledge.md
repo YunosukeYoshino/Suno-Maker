@@ -970,3 +970,221 @@ lines.forEach((line, index) => {
 - 型アサーションの適切な使用
 
 この改善により、型安全性が大幅に向上し、エラーハンドリングの品質と保守性が向上しました。
+
+## Issue #41: Playwright E2E & VRT 実装完了
+
+### E2E テスト & ビジュアル回帰テストの包括的実装
+
+#### Page Object Model (POM) 設計パターン
+
+```typescript
+// 統一された基底クラス設計
+export abstract class BasePage {
+  protected constructor(protected page: Page) {}
+
+  // 共通操作の抽象化
+  async goto(path: string): Promise<void> {
+    await this.page.goto(path);
+    await waitForPageLoad(this.page);
+  }
+
+  // 型安全な要素操作
+  async click(locator: Locator): Promise<void> {
+    await locator.click();
+    await waitForPageLoad(this.page);
+  }
+
+  // VRT 統合メソッド
+  async expectScreenshot(name: string): Promise<void> {
+    await this.page.screenshot({
+      path: `e2e/screenshots/${name}-actual.png`,
+      fullPage: true,
+    });
+  }
+}
+```
+
+#### 継承ベース特化ページクラス
+
+```typescript
+export class CompliancePage extends BasePage {
+  private readonly contentInput: Locator;
+  private readonly checkButton: Locator;
+  private readonly resultArea: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    // セレクタの堅牢性確保（フォールバック付き）
+    this.contentInput = page
+      .locator('[data-testid="content-input"]')
+      .or(page.locator("textarea"));
+  }
+
+  // ドメイン特化操作
+  async enterContent(content: string): Promise<void> {
+    await this.fill(this.contentInput, content);
+  }
+}
+```
+
+### フォールバック戦略による堅牢性確保
+
+#### セレクタの堅牢性パターン
+
+```typescript
+// プライマリセレクタ + フォールバック
+this.generateButton = page
+  .locator('[data-testid="generate-button"]')
+  .or(page.getByRole("button", { name: /生成/i }));
+
+// 多段階フォールバック
+this.contentInput = page
+  .locator('[data-testid="content-input"]')
+  .or(page.locator("textarea"))
+  .or(page.locator('input[type="text"]'));
+```
+
+#### ロケーター戦略の設計原則
+
+1. **data-testid 優先**: テスト専用属性による確実な要素特定
+2. **セマンティックフォールバック**: role/name による意味的選択
+3. **CSSセレクタ最終手段**: 実装詳細への依存最小化
+4. **国際化対応**: 正規表現による言語非依存検索
+
+### GitHub Actions CI/CD パイプライン設計
+
+#### 並列テスト実行戦略
+
+```yaml
+# クロスブラウザ並列実行
+strategy:
+  fail-fast: false
+  matrix:
+    browser: [chromium, firefox, webkit]
+
+# ブラウザ別テスト
+- name: Run Playwright tests on ${{ matrix.browser }}
+  run: bun playwright test --project=${{ matrix.browser }}
+```
+
+#### VRT ワークフロー設計
+
+```yaml
+# PR トリガーでの自動VRT実行
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+# 差分検出ロジック
+- name: Check for visual differences
+  run: |
+    if [ -d "test-results" ] && [ "$(find test-results -name "*-diff.png" | wc -l)" -gt 0 ]; then
+      echo "has_diff=true" >> $GITHUB_OUTPUT
+    fi
+```
+
+### VRT 自動化と継続的品質保証
+
+#### スマートベースライン更新
+
+```yaml
+# 特定ブランチでの自動ベースライン更新
+baseline-update:
+  if: github.event.pull_request.head.ref == 'update-vrt-baseline'
+  
+# 更新後のコミット自動化
+- name: Commit updated screenshots
+  run: |
+    git add e2e/visual/
+    if ! git diff --cached --exit-code; then
+      git commit -m "chore: update VRT baseline screenshots"
+      git push
+    fi
+```
+
+#### PR コメント自動化
+
+```javascript
+// 視覚的差分の詳細報告
+const comment = `## 🔍 Visual Regression Test Results
+
+⚠️ **Visual differences detected!**
+
+Found ${diffFiles.length} visual difference(s):
+${diffFiles.map(file => `- \`${file}\``).join('\n')}
+
+Please review the visual changes in the [Playwright report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifacts.`;
+```
+
+### テストユーティリティの設計パターン
+
+#### 待機ヘルパー関数
+
+```typescript
+export async function waitForPageLoad(page: Page): Promise<void> {
+  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+}
+
+export async function waitForElement(page: Page, selector: string): Promise<void> {
+  await page.waitForSelector(selector, { state: 'visible' });
+}
+```
+
+#### 型安全なフィクスチャー
+
+```typescript
+type TestFixtures = Record<string, never>;
+
+export const test = base.extend<TestFixtures>({
+  // 将来のフィクスチャー拡張のためのベース
+});
+```
+
+### E2E テスト設計のベストプラクティス
+
+#### 1. Page Object Model の一貫性
+
+- 全ページクラスでの統一インターフェース
+- BasePage による共通操作の抽象化
+- ドメイン特化メソッドによる可読性向上
+
+#### 2. 堅牢性とメンテナンス性
+
+- フォールバック戦略による変更への対応力向上
+- data-testid による実装詳細からの分離
+- 型安全性による実行時エラーの事前防止
+
+#### 3. CI/CD統合による継続的品質保証
+
+- 並列実行による実行時間短縮
+- マルチブラウザテストによる互換性確保
+- 自動レポート生成による結果の可視化
+
+#### 4. VRT による回帰防止
+
+- フルページスクリーンショット比較
+- 自動ベースライン更新機能
+- PR での差分レポート自動生成
+
+### 学習した品質向上効果
+
+#### 1. 開発効率の向上
+
+- **自動テスト実行**: プッシュ/PR時の自動品質チェック
+- **並列実行**: 3ブラウザ×複数テストの効率的実行
+- **視覚的回帰検出**: UI変更の影響範囲即座把握
+
+#### 2. 保守性の向上
+
+- **POMパターン**: UI変更時の修正箇所最小化
+- **フォールバック戦略**: 実装変更への堅牢性
+- **型安全設計**: 実行時エラーの事前防止
+
+#### 3. チーム開発支援
+
+- **自動PR コメント**: 視覚的差分の詳細報告
+- **アーティファクト保存**: 失敗時の詳細情報提供
+- **継続的品質監視**: 回帰バグの早期発見
+
+この E2E & VRT 実装により、UI 品質の継続的保証と開発プロセスの効率化を実現しました。
