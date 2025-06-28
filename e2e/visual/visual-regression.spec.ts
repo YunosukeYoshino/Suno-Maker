@@ -147,14 +147,9 @@ test.describe("Visual Regression Tests", () => {
       await promptPage.navigate();
 
       // データ入力済み状態を作成
-      try {
-        await promptPage.selectGenre("rock");
-        await promptPage.setMoodMatrix(150, 150);
-        await promptPage.adjustParameter("energy", 80);
-      } catch (error) {
-        // 要素が見つからない場合はスキップ
-        console.log("Prompt page elements not found, skipping data input");
-      }
+      await promptPage.selectGenre("rock");
+      await promptPage.setMoodMatrix(150, 150);
+      await promptPage.adjustParameter("energy", 80);
 
       await page.waitForLoadState("networkidle");
 
@@ -169,13 +164,9 @@ test.describe("Visual Regression Tests", () => {
       await lyricsPage.navigate();
 
       // 歌詞入力済み状態を作成
-      try {
-        await lyricsPage.enterLyrics(`テスト歌詞
+      await lyricsPage.enterLyrics(`テスト歌詞
 音楽を作ろう
 素晴らしいメロディーで`);
-      } catch (error) {
-        console.log("Lyrics page elements not found, skipping text input");
-      }
 
       await page.waitForLoadState("networkidle");
 
@@ -190,15 +181,9 @@ test.describe("Visual Regression Tests", () => {
       await compliancePage.navigate();
 
       // コンテンツ入力済み状態を作成
-      try {
-        await compliancePage.enterContent(
-          "これはテスト用のコンプライアンスチェック内容です。"
-        );
-      } catch (error) {
-        console.log(
-          "Compliance page elements not found, skipping content input"
-        );
-      }
+      await compliancePage.enterContent(
+        "これはテスト用のコンプライアンスチェック内容です。"
+      );
 
       await page.waitForLoadState("networkidle");
 

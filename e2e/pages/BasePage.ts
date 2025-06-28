@@ -28,10 +28,10 @@ export abstract class BasePage {
 
   /**
    * 要素をクリック
+   * Playwrightの自動待機機能を活用し、特定の待機が必要な場合は呼び出し元で明示的に処理
    */
   async click(locator: Locator): Promise<void> {
     await locator.click();
-    await waitForPageLoad(this.page);
   }
 
   /**
