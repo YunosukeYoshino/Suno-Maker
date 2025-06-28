@@ -3,6 +3,13 @@ name: Visual Regression Testing
 on:
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: 'Update VRT baseline images'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   visual-tests:
@@ -28,7 +35,12 @@ jobs:
       run: bun run build
     
     - name: Run Visual Regression Tests
-      run: bun playwright test e2e/visual/ --project=chromium
+      run: |
+        if [ "${{ github.event.inputs.update_baseline }}" = "true" ]; then
+          bun playwright test e2e/visual/ --project=chromium --update-snapshots
+        else
+          bun playwright test e2e/visual/ --project=chromium
+        fi
       env:
         CI: true
     
