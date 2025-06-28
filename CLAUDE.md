@@ -51,6 +51,15 @@ bun x shadcn@latest add [component-name]
 2. `bun run typecheck` - 型チェック
 3. `bun test` - テスト通過確認
 4. `bun test:e2e` - E2Eテスト実行（UI変更時は必須）
+5. `bun test:vrt` - ビジュアル回帰テスト（VRT）でUI変更検証
+
+### E2E & VRT テスト
+
+Playwright を使用した包括的テスト：
+- **E2E**: 機能フローのエンドツーエンドテスト
+- **VRT**: ビジュアル回帰テスト（スクリーンショット比較）
+- **マルチブラウザ**: Chromium、Firefox、WebKit、Mobile Chrome、Mobile Safari
+- **レスポンシブ**: デスクトップ、タブレット、モバイル対応
 
 ## アーキテクチャ
 
@@ -79,18 +88,21 @@ src/
 - **shadcn/ui**: モダン UI コンポーネント（`/components/ui/`に配置）
 - **Biome**: リンティング・フォーマット（ESLint/Prettier 代替）
 - **Vitest**: テストフレームワーク + jsdom + React Testing Library
+- **Playwright**: E2Eテスト + ビジュアル回帰テスト（VRT）
 - **Zustand**: 軽量状態管理 + Zod バリデーション
+- **next-intl**: 国際化対応（i18n）
 
 ### パスエイリアス
 
 ```typescript
 "@/*"            -> ルートディレクトリ
 "~/*"            -> ./src/
-"@/components"   -> ./components/
-"@/domain"       -> ./src/domain/
-"@/application"  -> ./src/application/
-"@/infrastructure" -> ./src/infrastructure/
-"@/presentation" -> ./src/presentation/
+"@/components/*" -> ./components/
+"@/lib/*"        -> ./lib/
+"@/domain/*"     -> ./src/domain/
+"@/application/*" -> ./src/application/
+"@/infrastructure/*" -> ./src/infrastructure/
+"@/presentation/*" -> ./src/presentation/
 ```
 
 ## DDD 設計原則
@@ -254,6 +266,24 @@ describe("機能名", () => {
 - `.claude/project-knowledge.md`: 実装パターン・設計知見
 - `.claude/common-patterns.md`: コマンドパターン・テンプレート
 - `.claude/project-improvements.md`: 試行錯誤の記録
+
+## 設定ファイル詳細
+
+### TypeScript設定（tsconfig.json）
+- 厳密モード有効（`strict: true`）
+- パスエイリアス設定済み
+- Next.js プラグイン統合
+
+### Biome設定（biome.json）
+- インデント: スペース2個
+- クォート: ダブルクォート推奨
+- import自動整理有効
+- 推奨ルールセット適用
+
+### shadcn/ui設定（components.json）
+- スタイル: new-york
+- ベースカラー: neutral
+- CSS変数有効
 
 ## 開発ワークフロー
 

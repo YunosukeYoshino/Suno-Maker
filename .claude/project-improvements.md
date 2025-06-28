@@ -289,3 +289,51 @@ private readonly styleFieldOptimizer?: StyleFieldOptimizerService
    - 明確な設計原則の共有（DDD 概念の統一理解）
    - 自動化による人的ミス削減（Biome、TypeScript、テスト自動化）
    - ドキュメント駆動開発の価値（実装とドキュメントの同期維持）
+
+### Phase 4: E2E テスト品質向上（Issue #41 後の課題）
+
+#### 1. data-testid の統一標準化
+
+現在のフォールバック戦略は優秀だが、開発チーム全体でdata-testid属性の使用を標準化することで、テストの堅牢性をさらに向上できる：
+
+```typescript
+// 推奨：コンポーネント作成時のdata-testid標準
+<Button data-testid="generate-prompt-button">生成</Button>
+<Input data-testid="search-examples-input" placeholder="検索..." />
+```
+
+#### 2. VRT 閾値の動的調整
+
+現在の固定閾値（0.2）から、コンポーネント特性に応じた動的調整への移行：
+
+```typescript
+// アニメーション要素は高い閾値
+await expect(loadingSpinner).toHaveScreenshot("loading.png", { threshold: 0.5 });
+
+// 静的UI要素は低い閾値
+await expect(navigation).toHaveScreenshot("nav.png", { threshold: 0.1 });
+```
+
+#### 3. マルチ環境VRT対応
+
+現在のdarwin環境に加え、linux/windowsでのクロスプラットフォームVRT実装：
+
+```yaml
+# CI/CD改善案
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macos-latest]
+    browser: [chromium, firefox, webkit]
+```
+
+#### 4. テストデータ管理の改善
+
+E2Eテストでのテストデータ依存性を削減し、より堅牢なテストを実現：
+
+```typescript
+// 推奨：テストデータ非依存設計
+test("empty state handling", async ({ page }) => {
+  // データが空でも正常に動作することを確認
+  await expect(page.locator("text=成功事例が見つかりませんでした")).toBeVisible();
+});
+```
