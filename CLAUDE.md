@@ -84,13 +84,36 @@ src/
 
 - **Next.js 15**: App Router + Turbopack
 - **TypeScript 5**: 厳密モード + パスエイリアス
-- **Tailwind CSS v4**: ユーティリティファースト
+- **Tailwind CSS v4**: ユーティリティファースト + PostCSS
 - **shadcn/ui**: モダン UI コンポーネント（`/components/ui/`に配置）
 - **Biome**: リンティング・フォーマット（ESLint/Prettier 代替）
 - **Vitest**: テストフレームワーク + jsdom + React Testing Library
 - **Playwright**: E2Eテスト + ビジュアル回帰テスト（VRT）
 - **Zustand**: 軽量状態管理 + Zod バリデーション
 - **next-intl**: 国際化対応（i18n）
+
+### 利用可能なライブラリ
+
+#### UI・スタイリング
+- `@radix-ui/react-*`: Progress, ScrollArea, Slider, Slot, Tabs
+- `framer-motion`: アニメーション
+- `lucide-react`: アイコンライブラリ
+- `clsx` + `tailwind-merge`: 条件付きCSSクラス
+- `class-variance-authority`: コンポーネントバリアント管理
+
+#### フォーム・バリデーション
+- `react-hook-form` + `@hookform/resolvers`: フォーム管理
+- `zod`: スキーマバリデーション
+
+#### データ可視化
+- `recharts`: グラフ・チャートライブラリ
+
+#### テスト
+- `@testing-library/react` + `@testing-library/jest-dom` + `@testing-library/user-event`
+- `jsdom`: DOM環境シミュレート
+
+#### アニメーション
+- `tw-animate-css`: Tailwind CSS用アニメーション拡張
 
 ### パスエイリアス
 
@@ -275,15 +298,24 @@ describe("機能名", () => {
 - Next.js プラグイン統合
 
 ### Biome設定（biome.json）
-- インデント: スペース2個
-- クォート: ダブルクォート推奨
+- インデント: スペース2個、LF改行
+- クォート: ダブルクォート推奨（JS/JSX共通）
 - import自動整理有効
 - 推奨ルールセット適用
+- VCS統合: Git使用、.gitignore尊重
 
 ### shadcn/ui設定（components.json）
 - スタイル: new-york
 - ベースカラー: neutral
-- CSS変数有効
+- CSS変数有効（カスタマイズ対応）
+- アイコンライブラリ: Lucide React
+
+### Playwright設定（playwright.config.ts）
+- テストディレクトリ: `./e2e`
+- 並列実行有効（CI環境では制限）
+- スクリーンショット比較: 閾値0.2
+- レポート: HTML + JSON + List形式
+- 自動dev server起動（localhost:3000）
 
 ## 開発ワークフロー
 
@@ -301,6 +333,12 @@ gh pr create
 git checkout -b fix/問題の説明
 git commit -m "fix: 修正内容"
 ```
+
+### Git Hooks（Husky）
+
+- **pre-commit**: `lint-staged`によるコード品質チェック
+- 自動フォーマット: `biome format --write`
+- 対象ファイル: `*.{js,jsx,ts,tsx,json}`
 
 ### 実装順序
 

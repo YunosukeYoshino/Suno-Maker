@@ -7,6 +7,7 @@ git status
 
 # 2. 変更をステージングしてコミット
 git add .
+huskyで整形されるファイルがある場合は再びgit add .を実行してください。
 
 # 3. リモートに push（初回の場合は -u をつけて upstream 設定）
 
