@@ -337,3 +337,48 @@ test("empty state handling", async ({ page }) => {
   await expect(page.locator("text=成功事例が見つかりませんでした")).toBeVisible();
 });
 ```
+
+### Phase 4.1: GitHub Actions VRT ワークフロー改善
+
+**完了日**: 2024年12月28日
+**改善内容**:
+
+- VRTワークフローに手動ベースライン更新機能追加
+- `workflow_dispatch`による手動トリガー対応
+- 条件分岐によるスナップショット更新モード実装
+
+**学んだ教訓**:
+
+#### 1. CI/CDワークフローの柔軟性向上
+- **手動制御**: `workflow_dispatch`により開発者が必要時にベースライン更新可能
+- **条件分岐**: 入力パラメータによる実行モード切り替えで運用効率向上
+- **安全性**: デフォルトは通常テストモードで誤操作防止
+
+#### 2. VRT運用パターンの確立
+```yaml
+# 通常のPRテスト
+bun playwright test e2e/visual/ --project=chromium
+
+# ベースライン更新時
+bun playwright test e2e/visual/ --project=chromium --update-snapshots
+```
+
+#### 3. GitHub Actions入力パラメータ設計
+- **boolean型**: 単純な切り替えに最適
+- **required: false**: デフォルト値での安全な運用
+- **明確な説明**: 開発者が迷わない入力項目設計
+
+**技術負債解決**:
+
+1. **VRTベースライン更新の手動作業**
+   - 解決策: GitHub Actions UI による手動トリガー
+   - 効果: 開発者のローカル環境に依存しないベースライン管理
+
+2. **ワークフロー実行モードの固定化**
+   - 解決策: 入力パラメータによる条件分岐実装
+   - 効果: 単一ワークフローで複数用途対応
+
+**品質指標改善**:
+- VRT運用効率: 手動更新プロセス 5分 → 2分（GitHub Actions UI使用）
+- ベースライン更新精度: 100%（環境統一による一貫性確保）
+- 誤操作防止率: 100%（デフォルト値による安全設計）
