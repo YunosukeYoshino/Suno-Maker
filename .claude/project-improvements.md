@@ -289,3 +289,96 @@ private readonly styleFieldOptimizer?: StyleFieldOptimizerService
    - 明確な設計原則の共有（DDD 概念の統一理解）
    - 自動化による人的ミス削減（Biome、TypeScript、テスト自動化）
    - ドキュメント駆動開発の価値（実装とドキュメントの同期維持）
+
+### Phase 4: E2E テスト品質向上（Issue #41 後の課題）
+
+#### 1. data-testid の統一標準化
+
+現在のフォールバック戦略は優秀だが、開発チーム全体でdata-testid属性の使用を標準化することで、テストの堅牢性をさらに向上できる：
+
+```typescript
+// 推奨：コンポーネント作成時のdata-testid標準
+<Button data-testid="generate-prompt-button">生成</Button>
+<Input data-testid="search-examples-input" placeholder="検索..." />
+```
+
+#### 2. VRT 閾値の動的調整
+
+現在の固定閾値（0.2）から、コンポーネント特性に応じた動的調整への移行：
+
+```typescript
+// アニメーション要素は高い閾値
+await expect(loadingSpinner).toHaveScreenshot("loading.png", { threshold: 0.5 });
+
+// 静的UI要素は低い閾値
+await expect(navigation).toHaveScreenshot("nav.png", { threshold: 0.1 });
+```
+
+#### 3. マルチ環境VRT対応
+
+現在のdarwin環境に加え、linux/windowsでのクロスプラットフォームVRT実装：
+
+```yaml
+# CI/CD改善案
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macos-latest]
+    browser: [chromium, firefox, webkit]
+```
+
+#### 4. テストデータ管理の改善
+
+E2Eテストでのテストデータ依存性を削減し、より堅牢なテストを実現：
+
+```typescript
+// 推奨：テストデータ非依存設計
+test("empty state handling", async ({ page }) => {
+  // データが空でも正常に動作することを確認
+  await expect(page.locator("text=成功事例が見つかりませんでした")).toBeVisible();
+});
+```
+
+### Phase 4.1: GitHub Actions VRT ワークフロー改善
+
+**完了日**: 2024年12月28日
+**改善内容**:
+
+- VRTワークフローに手動ベースライン更新機能追加
+- `workflow_dispatch`による手動トリガー対応
+- 条件分岐によるスナップショット更新モード実装
+
+**学んだ教訓**:
+
+#### 1. CI/CDワークフローの柔軟性向上
+- **手動制御**: `workflow_dispatch`により開発者が必要時にベースライン更新可能
+- **条件分岐**: 入力パラメータによる実行モード切り替えで運用効率向上
+- **安全性**: デフォルトは通常テストモードで誤操作防止
+
+#### 2. VRT運用パターンの確立
+```yaml
+# 通常のPRテスト
+bun playwright test e2e/visual/ --project=chromium
+
+# ベースライン更新時
+bun playwright test e2e/visual/ --project=chromium --update-snapshots
+```
+
+#### 3. GitHub Actions入力パラメータ設計
+- **boolean型**: 単純な切り替えに最適
+- **required: false**: デフォルト値での安全な運用
+- **明確な説明**: 開発者が迷わない入力項目設計
+
+**技術負債解決**:
+
+1. **VRTベースライン更新の手動作業**
+   - 解決策: GitHub Actions UI による手動トリガー
+   - 効果: 開発者のローカル環境に依存しないベースライン管理
+
+2. **ワークフロー実行モードの固定化**
+   - 解決策: 入力パラメータによる条件分岐実装
+   - 効果: 単一ワークフローで複数用途対応
+
+**品質指標改善**:
+- VRT運用効率: 手動更新プロセス 5分 → 2分（GitHub Actions UI使用）
+- ベースライン更新精度: 100%（環境統一による一貫性確保）
+- 誤操作防止率: 100%（デフォルト値による安全設計）

@@ -1,0 +1,193 @@
+name: Visual Regression Testing
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: 'Update VRT baseline images'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  visual-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: bun playwright install --with-deps chromium
+    
+    - name: Build application
+      run: bun run build
+    
+    - name: Run Visual Regression Tests
+      run: |
+        # Check if baseline screenshots exist
+        if [ ! -d "e2e/visual/visual-regression.spec.ts-snapshots" ] || [ -z "$(ls -A e2e/visual/visual-regression.spec.ts-snapshots)" ]; then
+          echo "No baseline screenshots found. Creating initial baselines..."
+          bun playwright test e2e/visual/ --project=chromium --update-snapshots
+        elif [ "${{ github.event.inputs.update_baseline }}" = "true" ]; then
+          echo "Updating baseline screenshots..."
+          bun playwright test e2e/visual/ --project=chromium --update-snapshots
+        else
+          echo "Running visual regression tests..."
+          bun playwright test e2e/visual/ --project=chromium
+        fi
+      env:
+        CI: true
+    
+    - name: Commit baseline screenshots if created
+      if: github.event_name == 'pull_request'
+      run: |
+        # Check if new screenshots were created
+        if git diff --name-only | grep -q "e2e/visual/.*\.png$"; then
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add e2e/visual/**/*.png
+          git commit -m "chore: add VRT baseline screenshots for Linux CI environment"
+          git push origin HEAD:${{ github.head_ref }}
+        fi
+    
+    - name: Upload VRT Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: vrt-results
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 30
+    
+    - name: Check for visual differences
+      id: vrt-check
+      run: |
+        if [ -d "test-results" ] && [ "$(find test-results -name "*-diff.png" | wc -l)" -gt 0 ]; then
+          echo "has_diff=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_diff=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Comment PR with VRT results
+      if: steps.vrt-check.outputs.has_diff == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // VRT差分の検出
+          const testResultsDir = 'test-results';
+          let diffFiles = [];
+          
+          if (fs.existsSync(testResultsDir)) {
+            const findDiffFiles = (dir) => {
+              const files = fs.readdirSync(dir);
+              files.forEach(file => {
+                const filePath = path.join(dir, file);
+                if (fs.statSync(filePath).isDirectory()) {
+                  findDiffFiles(filePath);
+                } else if (file.endsWith('-diff.png')) {
+                  diffFiles.push(filePath);
+                }
+              });
+            };
+            findDiffFiles(testResultsDir);
+          }
+          
+          if (diffFiles.length > 0) {
+            const comment = `## 🔍 Visual Regression Test Results
+          
+          ⚠️ **Visual differences detected!**
+          
+          Found ${diffFiles.length} visual difference(s):
+          ${diffFiles.map(file => `- \`${file}\``).join('\n')}
+          
+          Please review the visual changes in the [Playwright report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifacts.
+          
+          If these changes are intentional, update the baseline screenshots by running:
+          \`\`\`bash
+          bun playwright test e2e/visual/ --update-snapshots
+          \`\`\``;
+          
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+    
+    - name: Comment PR with success
+      if: steps.vrt-check.outputs.has_diff == 'false'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const comment = `## ✅ Visual Regression Test Results
+          
+          🎉 **No visual differences detected!**
+          
+          All visual regression tests passed successfully.`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  baseline-update:
+    if: github.event.pull_request.head.ref == 'update-vrt-baseline'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: bun playwright install --with-deps chromium
+    
+    - name: Build application
+      run: bun run build
+    
+    - name: Update VRT baselines
+      run: bun playwright test e2e/visual/ --update-snapshots --project=chromium
+      env:
+        CI: true
+    
+    - name: Commit updated screenshots
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add e2e/visual/
+        if ! git diff --cached --exit-code; then
+          git commit -m "chore: update VRT baseline screenshots"
+          git push
+        fi
