@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened, reopened]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   triage-issue:
     if: github.event_name == 'issues'
