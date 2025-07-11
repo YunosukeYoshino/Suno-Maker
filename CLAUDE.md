@@ -47,6 +47,9 @@ bun x shadcn@latest add [component-name]
 2. `bun run typecheck` - 型チェック
 3. `bun test` - テスト通過確認
 
+**推奨統合チェック:**
+`bun run test:types && bun run test:lint && bun test`
+
 ## アーキテクチャ
 
 ### DDD レイヤー構造

@@ -1,4 +1,6 @@
+/// <reference types="vitest/globals" />
 import { beforeEach, expect, vi } from "vitest";
+import type { MockInstance, MockedFunction } from "vitest";
 
 // Export expect and vi for jest-dom and mocking
 (globalThis as typeof globalThis & { expect: typeof expect }).expect = expect;
@@ -30,7 +32,6 @@ if (typeof document === "undefined") {
 import "@testing-library/jest-dom";
 
 // VitestでjestのMockedを使用できるようにする
-type MockedFunction<T extends (...args: unknown[]) => unknown> = T;
 
 declare global {
   var jest: {
@@ -44,7 +45,7 @@ global.jest = {
   ...(global.jest ?? {}),
   Mocked: <T extends (...args: unknown[]) => unknown>(
     fn: T
-  ): MockedFunction<T> => fn,
+  ): MockedFunction<T> => fn as MockedFunction<T>,
 };
 
 // DOM環境のクリーンアップ
