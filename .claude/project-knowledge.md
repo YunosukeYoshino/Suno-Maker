@@ -970,3 +970,54 @@ lines.forEach((line, index) => {
 - 型アサーションの適切な使用
 
 この改善により、型安全性が大幅に向上し、エラーハンドリングの品質と保守性が向上しました。
+
+## GitHub Actions 権限設定とCI/CD統合パターン
+
+### Claude Code Review / PR Assistant 権限要件
+
+#### 必要な権限設定
+```yaml
+permissions:
+  contents: write      # リポジトリコンテンツへの書き込み権限
+  pull-requests: write # PRへのコメント・レビュー投稿権限
+  issues: write        # Issueへのコメント投稿権限
+  id-token: write      # OIDCトークン生成権限
+  actions: write       # CI結果の読み取り・操作権限
+```
+
+#### 権限設定の詳細
+- **contents: write**: Claudeがコードレビュー結果をコミットする際に必要
+- **pull-requests: write**: PRへのレビューコメント投稿に必須
+- **issues: write**: Issue内でのインタラクティブな対話に必須
+- **actions: write**: CI/CDパイプラインの結果読み取りと連携に必要
+
+### CI/CDとAI統合のベストプラクティス
+
+#### 1. 自動コードレビューワークフロー
+```yaml
+# claude-code-review.yml
+- Triggered on pull_request events
+- Direct prompt による自動レビュー（@claude mention不要）
+- カスタマイズ可能なレビュー基準
+- ファイルタイプ別のレビュー戦略
+```
+
+#### 2. インタラクティブPRアシスタント
+```yaml
+# claude.yml
+- issue/PR コメントでの @claude mention による起動
+- CI結果の読み取りと分析
+- インタラクティブな問題解決支援
+```
+
+### 学習した統合パターン
+
+#### 権限の最小権限原則との葛藤
+- **課題**: セキュリティのためread権限が推奨されるが、実用には不十分
+- **解決**: 必要最小限のwrite権限のみを付与
+- **補完策**: ブランチ保護ルールやPRレビュー必須設定との組み合わせ
+
+#### 自動化と人的レビューのバランス
+1. **Claude自動レビュー**: 基本的な品質チェック・規約準拠確認
+2. **人的レビュー**: ビジネスロジック・設計判断の確認
+3. **相互補完**: AIは形式面、人間は意味面を重点的にレビュー

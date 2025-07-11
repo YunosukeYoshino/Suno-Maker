@@ -666,3 +666,126 @@ bun run build      # ビルド成功
 # - ランタイムエラー: 0件
 # - Biome品質チェック: 100%通過
 ```
+
+## GitHub Actions CI/CD 自動化パターン
+
+### Claude統合ワークフロー設定
+
+#### 1. 自動コードレビューワークフロー（claude-code-review.yml）
+```yaml
+name: Claude Code Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # コード読み取り・修正提案用
+      pull-requests: write # レビューコメント投稿用
+      issues: write        # イシュートラッキング用
+      id-token: write      # OIDC認証用
+      actions: write       # CI結果分析用
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-github-actions@v1
+        with:
+          direct_prompt: |
+            Please review this pull request and provide feedback on:
+            - Code quality and adherence to project standards
+            - Potential bugs or issues
+            - Performance considerations
+            - Security concerns
+            - Test coverage
+            
+            Be constructive and helpful in your feedback.
+```
+
+#### 2. インタラクティブPRアシスタント（claude.yml）
+```yaml
+name: Claude PR Assistant
+on:
+  issue_comment:
+    types: [created]
+  pull_request_comment:
+    types: [created]
+
+jobs:
+  claude-assist:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: write # CI結果読み取り用
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-github-actions@v1
+        with:
+          # @claude メンションで起動
+          trigger_phrase: "@claude"
+          
+          # CI結果へのアクセス許可
+          additional_permissions: |
+            actions: write
+```
+
+### 権限設定のベストプラクティス
+
+#### 必要最小限の権限付与
+```yaml
+# ❌ 過剰な権限
+permissions: write-all
+
+# ✅ 必要最小限の権限
+permissions:
+  contents: write      # 必要な場合のみ
+  pull-requests: write # PR操作に必須
+  issues: write        # Issue操作に必須
+```
+
+#### セキュリティ対策との組み合わせ
+1. **ブランチ保護ルール**: mainブランチへの直接pushを禁止
+2. **PRレビュー必須**: 最低1人の承認が必要
+3. **ステータスチェック**: CI/CDパイプラインの成功を必須化
+4. **署名コミット**: GPG署名付きコミットのみ許可
+
+### 効果的な活用パターン
+
+#### ファイルタイプ別レビュー戦略
+```yaml
+direct_prompt: |
+  Review this PR focusing on:
+  - For TypeScript files: Type safety, patterns, and best practices
+  - For API endpoints: Security, input validation, and error handling
+  - For React components: Performance, accessibility, and best practices
+  - For tests: Coverage, edge cases, and test quality
+```
+
+#### 初回貢献者への特別対応
+```yaml
+direct_prompt: |
+  ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' &&
+  'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
+  'Please provide a thorough code review focusing on our coding standards and best practices.' }}
+```
+
+### トラブルシューティング
+
+#### 権限エラーの対処
+```bash
+# エラー: "Resource not accessible by integration"
+# 解決: permissions設定の確認と修正
+
+# エラー: "Must have write permission to create comment"
+# 解決: pull-requests: write 権限の追加
+```
+
+#### Claudeレビューの最適化
+- **use_sticky_comment: true**: 同一PRへの追加pushで既存コメントを更新
+- **allowed_tools**: 特定のツール（テスト実行等）の許可
+- **skip条件**: WIPやドラフトPRのスキップ設定

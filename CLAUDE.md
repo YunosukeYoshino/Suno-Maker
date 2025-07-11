@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-「suno-maker」は、AI 音楽生成のためのインテリジェントプロンプト＆歌詞作成ツールです。TypeScript と Tailwind CSS v4 で構築された Next.js 15 アプリケーションで、DDD（ドメイン駆動設計）+ TDD（テスト駆動開発）アーキテクチャを採用しています。
+「suno-maker」は、AI音楽生成のためのインテリジェントプロンプト＆歌詞作成ツールです。TypeScript と Tailwind CSS v4 で構築された Next.js 15 アプリケーションで、DDD（ドメイン駆動設計）+ TDD（テスト駆動開発）アーキテクチャを採用しています。
 
 ## 必須ツールとコマンド
 
@@ -71,8 +71,8 @@ src/
 - **Next.js 15**: App Router + Turbopack
 - **TypeScript 5**: 厳密モード + パスエイリアス
 - **Tailwind CSS v4**: ユーティリティファースト
-- **shadcn/ui**: モダン UI コンポーネント（`/components/ui/`に配置）
-- **Biome**: リンティング・フォーマット（ESLint/Prettier 代替）
+- **shadcn/ui**: モダンUIコンポーネント（`/components/ui/`に配置）
+- **Biome**: リンティング・フォーマット（ESLint/Prettier代替）
 - **Vitest**: テストフレームワーク + jsdom + React Testing Library
 - **Zustand**: 軽量状態管理 + Zod バリデーション
 
@@ -233,6 +233,32 @@ describe("機能名", () => {
 - インポート: `@/components/ui/component-name`
 - カスタマイズは必要最小限
 
+### Biome 設定
+
+- インデント: スペース2つ
+- クオート: ダブルクオート
+- 末尾カンマ: ES5
+- import の自動整理: 有効
+
+## 重要なビジネスルール
+
+### プロンプト最適化
+
+- 最大長: 120文字（厳密に守る）
+- 重複除去、同義語短縮、冗長語削除を自動実行
+- ジャンル競合検出機能あり
+
+### 歌詞制限
+
+- 最大文字数: 3000文字
+- 構造タグの自動挿入（[Verse], [Chorus]等）
+- 日本語最適化（ひらがな推奨、発音最適化）
+
+### テンプレート品質基準
+
+- 品質スコア: 85-95点の高品質テンプレートのみ使用
+- 多言語対応: 英語、日本語、韓国語、スペイン語、フランス語
+
 ## ドキュメント管理
 
 ### 自動更新対象
@@ -273,5 +299,10 @@ git commit -m "fix: 修正内容"
 2. アプリケーション層（ユースケース）の実装
 3. プレゼンテーション層（UI）の実装
 4. 統合テスト・E2E テスト
+
+### GitHub Actions 統合
+
+- PR 作成時に自動的に Claude Code Review が実行される
+- `.github/workflows/claude-code-review.yml` で設定
 
 **重要**: 新しい実装や重要な決定を行った際は、該当する知見管理ファイルを更新してください。
