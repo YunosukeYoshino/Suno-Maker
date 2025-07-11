@@ -970,3 +970,16 @@ lines.forEach((line, index) => {
 - 型アサーションの適切な使用
 
 この改善により、型安全性が大幅に向上し、エラーハンドリングの品質と保守性が向上しました。
+
+# Project Knowledge Base
+
+## Domain Patterns
+- エンティティ不変性パターン
+- 値オブジェクト設計原則
+- ユースケース実装テンプレート
+
+## Common Issues & Solutions
+- レイヤー境界違反 → 型定義の適切配置
+- UUID生成不整合 → generateUUID()統一
+- テスト環境エラー → 型定義整備
+```
