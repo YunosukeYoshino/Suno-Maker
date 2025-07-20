@@ -442,6 +442,122 @@ export class Template {
 - 責務の明確な分離
 - 包括的なドキュメント管理
 
+## DevContainer セキュリティ強化パターン（最新学習事項）
+
+### デュアル設定アーキテクチャの実装
+
+#### 設計思想
+```yaml
+# セキュリティ優先 vs 開発効率の両立
+devcontainer.json        # 本番開発環境用（セキュリティ強化）
+devcontainer-simple.json # ローカル開発用（シンプル設定）
+```
+
+#### コンテナセキュリティベストプラクティス
+
+##### 1. ネットワーク分離・制限パターン
+```bash
+# iptables + ipset による厳格なネットワーク制御
+- GitHub API、npm registry、Anthropic APIのみ許可
+- 動的IP解決による柔軟性と堅牢性の両立
+- 検証機能付きファイアウォール（example.comアクセス禁止確認）
+```
+
+##### 2. 権限管理の最小化
+```dockerfile
+# 非root実行 + 選択的sudo権限
+USER node  # 非rootユーザーでの実行
+echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall
+```
+
+##### 3. コンテナセキュリティ監査パターン
+```bash
+# セキュリティ検証の自動化
+- 外部通信テスト（example.com遮断確認）
+- 必要サービス疎通確認（GitHub API接続確認）
+- エラー処理の堅牢性（DNS解決失敗時の適切な停止）
+```
+
+### 開発環境統一化の技術的知見
+
+#### VS Code 拡張機能の統一管理
+```json
+"extensions": [
+  "biomejs.biome",      # プロジェクト標準リンター
+  "eamodio.gitlens",    # Git履歴・ブレーム機能
+  "bradlc.vscode-tailwindcss"  # Tailwind intellisense
+]
+```
+
+#### 永続化ボリューム戦略
+```json
+"mounts": [
+  "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory",
+  "source=claude-code-config-${devcontainerId},target=/home/node/.claude"
+]
+```
+
+##### 利点
+- **開発継続性**: コンテナ再作成時の履歴・設定保持
+- **チーム統一**: 同一環境での開発体験
+- **セキュリティ**: 設定の分離による情報漏洩防止
+
+### Docker Layer 最適化パターン
+
+#### マルチステージ最適化
+```dockerfile
+# 開発ツール統合インストール
+RUN apt update && apt install -y less git procps sudo fzf zsh \
+  man-db unzip gnupg2 gh iptables ipset iproute2 dnsutils aggregate jq
+
+# Claude Code事前インストール
+RUN npm install -g @anthropic-ai/claude-code
+```
+
+##### 学習したポイント
+1. **Layer数最小化**: 関連パッケージの同時インストール
+2. **キャッシュ効率**: 頻繁に変更される部分を後に配置
+3. **セキュリティツール統合**: iptables/ipsetの開発環境統合
+
+### エラーハンドリング・検証パターン
+
+#### 防御的プログラミングの適用
+```bash
+set -euo pipefail  # 厳格なエラーハンドリング
+IFS=$'\n\t'       # 安全な文字列分割
+
+# 入力値検証の徹底
+if [[ ! "$cidr" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]; then
+    echo "ERROR: Invalid CIDR range from GitHub meta: $cidr"
+    exit 1
+fi
+```
+
+#### API応答の構造検証
+```bash
+# GitHub API レスポンスの整合性確認
+if ! echo "$gh_ranges" | jq -e '.web and .api and .git' >/dev/null; then
+    echo "ERROR: GitHub API response missing required fields"
+    exit 1
+fi
+```
+
+### セキュリティ設定の段階的適用指針
+
+#### 開発段階に応じた設定選択
+```markdown
+1. **学習・実験段階**: devcontainer-simple.json（ファイアウォール無し）
+2. **本格開発段階**: devcontainer.json（セキュリティ強化）
+3. **本番準備段階**: さらなるセキュリティ制約の追加検討
+```
+
+#### セキュリティと開発効率のバランス
+- **トレードオフの明示**: README.mdでの設定選択指針
+- **切り替えの容易性**: ファイル名変更による設定切り替え
+- **トラブルシューティング情報**: 権限エラー時の対処法文書化
+
+この学習により、コンテナセキュリティとチーム開発効率の両立パターンが確立されました。
+
 ## 学習済みパターン・知見
 
 ### エラーハンドリング

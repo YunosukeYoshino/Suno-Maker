@@ -789,3 +789,164 @@ direct_prompt: |
 - **use_sticky_comment: true**: 同一PRへの追加pushで既存コメントを更新
 - **allowed_tools**: 特定のツール（テスト実行等）の許可
 - **skip条件**: WIPやドラフトPRのスキップ設定
+
+## DevContainer 運用パターン（新実装）
+
+### 基本セットアップ
+```bash
+# VS Code でプロジェクトを開く
+code .
+
+# DevContainer で再開発
+Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+
+# 初回構築時（自動実行される）
+- Docker image のビルド
+- 拡張機能の自動インストール
+- ファイアウォール初期化（セキュリティ強化版のみ）
+```
+
+### セキュリティ設定の切り替え
+```bash
+# シンプル設定に切り替え（ローカル開発・学習用）
+mv .devcontainer/devcontainer.json .devcontainer/devcontainer-secure.json
+mv .devcontainer/devcontainer-simple.json .devcontainer/devcontainer.json
+
+# セキュリティ強化設定に戻す（本格開発用）
+mv .devcontainer/devcontainer.json .devcontainer/devcontainer-simple.json
+mv .devcontainer/devcontainer-secure.json .devcontainer/devcontainer.json
+
+# DevContainer の再構築
+Ctrl+Shift+P → "Dev Containers: Rebuild Container"
+```
+
+### ネットワーク制限確認
+```bash
+# ファイアウォール状態確認
+sudo iptables -L -n
+
+# 許可ドメインリスト確認
+sudo ipset list allowed-domains
+
+# 外部通信テスト（遮断されるべき）
+curl --connect-timeout 5 https://example.com  # 失敗するはず
+
+# 必要サービス疎通確認（成功するべき）
+curl --connect-timeout 5 https://api.github.com/zen      # GitHub API
+curl --connect-timeout 5 https://registry.npmjs.org/     # npm registry
+```
+
+### 開発環境メンテナンス
+```bash
+# コンテナ内での基本確認
+node --version    # Node.js バージョン
+bun --version     # Bun バージョン
+code --version    # VS Code Server バージョン
+
+# 永続化ボリューム確認
+ls -la /commandhistory/      # bash履歴
+ls -la /home/node/.claude/   # Claude設定
+
+# 拡張機能確認
+code --list-extensions
+```
+
+### ファイアウォール許可ドメイン追加
+```bash
+# init-firewall.sh の編集
+sudo vi /usr/local/bin/init-firewall.sh
+
+# 新しいドメインを追加する場合
+for domain in \
+    "registry.npmjs.org" \
+    "api.anthropic.com" \
+    "your-new-domain.com"; do  # 新ドメイン追加
+    # ... IP解決・追加ロジック
+done
+
+# ファイアウォール再初期化
+sudo /usr/local/bin/init-firewall.sh
+```
+
+### トラブルシューティング
+
+#### 権限エラー対処
+```bash
+# NET_ADMIN権限エラー
+# 解決: Docker設定で --cap-add=NET_ADMIN を確認
+
+# sudo権限エラー
+# 解決: sudoers設定の確認
+cat /etc/sudoers.d/node-firewall
+
+# ファイアウォール無効化（緊急時）
+sudo iptables -F  # 全ルール削除
+sudo iptables -P INPUT ACCEPT    # デフォルト許可
+sudo iptables -P OUTPUT ACCEPT   # デフォルト許可
+```
+
+#### パッケージインストール失敗
+```bash
+# npm/bun installでネットワークエラー
+# 1. シンプル設定に切り替え
+# 2. または、必要なドメインをファイアウォール許可リストに追加
+
+# DNS解決エラー
+# 解決: /etc/resolv.conf の確認
+cat /etc/resolv.conf
+```
+
+#### パフォーマンス問題
+```bash
+# メモリ使用量確認
+free -h
+docker stats
+
+# ディスク使用量確認
+df -h
+docker system df
+
+# 不要なコンテナ・イメージの削除
+docker system prune -f
+```
+
+### DevContainer設定カスタマイズパターン
+
+#### 拡張機能の追加
+```json
+// .devcontainer/devcontainer.json
+"customizations": {
+  "vscode": {
+    "extensions": [
+      "biomejs.biome",           // 必須: プロジェクト標準
+      "eamodio.gitlens",         // 必須: Git支援
+      "bradlc.vscode-tailwindcss", // 必須: Tailwind
+      "ms-vscode.vscode-typescript-next", // オプション: TypeScript支援
+      "christian-kohler.path-intellisense"  // オプション: パス補完
+    ]
+  }
+}
+```
+
+#### 環境変数の設定
+```json
+"remoteEnv": {
+  "NODE_OPTIONS": "--max-old-space-size=4096",
+  "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+  "PROJECT_ENV": "devcontainer"
+}
+```
+
+#### Dockerfile のカスタマイズ
+```dockerfile
+# 追加パッケージのインストール
+RUN apt update && apt install -y \
+  your-additional-package \
+  another-tool
+
+# 追加のグローバルnpmパッケージ
+RUN npm install -g \
+  your-global-package
+```
+
+この実装により、セキュアで効率的な開発環境の標準化が実現されました。
